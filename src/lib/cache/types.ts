@@ -7,6 +7,8 @@ export type PromptPaths = {
     errors: string;
     /** Путь к директории с промптами тестирования */
     testing: string;
+    /** Путь к директории с промптами инструментов */
+    tools: string;
     /** Путь к директории с промптами валидации */
     validation: string;
 };

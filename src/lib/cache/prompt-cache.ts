@@ -33,6 +33,7 @@ function getPromptPaths(): PromptPaths {
     return {
         errors: join(promptsDir, 'errors'),
         testing: join(promptsDir, 'testing'),
+        tools: join(promptsDir, 'tools'),
         validation: join(promptsDir, 'validation'),
     };
 }
@@ -70,9 +71,10 @@ export function initializePromptCache(): CacheInitResult {
 
     const validationPrompts = loadPromptsFromDirectory(paths.validation);
     const testingPrompts = loadPromptsFromDirectory(paths.testing);
+    const toolsPrompts = loadPromptsFromDirectory(paths.tools);
     const errorPrompts = loadPromptsFromDirectory(paths.errors);
 
-    [validationPrompts, testingPrompts, errorPrompts].forEach((prompts) => {
+    [validationPrompts, testingPrompts, toolsPrompts, errorPrompts].forEach((prompts) => {
         prompts.forEach((content, id) => {
             promptCache.set(id, content);
             loaded++;

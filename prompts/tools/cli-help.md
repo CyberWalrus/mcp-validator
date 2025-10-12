@@ -1,59 +1,56 @@
-# mcp-validator - Упрощенный MCP валидатор
+# MCP Validator 2.0 - AI-powered Code Quality Tool
 
 ## Использование
 
 ```bash
-mcp-validator              # Запуск MCP сервера (stdio режим)
-mcp-validator --version    # Показать версию
-mcp-validator --help       # Показать справку
+yarn start                    # Запуск MCP сервера (по умолчанию)
+yarn start --help             # Показать эту справку
+yarn start --version          # Показать версию
 ```
 
-## Режимы работы
+## Возможности
 
-### MCP сервер (по умолчанию)
-
-Запускается в stdio режиме для интеграции с Cursor IDE:
-
-```bash
-mcp-validator
-```
-
-### CLI версия
-
-Показывает справку и версию:
-
-```bash
-mcp-validator --help
-mcp-validator --version
-```
-
-## Переменные окружения
-
-Создайте файл `.env` в корне проекта:
-
-```env
-# Уровень логирования
-LOG_LEVEL=INFO
-
-# API ключ OpenRouter (обязательный)
-OPENROUTER_API_KEY=your_key_here
-
-# Timeout запросов (опциональный)
-REQUEST_TIMEOUT=30000
-```
-
-## Доступные команды MCP
-
-- **validate**: валидация кода (9 типов)
-- **test-prompt**: параллельное тестирование промптов
+- 9 типов валидации (код, тесты, архитектура, безопасность, производительность, документация, промпты, задачи, кастом)
+- Параллельное тестирование промптов с анализом консистентности
+- Интеграция с Cursor IDE через MCP протокол
+- Поддержка множественных AI моделей через OpenRouter
 
 ## Требования
 
 - Node.js 20+
-- Переменная окружения OPENROUTER_API_KEY
+- Переменная OPENROUTER_API_KEY в .env файле
 
-## Производительность
+## Обновления в V2.0
 
-- Время запуска: < 1 секунды
-- Использование памяти: < 100MB
-- Покрытие тестами: 90%+
+✅ Официальный MCP SDK (@modelcontextprotocol/sdk)
+✅ Упрощенная агентная архитектура (OpenAI SDK)
+✅ Постоянный серверный режим (await server.connect())
+✅ Сохранены ВСЕ функции v1.x
+
+## Примеры MCP использования
+
+### validate инструмент
+
+```json
+{
+  "tool": "validate",
+  "arguments": {
+    "validationType": "code",
+    "input": { "type": "file", "data": "path/to/file.ts" },
+    "context": "Проверка качества TypeScript кода"
+  }
+}
+```
+
+### test-prompt инструмент
+
+```json
+{
+  "tool": "test-prompt",
+  "arguments": {
+    "prompt": "Напиши функцию для сортировки массива",
+    "iterations": 5,
+    "context": "Тестирование стабильности промпта"
+  }
+}
+```
