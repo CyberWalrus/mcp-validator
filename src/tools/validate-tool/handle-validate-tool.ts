@@ -1,42 +1,10 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
-import { createCodeValidatorAgent, validateCodeWithAgent } from '../agents/code-validator-agent';
-import type { ValidationInput, ValidationResult, ValidationType } from '../model/types/main';
-import { renderErrorResponse } from '../services/adapters/error-handler';
-
-/** Форматирование результата как раньше - ответ ИИ + метаданные */
-function formatSuccessfulValidation(result: ValidationResult): string {
-    const { recommendations, type, metadata } = result;
-
-    // Основной ответ ИИ
-    let content = recommendations || 'Ответ ИИ недоступен';
-
-    // Добавляем метаданные в конце
-    const modelValue = metadata?.model;
-    const durationValue = metadata?.duration;
-    const tokensValue = metadata?.tokensUsed;
-
-    const modelStr = typeof modelValue === 'string' ? modelValue : 'openai/gpt-oss-120b';
-    const durationStr =
-        typeof durationValue === 'number' || typeof durationValue === 'string' ? String(durationValue) : 'н/д';
-    const tokensStr = typeof tokensValue === 'number' || typeof tokensValue === 'string' ? String(tokensValue) : 'н/д';
-
-    content += `
-
----
-
-**Метаданные валидации:**
-- Тип: ${type}
-- Модель: ${modelStr}
-- Время выполнения: ${durationStr}мс
-- Токены: ${tokensStr}
-`;
-
-    return content;
-}
-
-/** Глобальный кэш агентов для повторного использования */
-let codeValidatorAgent: ReturnType<typeof createCodeValidatorAgent> | null = null;
+import { createCodeValidatorAgent, validateCodeWithAgent } from '../../agents/code-validator-agent';
+import type { ValidationInput, ValidationType } from '../../model/types/main';
+import { renderErrorResponse } from '../../services/adapters/error-handler';
+import { getCodeValidatorAgent, setCodeValidatorAgent } from './clear-agent-cache';
+import { formatSuccessfulValidation } from './format-successful-validation';
 
 /** MCP инструмент для валидации кода через @modelcontextprotocol/sdk */
 export const validateTool: Tool = {
@@ -103,7 +71,6 @@ export const validateTool: Tool = {
 /** Обработчик MCP инструмента validate */
 export async function handleValidateTool(args: unknown): Promise<{ content: string; isError?: boolean }> {
     try {
-        // ИСПРАВЛЕНИЕ: Строгая валидация входных параметров для v2.0
         if (!args || typeof args !== 'object') {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
@@ -201,7 +168,6 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        // Валидация входных параметров
         const validationInput: ValidationInput = {
             input: {
                 data: input.data as string,
@@ -214,24 +180,23 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             language: typeof params.language === 'string' ? params.language : 'typescript',
         };
 
-        // Инициализация агента при первом использовании
+        let codeValidatorAgent = getCodeValidatorAgent();
         if (!codeValidatorAgent) {
             codeValidatorAgent = createCodeValidatorAgent();
+            setCodeValidatorAgent(codeValidatorAgent);
         }
 
-        // Выполнение валидации через агента
         const result = await validateCodeWithAgent(codeValidatorAgent, validationInput);
 
-        // Форматирование успешного результата в markdown
         if (result.success) {
             return {
                 content: formatSuccessfulValidation(result),
             };
         }
-        // Для неуспешной валидации используем существующую функцию форматирования ошибок
+
         const errorResult = renderErrorResponse({
             context: `Валидация типа: ${result.type}`,
-            errorCode: -32001, // Application error (валидация)
+            errorCode: -32001,
             errorMessage: result.issues.join('; '),
             errorType: 'validation',
         });
@@ -245,7 +210,6 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             isError: true,
         };
     } catch (error) {
-        // Обработка критических ошибок через существующую систему
         const errorResult = renderErrorResponse({
             context: 'Выполнение MCP инструмента validate',
             errorCode: -32603,
@@ -260,7 +224,3 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
     }
 }
 
-/** Очистка кэша агентов (для тестирования) */
-export function clearAgentCache(): void {
-    codeValidatorAgent = null;
-}
