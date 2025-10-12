@@ -8,6 +8,7 @@ export const VALIDATION_TYPES: readonly ValidationType[] = [
     'architecture',
     'documentation',
     'prompts',
+    'custom',
 ] as const;
 
 /** Конфигурация промптов для каждого типа валидации */
@@ -19,6 +20,10 @@ export const VALIDATION_PROMPTS: Record<ValidationType, ValidationPromptConfig> 
     code: {
         requiredParams: ['code', 'language'],
         type: 'code',
+    },
+    custom: {
+        requiredParams: ['code', 'language', 'customPrompt'],
+        type: 'custom',
     },
     documentation: {
         requiredParams: ['code', 'language'],
@@ -65,4 +70,4 @@ export const SUPPORTED_EXTENSIONS = [
 ] as const;
 
 /** Timeout для валидации в миллисекундах */
-export const VALIDATION_TIMEOUT = Number(process.env['VALIDATION_TIMEOUT']) || 30000;
+export const VALIDATION_TIMEOUT = Number(process.env.VALIDATION_TIMEOUT) || 30000;

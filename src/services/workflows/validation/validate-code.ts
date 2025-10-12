@@ -121,7 +121,7 @@ export async function validateCode(params: ValidationParams): Promise<Validation
                 model: typedResponse.model,
             },
             promptUsed: formattedPrompt,
-            score: (result.metadata?.['score'] as number) || (result.success ? 85 : 45),
+            score: (result.metadata?.score as number) || (result.success ? 85 : 45),
             type: params.validationType,
         };
 

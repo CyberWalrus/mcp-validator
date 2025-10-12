@@ -17,7 +17,7 @@ export const DEFAULT_TEST_PARAMS = {
 
 /** Модели для тестирования по умолчанию */
 export const DEFAULT_TEST_MODELS = [
-    process.env['DEFAULT_AI_MODEL'] || 'openai/gpt-oss-120b',
+    process.env.DEFAULT_AI_MODEL || 'openai/gpt-oss-120b',
     'openai/gpt-3.5-turbo',
 ] as const;
 

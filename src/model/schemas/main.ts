@@ -5,7 +5,7 @@ export const logLevelSchema = z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR']);
 
 /** Схема валидации конфигурации OpenRouter */
 export const openRouterConfigSchema = z.object({
-    apiKey: z.string({ required_error: 'OPENROUTER_API_KEY is required' }).min(1, 'OPENROUTER_API_KEY is required'),
+    apiKey: z.string({ message: 'OPENROUTER_API_KEY is required' }).min(1, 'OPENROUTER_API_KEY is required'),
     apiUrl: z.string().url('OPENROUTER_API_URL must be a valid URL').default('https://openrouter.ai/api/v1'),
     timeout: z.coerce.number().positive('OPENROUTER_TIMEOUT must be a positive number').default(30000),
 });

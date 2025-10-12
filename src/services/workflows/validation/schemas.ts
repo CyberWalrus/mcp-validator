@@ -10,14 +10,14 @@ export const InputSourceSchema = z.object({
     /** Кодировка для файлов */
     encoding: z
         .enum(['utf8', 'utf16le', 'ascii'], {
-            errorMap: () => ({ message: 'Кодировка должна быть: utf8, utf16le или ascii' }),
+            message: 'Кодировка должна быть: utf8, utf16le или ascii',
         })
         .optional()
         .default('utf8'),
 
     /** Тип источника */
     type: z.enum(['content', 'file', 'url'], {
-        errorMap: () => ({ message: 'Тип должен быть: content, file или url' }),
+        message: 'Тип должен быть: content, file или url',
     }),
 });
 
@@ -39,8 +39,8 @@ export const ValidationParamsSchema = z.object({
     language: z.string().default(''),
 
     /** Тип валидации */
-    validationType: z.enum(['code', 'tests', 'architecture', 'documentation', 'prompts'], {
-        errorMap: () => ({ message: `Поддерживаемые типы: ${VALIDATION_TYPES.join(', ')}` }),
+    validationType: z.enum(['code', 'tests', 'architecture', 'documentation', 'prompts', 'custom'], {
+        message: `Поддерживаемые типы: ${VALIDATION_TYPES.join(', ')}`,
     }),
 });
 
@@ -50,7 +50,7 @@ export const ValidationResultSchema = z.object({
     issues: z.array(z.string()),
 
     /** Дополнительные данные результата */
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
 
     /** Успешно ли прошла валидация */
     success: z.boolean(),

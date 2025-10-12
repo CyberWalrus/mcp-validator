@@ -86,7 +86,7 @@ describe('validateParams', () => {
                 data: 'test',
                 type: 'content',
             },
-            validationType: 'code',
+            validationType: 'custom',
         };
 
         expect(() => validateParams(params)).toThrow('Для кастомной валидации требуется указать customPrompt');

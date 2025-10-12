@@ -25,8 +25,8 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
         },
         openRouter: {
             apiKey: env.OPENROUTER_API_KEY,
-            apiUrl: env['OPENROUTER_API_URL'],
-            timeout: env['OPENROUTER_TIMEOUT'],
+            apiUrl: env.OPENROUTER_API_URL,
+            timeout: env.OPENROUTER_TIMEOUT,
         },
         paths: {
             errors: join(packageRoot, PACKAGE_RESOURCE_PATHS.ERRORS),
@@ -36,7 +36,7 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
             environment: env.NODE_ENV ?? 'development',
             isE2ETest: env.MCP_E2E_TEST === 'true',
             isTestMode: env.NODE_ENV === 'test' || env.MCP_E2E_TEST === 'true',
-            nodePath: env['NODE_PATH'] || '',
+            nodePath: env.NODE_PATH || '',
         },
     };
 
@@ -77,7 +77,7 @@ function createFallbackConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
             environment: env.NODE_ENV ?? 'development',
             isE2ETest: env.MCP_E2E_TEST === 'true',
             isTestMode: env.NODE_ENV === 'test' || env.MCP_E2E_TEST === 'true',
-            nodePath: env['NODE_PATH'] || '',
+            nodePath: env.NODE_PATH || '',
         },
     };
 }

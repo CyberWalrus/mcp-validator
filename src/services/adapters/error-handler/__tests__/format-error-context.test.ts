@@ -20,16 +20,16 @@ describe('formatErrorContext', () => {
 
         const result = formatErrorContext(context);
 
-        expect(result['error_type']).toBe('system');
-        expect(result['error_message']).toBe('Internal server error');
-        expect(result['error_code']).toBe('-32603');
-        expect(result['node_version']).toBe('v20.0.0');
-        expect(result['platform']).toBe('darwin');
-        expect(result['memory_usage']).toBe('150MB');
-        expect(result['uptime']).toBe('2h 30m');
-        expect(result['stack_trace']).toBe('Error: test\n    at test.ts:1:1');
-        expect(result['file_path']).toBe('/path/to/file.ts');
-        expect(result['line_number']).toBe('42');
+        expect(result.error_type).toBe('system');
+        expect(result.error_message).toBe('Internal server error');
+        expect(result.error_code).toBe('-32603');
+        expect(result.node_version).toBe('v20.0.0');
+        expect(result.platform).toBe('darwin');
+        expect(result.memory_usage).toBe('150MB');
+        expect(result.uptime).toBe('2h 30m');
+        expect(result.stack_trace).toBe('Error: test\n    at test.ts:1:1');
+        expect(result.file_path).toBe('/path/to/file.ts');
+        expect(result.line_number).toBe('42');
     });
 
     it('должен использовать значения по умолчанию для отсутствующих полей', () => {
@@ -41,12 +41,12 @@ describe('formatErrorContext', () => {
 
         const result = formatErrorContext(context);
 
-        expect(result['error_type']).toBe('system');
-        expect(result['error_message']).toBe('Test error');
-        expect(result['node_version']).toBe(process.version);
-        expect(result['platform']).toBe(process.platform);
-        expect(result['memory_usage']).toMatch(/^\d+MB$/);
-        expect(result['stack_trace']).toBe('Стек вызова недоступен');
+        expect(result.error_type).toBe('system');
+        expect(result.error_message).toBe('Test error');
+        expect(result.node_version).toBe(process.version);
+        expect(result.platform).toBe(process.platform);
+        expect(result.memory_usage).toMatch(/^\d+MB$/);
+        expect(result.stack_trace).toBe('Стек вызова недоступен');
     });
 
     it('должен форматировать файловую ошибку', () => {
@@ -61,10 +61,10 @@ describe('formatErrorContext', () => {
 
         const result = formatErrorContext(context);
 
-        expect(result['error_type']).toBe('file');
-        expect(result['operation']).toBe('прочитать');
-        expect(result['file_path']).toBe('/missing/file.txt');
-        expect(result['file_size_limit']).toBe('5MB');
+        expect(result.error_type).toBe('file');
+        expect(result.operation).toBe('прочитать');
+        expect(result.file_path).toBe('/missing/file.txt');
+        expect(result.file_size_limit).toBe('5MB');
     });
 
     it('должен форматировать ошибку валидации с причинами и решениями', () => {
@@ -80,11 +80,11 @@ describe('formatErrorContext', () => {
 
         const result = formatErrorContext(context);
 
-        expect(result['error_type']).toBe('validation');
-        expect(result['error_details']).toBe('Missing required field');
-        expect(result['causes']).toEqual(['Пропущено поле', 'Неверный тип']);
-        expect(result['solutions']).toEqual(['Добавьте поле', 'Исправьте тип']);
-        expect(result['context']).toBe('API validation');
+        expect(result.error_type).toBe('validation');
+        expect(result.error_details).toBe('Missing required field');
+        expect(result.causes).toEqual(['Пропущено поле', 'Неверный тип']);
+        expect(result.solutions).toEqual(['Добавьте поле', 'Исправьте тип']);
+        expect(result.context).toBe('API validation');
     });
 
     it('должен собирать системную информацию автоматически', () => {
@@ -97,9 +97,9 @@ describe('formatErrorContext', () => {
 
         const result = formatErrorContext(context);
 
-        expect(result['node_version']).toBe(process.version);
-        expect(result['platform']).toBe(process.platform);
-        expect(result['memory_usage']).toMatch(/^\d+MB$/);
-        expect(result['uptime']).toMatch(/^\d+[чм]/);
+        expect(result.node_version).toBe(process.version);
+        expect(result.platform).toBe(process.platform);
+        expect(result.memory_usage).toMatch(/^\d+MB$/);
+        expect(result.uptime).toMatch(/^\d+[чм]/);
     });
 });

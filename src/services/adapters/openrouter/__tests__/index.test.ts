@@ -30,8 +30,8 @@ describe('makeOpenRouterRequest', () => {
     afterEach(async () => {
         vi.useRealTimers();
         delete process.env.OPENROUTER_API_KEY;
-        delete process.env['OPENROUTER_API_URL'];
-        delete process.env['OPENROUTER_TIMEOUT'];
+        delete process.env.OPENROUTER_API_URL;
+        delete process.env.OPENROUTER_TIMEOUT;
         await reloadConfig();
     });
 
@@ -140,7 +140,7 @@ describe('makeOpenRouterRequest', () => {
     });
 
     it('должен использовать базовый URL из конфигурации', async () => {
-        process.env['OPENROUTER_API_URL'] = 'https://api.openrouter.ai/api/v2';
+        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v2';
         await reloadConfig();
 
         const mockResponse = {
@@ -158,7 +158,7 @@ describe('makeOpenRouterRequest', () => {
 
         expect(mockFetch).toHaveBeenCalledWith('https://api.openrouter.ai/api/v2/chat/completions', expect.any(Object));
 
-        delete process.env['OPENROUTER_API_URL'];
+        delete process.env.OPENROUTER_API_URL;
     });
 
     it('должен обрабатывать HTTP ошибки', async () => {

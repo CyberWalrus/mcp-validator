@@ -13,7 +13,7 @@ describe('parseValidationResult', () => {
 
         expect(result.success).toBe(true);
         expect(result.issues).toHaveLength(0);
-        expect(result.metadata?.['fullResponse']).toBe(aiResponse);
+        expect(result.metadata?.fullResponse).toBe(aiResponse);
     });
 
     it('должен определять неуспешный результат с проблемами', () => {
@@ -37,8 +37,8 @@ describe('parseValidationResult', () => {
 
         responses.forEach((response) => {
             const result = parseValidationResult(response);
-            expect(result.metadata?.['score']).toBeDefined();
-            expect(typeof result.metadata?.['score']).toBe('number');
+            expect(result.metadata?.score).toBeDefined();
+            expect(typeof result.metadata?.score).toBe('number');
         });
     });
 
@@ -49,7 +49,7 @@ describe('parseValidationResult', () => {
 
         expect(result.success).toBe(false);
         expect(result.issues).toContain('Низкая оценка: 45');
-        expect(result.metadata?.['score']).toBe(45);
+        expect(result.metadata?.score).toBe(45);
     });
 
     it('должен обрабатывать текст с критическими словами', () => {
@@ -73,7 +73,7 @@ describe('parseValidationResult', () => {
 
         expect(result.success).toBe(true);
         expect(result.issues).toHaveLength(0);
-        expect(result.metadata?.['fullResponse']).toBe('');
+        expect(result.metadata?.fullResponse).toBe('');
     });
 
     it('должен находить множественные проблемы', () => {
@@ -109,6 +109,6 @@ describe('parseValidationResult', () => {
 
         const result = parseValidationResult(aiResponse);
 
-        expect(result.metadata?.['fullResponse']).toBe(aiResponse);
+        expect(result.metadata?.fullResponse).toBe(aiResponse);
     });
 });

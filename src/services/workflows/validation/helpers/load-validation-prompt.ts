@@ -55,6 +55,18 @@ function getDefaultPrompt(type: ValidationType): string {
 
 Предоставьте оценку и рекомендации по улучшению.`,
 
+        custom: `# Кастомная валидация
+
+{CUSTOM_PROMPT}
+
+\`\`\`{LANGUAGE}
+{CODE}
+\`\`\`
+
+{CONTEXT}
+
+{ADDITIONAL_FILES}`,
+
         documentation: `# Анализ документации
 
 Проанализируйте качество документации:

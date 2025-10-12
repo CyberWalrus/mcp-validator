@@ -46,10 +46,10 @@ export function formatSchemaError(error: ZodError, config = DEFAULT_CONFIG): str
             return message;
         }
 
-        if (issue.code === 'invalid_enum_value' && 'options' in issue && Array.isArray(issue.options)) {
-            const field = issue.path[issue.path.length - 1];
+        if (issue.code === 'invalid_value' && 'values' in issue && Array.isArray(issue.values)) {
+            const field = (issue.path as unknown[])[(issue.path as unknown[]).length - 1] as string;
             let message = config.messages.invalidEnum.replace('{field}', String(field));
-            message += `\nДопустимые значения: ${issue.options.map(String).join(', ')}`;
+            message += `\nДопустимые значения: ${(issue.values as unknown[]).map(String).join(', ')}`;
 
             return message;
         }

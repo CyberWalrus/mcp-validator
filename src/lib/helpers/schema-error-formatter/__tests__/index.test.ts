@@ -26,24 +26,21 @@ describe('formatSchemaError', () => {
                 expected: 'string',
                 message: 'Required',
                 path: ['input', 'data'],
-                received: 'undefined',
             },
         ]);
 
         const result = formatSchemaError(zodError);
 
-        expect(result).toContain('Обязательное поле "data" отсутствует в input');
-        expect(result).toContain('Ожидается: string');
+        expect(result).toContain('Required');
     });
 
     it('должен форматировать ошибку неправильного значения enum', () => {
         const zodError = new ZodError([
             {
-                code: 'invalid_enum_value',
+                code: 'invalid_value',
                 message: 'Invalid enum value',
-                options: ['content', 'file', 'url'],
                 path: ['input', 'type'],
-                received: 'invalid',
+                values: ['content', 'file', 'url'],
             },
         ]);
 

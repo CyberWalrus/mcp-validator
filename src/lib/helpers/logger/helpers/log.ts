@@ -11,8 +11,8 @@ export function log(level: LogLevel, message: string, meta?: object): void {
     const formattedMessage = `[${timestamp}] [${level}] ${message}`;
 
     if (meta) {
-        console.log(formattedMessage, meta);
+        console.error(formattedMessage, meta);
     } else {
-        console.log(formattedMessage);
+        console.error(formattedMessage);
     }
 }

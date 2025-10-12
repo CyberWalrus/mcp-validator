@@ -41,7 +41,7 @@ describe('E2E: Инициализация MCP сервера', () => {
         });
 
         expect(response.result.capabilities).toBeDefined();
-        expect(response.result.capabilities['tools']).toBeDefined();
+        expect(response.result.capabilities.tools).toBeDefined();
     });
 
     it('должен возвращать список доступных инструментов', async () => {

@@ -1,5 +1,5 @@
 /** Типы валидации для разрешения путей к промптам */
-export type ValidationType = 'architecture' | 'code' | 'documentation' | 'prompts' | 'tests';
+export type ValidationType = 'architecture' | 'code' | 'custom' | 'documentation' | 'prompts' | 'tests';
 
 /** Интерфейс для разрешения ресурсов пакета */
 export type ResourceResolver = {

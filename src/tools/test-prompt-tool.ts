@@ -126,7 +126,7 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
 
         const params = args as Record<string, unknown>;
 
-        if (!params['prompt'] || typeof params['prompt'] !== 'string') {
+        if (!params.prompt || typeof params.prompt !== 'string') {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -142,11 +142,11 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
 
         // Подготовка входных параметров с значениями по умолчанию
         const testInput: TestPromptInput = {
-            iterations: typeof params['iterations'] === 'number' ? params['iterations'] : 5,
-            models: Array.isArray(params['models']) ? (params['models'] as string[]) : ['openai/gpt-oss-120b'],
-            prompt: params['prompt'],
-            timeout: typeof params['timeout'] === 'number' ? params['timeout'] : 30000,
-            ...(typeof params['context'] === 'string' && { context: params['context'] }),
+            iterations: typeof params.iterations === 'number' ? params.iterations : 5,
+            models: Array.isArray(params.models) ? (params.models as string[]) : ['openai/gpt-oss-120b'],
+            prompt: params.prompt,
+            timeout: typeof params.timeout === 'number' ? params.timeout : 30000,
+            ...(typeof params.context === 'string' && { context: params.context }),
         };
 
         // Инициализация агента при первом использовании

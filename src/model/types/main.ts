@@ -36,7 +36,7 @@ export type ValidationInput = {
 };
 
 /** Типы валидации */
-export type ValidationType = 'architecture' | 'code' | 'documentation' | 'prompts' | 'tests';
+export type ValidationType = 'architecture' | 'code' | 'custom' | 'documentation' | 'prompts' | 'tests';
 
 /** Источник входных данных */
 export type InputSource = {

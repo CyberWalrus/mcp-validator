@@ -4,7 +4,7 @@ describe('showHelp', () => {
     let consoleSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-        consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -17,27 +17,31 @@ describe('showHelp', () => {
         expect(consoleSpy).toHaveBeenCalled();
         const output = consoleSpy.mock.calls.join('\n');
 
-        expect(output).toContain('MCP Validator');
-        expect(output).toContain('validate');
-        expect(output).toContain('test-prompt');
-    });
-
-    it('должен показывать информацию о версии', () => {
-        showHelp();
-
-        expect(consoleSpy).toHaveBeenCalled();
-        const output = consoleSpy.mock.calls.join('\n');
-
+        expect(output).toContain('MCP Validator 2.0');
+        expect(output).toContain('yarn start');
+        expect(output).toContain('--help');
         expect(output).toContain('--version');
     });
 
-    it('должен показывать примеры использования', () => {
+    it('должен показывать информацию о возможностях', () => {
         showHelp();
 
         expect(consoleSpy).toHaveBeenCalled();
         const output = consoleSpy.mock.calls.join('\n');
 
-        expect(output).toContain('EXAMPLES');
-        expect(output).toContain('npx');
+        expect(output).toContain('9 типов валидации');
+        expect(output).toContain('Параллельное тестирование промптов');
+        expect(output).toContain('Интеграция с Cursor IDE');
+    });
+
+    it('должен показывать примеры MCP использования', () => {
+        showHelp();
+
+        expect(consoleSpy).toHaveBeenCalled();
+        const output = consoleSpy.mock.calls.join('\n');
+
+        expect(output).toContain('validate инструмент');
+        expect(output).toContain('test-prompt инструмент');
+        expect(output).toContain('validationType');
     });
 });

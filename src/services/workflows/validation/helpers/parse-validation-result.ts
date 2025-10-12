@@ -8,7 +8,7 @@ export function parseValidationResult(aiResponse: string): {
     let success = true;
     const metadata: Record<string, unknown> = {};
 
-    metadata['fullResponse'] = aiResponse;
+    metadata.fullResponse = aiResponse;
 
     const problemIndicators = [
         'ошибка',
@@ -79,7 +79,7 @@ export function parseValidationResult(aiResponse: string): {
     const scoreMatch = aiResponse.match(/(\d+)\/(\d+)|(\d+)%|score[:\s]*(\d+)/i);
     if (scoreMatch) {
         const score = parseInt(scoreMatch[1] || scoreMatch[3] || scoreMatch[4] || '0', 10);
-        metadata['score'] = score;
+        metadata.score = score;
 
         // Если оценка низкая, считаем неуспешным
         if (score < 70) {

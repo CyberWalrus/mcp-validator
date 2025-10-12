@@ -71,6 +71,10 @@ export function validateParams(params: ValidationParams): void {
         throw new Error('Максимальная длина контекста: 10000 символов');
     }
 
+    if (params.validationType === 'custom' && (!params.customPrompt || params.customPrompt.trim().length === 0)) {
+        throw new Error('Для кастомной валидации требуется указать customPrompt');
+    }
+
     if (params.customPrompt && params.customPrompt.length > 20000) {
         throw new Error('Максимальная длина кастомного промпта: 20000 символов');
     }

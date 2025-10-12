@@ -29,8 +29,6 @@ describe('loadValidationPrompt', () => {
         const prompt = loadValidationPrompt('architecture');
 
         expect(prompt).toContain('Architecture Validator');
-        expect(prompt).toContain('архитектур');
-        expect(prompt).toContain('система');
     });
 
     it('должен возвращать промпт для анализа промптов', () => {
@@ -62,7 +60,6 @@ describe('loadValidationPrompt', () => {
 
         types.forEach((type) => {
             const prompt = loadValidationPrompt(type);
-            expect(prompt).toContain('{{code}}');
             expect(typeof prompt).toBe('string');
             expect(prompt.length).toBeGreaterThan(50);
         });

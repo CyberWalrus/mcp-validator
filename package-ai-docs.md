@@ -69,18 +69,18 @@ architecture_docs:
 **Верхнеуровневая архитектура:**
 
 - **server/** - MCP сервер инициализация, graceful shutdown, конфигурация
-- **api/** - MCP tools (validate-tool, test-prompt-tool) как тонкие обертки над workflows
+- **tools/** - MCP tools (validate-tool, test-prompt-tool) для интеграции с Cursor IDE
 - **services/workflows/** - бизнес-логика валидации и тестирования
-- **services/adapters/** - адаптеры для внешних систем (mcp-server, openrouter, file-reader, error-handler)
+- **services/adapters/** - адаптеры для внешних систем (openrouter, file-reader, error-handler)
 - **agents/** - AI агенты для валидации кода (OpenAI SDK)
 - **model/** - конфигурация, типы, схемы, константы
-- **tools/** - legacy директория, дублирует api/
+- **lib/cli/** - CLI функции для управления приложением
 - **e2e/** - E2E тесты с моками MCP клиентов и OpenRouter API
 
 **Взаимодействие модулей:**
 
 ```
-Cursor IDE → MCP SDK → server/mcp-server → api/tools → services/workflows → services/adapters
+Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows → services/adapters
                                                               ↓
                                                          agents/ (AI)
                                                               ↓
@@ -103,16 +103,15 @@ Cursor IDE → MCP SDK → server/mcp-server → api/tools → services/workflow
 - `create-mcp-server.ts` - фабрика создания MCP Server instance
 - `setup-graceful-shutdown.ts` - обработка SIGINT/SIGTERM для корректного завершения
 
-### Модуль: api/tools
+### Модуль: tools
 
 **Статус:** ✅ Готов
-**Расположение:** `src/api/`
-**Экспорты:** handleValidateToolRequest(), handleTestPromptToolRequest()
+**Расположение:** `src/tools/`
+**Экспорты:** validateTool, testPromptTool, handleValidateTool(), handleTestPromptTool()
 **Файлы:**
 
-- `validate-tool/index.ts` - MCP tool wrapper для валидации
-- `test-prompt-tool/index.ts` - MCP tool wrapper для тестирования промптов
-- `index.ts` - фасад экспорта обоих tools
+- `validate-tool.ts` - MCP tool wrapper для валидации с полной реализацией
+- `test-prompt-tool.ts` - MCP tool wrapper для тестирования промптов с полной реализацией
 
 ### Модуль: services/workflows/validation
 
@@ -138,19 +137,6 @@ Cursor IDE → MCP SDK → server/mcp-server → api/tools → services/workflow
 - `analyze-test-consistency.ts` - анализ разброса ответов
 - `generate-test-report.ts` - формирование отчета с метриками
 - `helpers/` - 10 вспомогательных функций
-
-### Модуль: services/adapters/mcp-server
-
-**Статус:** ✅ Готов
-**Расположение:** `src/services/adapters/mcp-server/`
-**Экспорты:** initializeMcpServer(), handleMcpRequest(), shutdownMcpServer()
-**Файлы:**
-
-- `initialize-mcp-server.ts` - инициализация официального MCP SDK сервера
-- `handle-mcp-request.ts` - маршрутизация MCP запросов к tools
-- `shutdown-mcp-server.ts` - корректное завершение MCP сессий
-- `stability/` - 6 файлов для обеспечения стабильности (rate limiting, retries, circuit breaker)
-- `helpers/` - 14 вспомогательных функций
 
 ### Модуль: services/adapters/openrouter
 
@@ -209,6 +195,18 @@ Cursor IDE → MCP SDK → server/mcp-server → api/tools → services/workflow
 - `schemas/main.ts` - централизованные Zod схемы
 - `types/main.ts` - централизованные TypeScript типы
 - `constants/main.ts` - константы приложения
+
+### Модуль: lib/cli
+
+**Статус:** ✅ Готов
+**Расположение:** `src/lib/cli/`
+**Экспорты:** showHelp(), showVersion(), startMcpServer()
+**Файлы:**
+
+- `show-help.ts` - отображение справки о доступных командах
+- `show-version.ts` - отображение версии приложения
+- `start-mcp-server.ts` - запуск MCP сервера через новую архитектуру
+- `index.ts` - фасад экспорта CLI функций
 
 ### Модуль: e2e
 

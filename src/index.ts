@@ -16,9 +16,9 @@
 
 // ИСПРАВЛЕНИЕ: Переменные окружения загружаются через встроенный --env-file флаг Node.js
 
-import { error, info } from './lib/helpers/logger/index';
+import { showHelp, showVersion, startMcpServer } from './lib/cli';
+import { error } from './lib/helpers/logger/index';
 import { APP_CONFIG, getAppConfigError, reloadAppConfig } from './model/config';
-import { startMcpServer } from './server/mcp-server';
 import { setupGracefulShutdown } from './server/setup-graceful-shutdown';
 
 reloadAppConfig();
@@ -36,61 +36,6 @@ function ensureConfiguration(): void {
         error('LOG_LEVEL=INFO');
         process.exit(1);
     }
-}
-
-/** Показать справку CLI */
-function showHelp(): void {
-    info(`
-🔧 MCP Validator 2.0 - AI-powered Code Quality Tool
-
-ИСПОЛЬЗОВАНИЕ:
-  yarn start                    # Запуск MCP сервера (по умолчанию)
-  yarn start --help             # Показать эту справку
-  yarn start --version          # Показать версию
-
-ВОЗМОЖНОСТИ:
-  • 9 типов валидации (код, тесты, архитектура, безопасность, производительность, документация, промпты, задачи, кастом)
-  • Параллельное тестирование промптов с анализом консистентности
-  • Интеграция с Cursor IDE через MCP протокол
-  • Поддержка множественных AI моделей через OpenRouter
-
-ТРЕБОВАНИЯ:
-  • Node.js 20+
-  • Переменная OPENROUTER_API_KEY в .env файле
-
-ОБНОВЛЕНИЯ В V2.0:
-  ✅ Официальный MCP SDK (@modelcontextprotocol/sdk)
-  ✅ Упрощенная агентная архитектура (OpenAI SDK)
-  ✅ Постоянный серверный режим (await server.connect())
-  ✅ Сохранены ВСЕ функции v1.x
-
-ПРИМЕРЫ MCP ИСПОЛЬЗОВАНИЯ:
-  validate инструмент:
-    {
-      "tool": "validate",
-      "arguments": {
-        "validationType": "code",
-        "input": {"type": "file", "data": "path/to/file.ts"},
-        "context": "Проверка качества TypeScript кода"
-      }
-    }
-
-  test-prompt инструмент:
-    {
-      "tool": "test-prompt", 
-      "arguments": {
-        "prompt": "Напиши функцию для сортировки массива",
-        "iterations": 5,
-        "context": "Тестирование стабильности промпта"
-      }
-    }
-`);
-}
-
-/** Показать версию */
-function showVersion(): void {
-    info('mcp-validator v2.0.0');
-    info('SDK Migration: Official MCP SDK + OpenAI');
 }
 
 /** Основная функция приложения */
@@ -115,10 +60,10 @@ async function main(): Promise<void> {
     setupGracefulShutdown();
 
     // Логирование старта
-    info('🚀 MCP Validator 2.0 запускается...');
-    info('🔧 Официальный MCP SDK + упрощенная архитектура');
-    info('📝 Все функции v1.x сохранены');
-    info('');
+    error('🚀 MCP Validator 2.0 запускается...');
+    error('🔧 Официальный MCP SDK + упрощенная архитектура');
+    error('📝 Все функции v1.x сохранены');
+    error('');
 
     try {
         // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Запуск в постоянном серверном режиме

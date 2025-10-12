@@ -14,8 +14,8 @@ describe('createAppConfig', () => {
 
     it('должен возвращать корректную конфигурацию с валидными env переменными', () => {
         process.env.OPENROUTER_API_KEY = 'test-api-key';
-        process.env['OPENROUTER_API_URL'] = 'https://api.openrouter.ai/api/v1';
-        process.env['OPENROUTER_TIMEOUT'] = '30000';
+        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v1';
+        process.env.OPENROUTER_TIMEOUT = '30000';
         process.env.LOG_LEVEL = 'INFO';
 
         const config = createAppConfig();
@@ -44,8 +44,8 @@ describe('createAppConfig', () => {
 
     it('должен использовать значения по умолчанию для необязательных переменных', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
-        delete process.env['OPENROUTER_API_URL'];
-        delete process.env['OPENROUTER_TIMEOUT'];
+        delete process.env.OPENROUTER_API_URL;
+        delete process.env.OPENROUTER_TIMEOUT;
         delete process.env.LOG_LEVEL;
 
         const config = createAppConfig();
@@ -76,7 +76,7 @@ describe('createAppConfig', () => {
 
     it('должен выбрасывать ошибку при некорректном значении OPENROUTER_TIMEOUT', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
-        process.env['OPENROUTER_TIMEOUT'] = 'not-a-number';
+        process.env.OPENROUTER_TIMEOUT = 'not-a-number';
 
         expect(() => createAppConfig()).toThrow();
     });
@@ -98,8 +98,8 @@ describe('reloadAppConfig', () => {
 
     it('должен обновлять конфигурацию при изменении переменных окружения', () => {
         process.env.OPENROUTER_API_KEY = 'updated-key';
-        process.env['OPENROUTER_API_URL'] = 'https://api.openrouter.ai/api/v2';
-        process.env['OPENROUTER_TIMEOUT'] = '15000';
+        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v2';
+        process.env.OPENROUTER_TIMEOUT = '15000';
         process.env.LOG_LEVEL = 'DEBUG';
 
         reloadAppConfig();

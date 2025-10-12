@@ -1,6 +1,6 @@
 # Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
-lib
-.turbo
-node_modules
-dist
-reports
+lib/*
+.turbo/*
+node_modules/*
+dist/*
+reports/*

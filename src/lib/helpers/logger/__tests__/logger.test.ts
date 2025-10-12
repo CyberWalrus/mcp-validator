@@ -3,7 +3,7 @@ describe('Logger', () => {
 
     beforeEach(() => {
         vi.resetModules();
-        consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+        consoleLogSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         vi.clearAllMocks();
 
         delete process.env.LOG_LEVEL;

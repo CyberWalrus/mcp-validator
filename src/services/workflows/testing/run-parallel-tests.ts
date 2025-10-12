@@ -116,7 +116,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
         const successfulModel = executeResults.find((r) => r.success)?.model || models[0];
         const analysisResult = await runSingleTest({
             iteration: 'analysis',
-            model: successfulModel!,
+            model: successfulModel,
             prompt: formattedAnalyzePrompt,
             timeout: validatedParams.timeout,
         });

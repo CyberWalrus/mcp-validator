@@ -12,9 +12,9 @@ function formatSuccessfulValidation(result: ValidationResult): string {
     let content = recommendations || 'Ответ ИИ недоступен';
 
     // Добавляем метаданные в конце
-    const modelValue = metadata?.['model'];
-    const durationValue = metadata?.['duration'];
-    const tokensValue = metadata?.['tokensUsed'];
+    const modelValue = metadata?.model;
+    const durationValue = metadata?.duration;
+    const tokensValue = metadata?.tokensUsed;
 
     const modelStr = typeof modelValue === 'string' ? modelValue : 'openai/gpt-oss-120b';
     const durationStr =
@@ -121,7 +121,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
 
         const params = args as Record<string, unknown>;
 
-        if (!params['validationType']) {
+        if (!params.validationType) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -137,15 +137,15 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
         }
 
         const allowedValidationTypes = ['code', 'tests', 'architecture', 'documentation', 'prompts'];
-        if (!allowedValidationTypes.includes(params['validationType'] as string)) {
+        if (!allowedValidationTypes.includes(params.validationType as string)) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
                 errorDetails: JSON.stringify({
                     allowed: allowedValidationTypes,
-                    provided: params['validationType'] as string,
+                    provided: params.validationType as string,
                 }),
-                errorMessage: `Неподдерживаемый тип валидации: ${params['validationType'] as string}`,
+                errorMessage: `Неподдерживаемый тип валидации: ${params.validationType as string}`,
                 errorType: 'validation',
             });
 
@@ -155,7 +155,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        if (!params['input']) {
+        if (!params.input) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -170,8 +170,8 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        const input = params['input'] as Record<string, unknown>;
-        if (typeof input !== 'object' || !input['type'] || !input['data']) {
+        const input = params.input as Record<string, unknown>;
+        if (typeof input !== 'object' || !input.type || !input.data) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -186,7 +186,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        if (params['validationType'] === 'custom' && !params['customPrompt']) {
+        if (params.validationType === 'custom' && !params.customPrompt) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -204,14 +204,14 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
         // Валидация входных параметров
         const validationInput: ValidationInput = {
             input: {
-                data: input['data'] as string,
-                type: input['type'] as 'content' | 'file' | 'url',
-                ...(input['encoding'] ? { encoding: input['encoding'] as 'ascii' | 'utf8' | 'utf16le' } : {}),
+                data: input.data as string,
+                type: input.type as 'content' | 'file' | 'url',
+                ...(input.encoding ? { encoding: input.encoding as 'ascii' | 'utf8' | 'utf16le' } : {}),
             } as ValidationInput['input'],
-            validationType: params['validationType'] as ValidationType,
-            ...(typeof params['context'] === 'string' && { context: params['context'] }),
-            ...(typeof params['customPrompt'] === 'string' && { customPrompt: params['customPrompt'] }),
-            language: typeof params['language'] === 'string' ? params['language'] : 'typescript',
+            validationType: params.validationType as ValidationType,
+            ...(typeof params.context === 'string' && { context: params.context }),
+            ...(typeof params.customPrompt === 'string' && { customPrompt: params.customPrompt }),
+            language: typeof params.language === 'string' ? params.language : 'typescript',
         };
 
         // Инициализация агента при первом использовании

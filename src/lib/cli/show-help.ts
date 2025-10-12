@@ -3,31 +3,48 @@ import { info } from '../helpers/logger';
 /** Показывает справку о доступных командах */
 export function showHelp(): void {
     info(`
-🔧 MCP Validator - Инструмент для валидации кода и тестирования промптов
+🔧 MCP Validator 2.0 - AI-powered Code Quality Tool
 
-USAGE:
-  npx mcp-validator [command] [options]
+ИСПОЛЬЗОВАНИЕ:
+  yarn start                    # Запуск MCP сервера (по умолчанию)
+  yarn start --help             # Показать эту справку
+  yarn start --version          # Показать версию
 
-COMMANDS:
-  validate <file|content> [options]  Валидация кода или промпта
-  test-prompt <prompt> [options]     Параллельное тестирование промпта
+ВОЗМОЖНОСТИ:
+  • 9 типов валидации (код, тесты, архитектура, безопасность, производительность, документация, промпты, задачи, кастом)
+  • Параллельное тестирование промптов с анализом консистентности
+  • Интеграция с Cursor IDE через MCP протокол
+  • Поддержка множественных AI моделей через OpenRouter
 
-OPTIONS:
-  --help, -h        Показать справку
-  --version, -v     Показать версию
-  --type <type>     Тип валидации (code|tests|architecture|documentation|prompts)
-  --language <lang> Язык программирования (опционально)
-  --context <text>  Дополнительный контекст
-  --iterations <n>  Количество итераций для test-prompt (по умолчанию 5)
-  --models <models> Список моделей для тестирования (разделенные запятыми)
+ТРЕБОВАНИЯ:
+  • Node.js 20+
+  • Переменная OPENROUTER_API_KEY в .env файле
 
-EXAMPLES:
-  npx mcp-validator validate src/utils.ts --type=code
-  npx mcp-validator validate --type=architecture --context="microservice"
-  npx mcp-validator test-prompt "Write unit tests" --iterations=3
-  npx mcp-validator --version
-  npx mcp-validator --help
+ОБНОВЛЕНИЯ В V2.0:
+  ✅ Официальный MCP SDK (@modelcontextprotocol/sdk)
+  ✅ Упрощенная агентная архитектура (OpenAI SDK)
+  ✅ Постоянный серверный режим (await server.connect())
+  ✅ Сохранены ВСЕ функции v1.x
 
-📖 Больше информации: https://github.com/monorepo/mcp-validator
+ПРИМЕРЫ MCP ИСПОЛЬЗОВАНИЯ:
+  validate инструмент:
+    {
+      "tool": "validate",
+      "arguments": {
+        "validationType": "code",
+        "input": {"type": "file", "data": "path/to/file.ts"},
+        "context": "Проверка качества TypeScript кода"
+      }
+    }
+
+  test-prompt инструмент:
+    {
+      "tool": "test-prompt", 
+      "arguments": {
+        "prompt": "Напиши функцию для сортировки массива",
+        "iterations": 5,
+        "context": "Тестирование стабильности промпта"
+      }
+    }
 `);
 }
