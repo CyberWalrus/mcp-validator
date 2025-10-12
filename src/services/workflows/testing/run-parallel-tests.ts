@@ -8,7 +8,7 @@ import { formatAnalyzePrompt, formatExecutePrompt } from './helpers/format-test-
 import { loadAnalyzePrompt, loadExecutePrompt } from './helpers/load-test-prompt';
 import { validateTestParams } from './helpers/validate-test-params';
 import { analyzeTestConsistency } from './analyze-test-consistency';
-import { DEFAULT_TEST_MODELS, DEFAULT_TEST_PARAMS } from './constants';
+import { DEFAULT_TEST_PARAMS } from './constants';
 import { ParallelTestParamsSchema } from './schemas';
 import type { ParallelTestParams, ParallelTestResult, TestIterationResult } from './types';
 
@@ -83,12 +83,13 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             validatedParams.context,
         );
 
-        const models = validatedParams.models || [...DEFAULT_TEST_MODELS];
+        const config = getConfigOrThrow();
+        const models = validatedParams.models || [config.ai.defaultModel];
 
         const testPromises = Array.from({ length: validatedParams.iterations }, (_, index) =>
             runSingleTest({
                 iteration: index + 1,
-                model: models[index % models.length] || DEFAULT_TEST_MODELS[0],
+                model: models[index % models.length] || config.ai.defaultModel,
                 prompt: formattedExecutePrompt,
                 timeout: validatedParams.timeout,
             }),
@@ -180,6 +181,8 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
 
         error('Ошибка параллельного тестирования', { duration, error: err });
 
+        const config = getConfigOrThrow();
+
         return {
             averageResponseTime: 0,
             consistency: {
@@ -194,7 +197,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
                 context: params.context || '',
                 duration: new Date().getTime() - startTime.getTime(),
                 endTime: new Date().toISOString(),
-                models: params.models || [...DEFAULT_TEST_MODELS],
+                models: params.models || [config.ai.defaultModel],
                 originalPrompt: params.prompt,
                 startTime: startTime.toISOString(),
                 validatorVersion: '2.0.0',

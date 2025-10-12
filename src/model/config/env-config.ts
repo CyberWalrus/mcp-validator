@@ -20,6 +20,11 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
     const packageRoot = getPackageRoot();
 
     const rawConfig = {
+        ai: {
+            defaultModel: env.DEFAULT_AI_MODEL,
+            maxTokens: env.AI_MAX_TOKENS,
+            temperature: env.AI_TEMPERATURE,
+        },
         logging: {
             level: env.LOG_LEVEL,
         },
@@ -37,6 +42,9 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
             isE2ETest: env.MCP_E2E_TEST === 'true',
             isTestMode: env.NODE_ENV === 'test' || env.MCP_E2E_TEST === 'true',
             nodePath: env.NODE_PATH || '',
+        },
+        validation: {
+            timeout: env.VALIDATION_TIMEOUT,
         },
     };
 
@@ -61,6 +69,11 @@ function createFallbackConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     const packageRoot = getPackageRoot();
 
     return {
+        ai: {
+            defaultModel: 'openai/gpt-oss-120b',
+            maxTokens: 100000,
+            temperature: 0.5,
+        },
         logging: {
             level: 'INFO',
         },
@@ -79,14 +92,19 @@ function createFallbackConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
             isTestMode: env.NODE_ENV === 'test' || env.MCP_E2E_TEST === 'true',
             nodePath: env.NODE_PATH || '',
         },
+        validation: {
+            timeout: 30000,
+        },
     };
 }
 
 function assignConfig(target: AppConfig, source: AppConfig): void {
+    Object.assign(target.ai, source.ai);
     Object.assign(target.logging, source.logging);
     Object.assign(target.openRouter, source.openRouter);
     Object.assign(target.paths, source.paths);
     Object.assign(target.runtime, source.runtime);
+    Object.assign(target.validation, source.validation);
 }
 
 function toError(error: unknown): Error {

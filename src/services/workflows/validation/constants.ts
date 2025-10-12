@@ -68,6 +68,3 @@ export const SUPPORTED_EXTENSIONS = [
     '.toml',
     '.sql',
 ] as const;
-
-/** Timeout для валидации в миллисекундах */
-export const VALIDATION_TIMEOUT = Number(process.env.VALIDATION_TIMEOUT) || 30000;

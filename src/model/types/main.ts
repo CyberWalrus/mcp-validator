@@ -114,8 +114,26 @@ export type TestPromptResult = {
 
 // ========== КОНФИГУРАЦИЯ ПРИЛОЖЕНИЯ ==========
 
+/** Настройки AI моделей */
+export type AiConfig = {
+    /** Модель по умолчанию */
+    readonly defaultModel: string;
+    /** Максимальное количество токенов */
+    readonly maxTokens: number;
+    /** Температура генерации */
+    readonly temperature: number;
+};
+
+/** Настройки валидации */
+export type ValidationConfig = {
+    /** Таймаут валидации в миллисекундах */
+    readonly timeout: number;
+};
+
 /** Конфигурация приложения */
 export type AppConfig = {
+    /** Настройки AI моделей */
+    readonly ai: AiConfig;
     /** Настройки логирования */
     readonly logging: {
         /** Уровень логирования */
@@ -139,6 +157,8 @@ export type AppConfig = {
     };
     /** Настройки среды выполнения */
     readonly runtime: RuntimeConfig;
+    /** Настройки валидации */
+    readonly validation: ValidationConfig;
 };
 
 /** Настройки среды выполнения приложения */

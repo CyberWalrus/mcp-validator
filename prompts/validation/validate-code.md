@@ -1,7 +1,13 @@
 ---
 id: validate-code-single-file-v4
 type: algorithm
-use_cases: ['single_file_code_validation', 'style_enforcement', 'mcp_validator_integration', 'isolated_code_quality']
+use_cases:
+  [
+    "single_file_code_validation",
+    "style_enforcement",
+    "mcp_validator_integration",
+    "isolated_code_quality",
+  ]
 prompt_language: mixed
 response_language: ru
 alwaysApply: false
@@ -19,6 +25,14 @@ Specialization: ruthless validation of production-ready TypeScript/JavaScript co
 
 Critical thinking: challenge developer decisions, seek cleaner alternatives, honestly assess code maintainability.
 
+**IMPORTANT FILE TYPE RULES:**
+
+- Constants files (`constants.ts`) should export MULTIPLE related constants - this is correct and expected
+- Types files (`types.ts`) should export MULTIPLE type definitions - this is correct and expected
+- Schemas files (`schemas.ts`) should export MULTIPLE validation schemas - this is correct and expected
+- Function files should export ONE main function/component - one-file-one-function rule applies here
+- DO NOT apply one-file-one-function rule to constants/types/schemas files
+
 **ВАЖНО: Все ответы должны быть на русском языке.**
 </expert_role>
 
@@ -30,26 +44,54 @@ Systematic single-file code quality validation prevents technical debt, ensures 
 
 <algorithm_steps>
 
+### Step 0: File Type Classification
+
+<cognitive_triggers>
+First, identify the file type to apply appropriate validation rules.
+</cognitive_triggers>
+
+**FILE TYPE DETECTION:**
+
+Determine file category based on content and name:
+
+- **Constants file** - Exports only constants (e.g., `constants.ts`, file with `export const` only). Multiple constant exports are ALLOWED and EXPECTED.
+- **Types file** - Exports only type definitions (e.g., `types.ts`, file with `type`/`interface` only). Multiple type exports are ALLOWED and EXPECTED.
+- **Schemas file** - Exports only validation schemas (e.g., `schemas.ts`, file with Zod/Yup schemas). Multiple schema exports are ALLOWED and EXPECTED.
+- **Function file** - Exports ONE main function/component (requiring one-file-one-function rule). May have 2-3 private (non-exported) helper functions under 10 lines each. Must NOT export types - move them to `types.ts`.
+- **Mixed file** - Exports multiple entity types (functions + types/constants) - CRITICAL violation, must be separated into different files.
+
+**IMPORTANT:**
+
+- The "one file = one function" rule applies ONLY to function files
+- Function files must export ONLY ONE function and NO types
+- Constants/Types/Schemas files should export multiple related entities of the same type
+- Helper functions in function files must be PRIVATE (not exported)
+
+<completion_criteria>
+File type identified, appropriate validation rules selected
+</completion_criteria>
+
 ### Step 1: Code Style and Structure Validation
 
 <cognitive_triggers>
-Let's analyze the code step by step. Check compliance with one-file-one-function principle and code-style.md standards.
+Let's analyze the code step by step. Check compliance with appropriate standards based on file type.
 </cognitive_triggers>
 
 **MANDATORY CODE STYLE CHECKLIST:**
 
 **File Structure:**
 
-- [ ] **One file = one function** - Exactly one main exported function/component
+- [ ] **One file = one function** - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, or files exporting only constants/types/schemas). Private (non-exported) helper functions are allowed (max 2-3, under 10 lines each).
 - [ ] **File size limit** - Max 150 lines of code (excluding comments and empty lines)
-- [ ] **Minimal helpers** - No more than 2-3 small private helper functions (prefer inline logic)
-- [ ] **No multiple entities** - Should not mix different types of entities (functions, types, classes, constants)
-- [ ] **Entity separation** - Complex types in separate `types.ts` (simple function-specific types allowed inline)
+- [ ] **Minimal helpers** - No more than 2-3 small private helper functions (prefer inline logic). Helper functions must NOT be exported.
+- [ ] **Entity consistency** - Files should focus on one entity type: either functions OR constants OR types OR schemas (mixing discouraged). Function files should NOT export types - move them to `types.ts`.
+- [ ] **Entity separation** - Complex types in separate `types.ts`, constants in `constants.ts`, schemas in `schemas.ts`
+- [ ] **No type exports in function files** - Function files must NOT export types using `export type` - all types belong in `types.ts`
 - [ ] **No classes** - Only functions and functional composition (exceptions: React components, library inheritance requirements)
 - [ ] **ESM-only** - Strictly forbid `require`, `module.exports`, `exports` - only ES modules
 - [ ] **Curly braces everywhere** - Mandatory `{}` in if/else even for single statements
 - [ ] **Functional composition** - No `this`, class methods, or OOP patterns
-- [ ] **Encapsulation principle** - Non-index files should not export multiple unrelated functions
+- [ ] **Encapsulation principle** - Non-index files with functions should not export multiple unrelated functions; constants/types/schemas files can have multiple related exports
 - [ ] **Clean syntax** - No syntax errors or obvious code issues
 
 **Coding Patterns:**
@@ -68,13 +110,17 @@ Let's analyze the code step by step. Check compliance with one-file-one-function
 - [ ] **Import grouping** - External libs → (blank line) → Types → (blank line) → Internal modules
 
 <completion_criteria>
-Code style checklist completed, file size verified (max 150 lines), single function principle enforced, all violations documented as critical issues
+Code style checklist completed, file size verified (max 150 lines), single function principle enforced ONLY for function files (NOT for constants/types/schemas files), file type identified, all violations documented as critical issues
 </completion_criteria>
 
 <exception_handling>
 If style rule unclear: mark as violation and request clarification
 If file exceeds 150 lines: document as critical blocking issue
-If multiple exported functions found: document as critical violation of one-file-one-function principle
+If multiple exported functions found in FUNCTION file: document as critical violation of one-file-one-function principle
+If multiple exported constants/types/schemas found: this is ALLOWED and EXPECTED in constants/types/schemas files
+If constants file named constants.ts: DO NOT require it to export functions - multiple constant exports are correct
+If types file named types.ts: DO NOT require it to export functions - multiple type exports are correct
+If schemas file: DO NOT require it to export functions - multiple schema exports are correct
 If legacy code patterns found: document for refactoring
 </exception_handling>
 
@@ -128,20 +174,21 @@ Ensure comprehensive documentation and type safety within the single file. Focus
 
 - [ ] **Single-line JSDoc only** - Strictly forbid multiline JSDoc with `@param`, `@returns` (only single-line Russian descriptions)
 - [ ] **Type documentation** - JSDoc for type fields
-- [ ] **Type safety** - Proper TypeScript types without `any`
+- [ ] **Type safety** - Proper TypeScript types without `any` (explicit types optional for constants with `as const`)
 - [ ] **Type over interface** - Strictly prefer `type` over `interface` declarations
 - [ ] **Zod inference** - Use `z.infer` for schema types when present
+- [ ] **Constants typing** - Explicit types optional for constants declared with `as const`
 
 **SINGLE FILE QUALITY:**
 
 - [ ] **No unused variables/imports** - All declarations used
-- [ ] **Error handling** - Proper error handling patterns
-- [ ] **Function purity** - Side effects clearly documented
-- [ ] **Explicit return types** - Mandatory explicit return types on all functions
-- [ ] **File coherence** - All content related to single exported function
-- [ ] **Function composition** - Max 2-3 helper functions, each under 10 lines (prefer inline logic in main function)
+- [ ] **Error handling** - Proper error handling patterns (applicable to function files)
+- [ ] **Function purity** - Side effects clearly documented (applicable to function files)
+- [ ] **Explicit return types** - Mandatory explicit return types on all functions (applicable to function files)
+- [ ] **File coherence** - All content related to single purpose (function/constants/types/schemas)
+- [ ] **Function composition** - Max 2-3 helper functions, each under 10 lines (applicable to function files, prefer inline logic)
 - [ ] **Self-sufficiency** - All types, constants, helpers either in file or properly imported
-- [ ] **Export clarity** - Only one main export per file (except types when necessary)
+- [ ] **Export clarity** - Function files: one main export; Constants/Types/Schemas files: multiple related exports allowed
 
 <completion_criteria>
 Documentation complete, type safety verified within single file scope
@@ -194,40 +241,46 @@ Use this EXACT format optimized for MCP validator processing:
 
 <!-- Only production-blocking issues -->
 
-- **[CRITICAL]** Using classes instead of functions
+- **[CRITICAL]** Using classes instead of functions (not applicable to constants/types/schemas files)
 - **[CRITICAL]** Using CommonJS (`require`, `module.exports`) instead of ESM
-- **[CRITICAL]** Missing curly braces in if/else statements
+- **[CRITICAL]** Missing curly braces in if/else statements (applicable to function files)
 - **[CRITICAL]** Using `interface` instead of `type`
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
 - **[CRITICAL]** Inline comments (`//`) inside function bodies
 - **[CRITICAL]** Missing JSDoc documentation
-- **[CRITICAL]** Deep nesting instead of guard clauses
+- **[CRITICAL]** Deep nesting instead of guard clauses (applicable to function files)
 - **[CRITICAL]** Using default exports
-- **[CRITICAL]** Multiple exported functions in single file (violates one-file-one-function)
-- **[CRITICAL]** Excessive decomposition into tiny private functions
-- **[CRITICAL]** Complex types mixed with business logic (should be in types.ts)
+- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas files)
+- **[CRITICAL]** Exporting helper functions (helpers must be private, not exported)
+- **[CRITICAL]** Excessive decomposition into tiny private functions (applicable to function files)
+- **[CRITICAL]** Mixing entity types (functions + constants/types in one file; should separate into different files)
+- **[CRITICAL]** Exporting types from function files (use `export type` ONLY in types.ts, not in function files)
 - **[CRITICAL]** Boolean variables without proper prefixes (`is/has/can/should`)
 - **[CRITICAL]** Using `enum` instead of union types
-- **[CRITICAL]** Missing explicit return types on functions
+- **[CRITICAL]** Missing explicit return types on functions (applicable to function files)
   </critical_issues>
 
 <recommendations>
 <!-- Priority-ordered actionable steps -->
 1. **[BLOCKS MERGE]** Convert to ESM (remove `require`, `module.exports`)
 2. **[BLOCKS MERGE]** Replace `interface` with `type` declarations
-3. **[BLOCKS MERGE]** Add curly braces to all if/else statements
+3. **[BLOCKS MERGE]** Add curly braces to all if/else statements (if function file)
 4. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format
 5. **[BLOCKS MERGE]** Remove inline comments from function bodies
-6. **[BLOCKS MERGE]** Add explicit return types to all functions
+6. **[BLOCKS MERGE]** Add explicit return types to all functions (if function file)
 7. **[BLOCKS MERGE]** Add proper prefixes to boolean variables
 8. **[BLOCKS MERGE]** Replace `enum` with union types
-9. **[BLOCKS MERGE]** Merge into single exported function (follow one-file-one-function principle)
-10. **[HIGH]** Move complex types to separate types.ts
-11. **[HIGH]** Combine small helper functions into main function body
-12. **[HIGH]** Add Russian JSDoc for main function
-13. **[MEDIUM]** Refactor conditions to use guard clauses
-14. **[LOW]** Replace for loops with array methods
-15. **[LOW]** Improve variable naming descriptiveness
+9. **[BLOCKS MERGE]** Move all exported types to separate types.ts (function files must NOT export types)
+10. **[BLOCKS MERGE]** Ensure file focuses on single entity type: separate functions/constants/types/schemas
+11. **[BLOCKS MERGE]** Remove exports from helper functions (keep only one main export in function files)
+12. **[HIGH]** Move constants to separate constants.ts
+13. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function)
+14. **[HIGH]** Make helper functions private (remove `export` keyword)
+15. **[HIGH]** Combine small helper functions into main function body (if function file)
+16. **[HIGH]** Add Russian JSDoc for all functions (exported and private)
+17. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+18. **[LOW]** Replace for loops with array methods (if function file)
+19. **[LOW]** Improve variable naming descriptiveness
 </recommendations>
 
 </validation_result>
@@ -257,39 +310,80 @@ Use this EXACT format optimized for MCP validator processing:
 
 <code_examples>
 
-**Good Code Example:**
+**Good Code Example (Function File):**
 
 ```typescript
-import type { ValidationResult } from './types';
+import type { ValidationResult } from "./types";
 
 /** Валидирует входные данные пользователя */
 export function validateUserInput(input: unknown): ValidationResult {
-    if (!input) return { isValid: false, error: 'Нет входных данных' };
-    if (typeof input !== 'object') return { isValid: false, error: 'Неверный тип' };
+  if (!input) return { isValid: false, error: "Нет входных данных" };
+  if (typeof input !== "object")
+    return { isValid: false, error: "Неверный тип" };
 
-    const userInput = input as Record<string, unknown>;
-    if (!userInput.email) return { isValid: false, error: 'Email обязателен' };
+  const userInput = input as Record<string, unknown>;
+  if (!userInput.email) return { isValid: false, error: "Email обязателен" };
 
-    return { isValid: true };
+  return { isValid: true };
 }
 ```
 
-**Bad Code Example:**
+**Good Code Example (Constants File):**
+
+```typescript
+/** Параметры валидации по умолчанию */
+export const DEFAULT_VALIDATION_PARAMS = {
+  /** Максимальная длина email */
+  MAX_EMAIL_LENGTH: 100,
+
+  /** Минимальная длина пароля */
+  MIN_PASSWORD_LENGTH: 8,
+} as const;
+
+/** Сообщения об ошибках */
+export const ERROR_MESSAGES = {
+  /** Ошибка при пустом email */
+  EMPTY_EMAIL: "Email не может быть пустым",
+
+  /** Ошибка при коротком пароле */
+  SHORT_PASSWORD: "Пароль слишком короткий",
+} as const;
+```
+
+**Bad Code Example (Function File with Multiple Violations):**
 
 ```typescript
 // Multiple violations: class, deep nesting, no JSDoc, default export
 export default class InputValidator {
-    validate(input: any) {
-        if (input) {
-            if (typeof input === 'object') {
-                if (input.email) {
-                    return true;
-                }
-            }
+  validate(input: any) {
+    if (input) {
+      if (typeof input === "object") {
+        if (input.email) {
+          return true;
         }
-        return false;
+      }
     }
+    return false;
+  }
 }
+```
+
+**Bad Code Example (Mixed File - Function + Type Export):**
+
+```typescript
+import type { Config } from './types';
+
+// WRONG: Exporting type from function file
+export type ValidationFunction = (input: unknown) => boolean;
+
+/** Валидирует входные данные */
+export function validateInput(input: unknown): boolean {
+  if (!input) return false;
+  return typeof input === 'object';
+}
+
+// CRITICAL: File exports both function AND type - should separate
+// Type should be in types.ts
 ```
 
 </code_examples>

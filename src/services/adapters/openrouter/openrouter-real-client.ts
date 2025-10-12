@@ -2,7 +2,7 @@
 
 import { APP_CONFIG, getAppConfigError } from '../../../model/config';
 import type { AppConfig } from '../../../model/types/main';
-import { DEFAULT_HEADERS, DEFAULT_MAX_TOKENS, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_TIMEOUT } from './constants';
+import { DEFAULT_HEADERS, DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE } from './constants';
 import type { OpenRouterRequest, OpenRouterResponse } from './types';
 
 function getConfigOrThrow(): AppConfig {
@@ -27,11 +27,13 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
 
     const config = getConfigOrThrow();
     const {
+        ai: { defaultModel },
         openRouter: { apiKey, apiUrl, timeout: defaultTimeout },
+        validation: { timeout: validationTimeout },
     } = config;
 
-    const model = params.model || DEFAULT_MODEL;
-    const timeout = params.timeout || defaultTimeout || DEFAULT_TIMEOUT;
+    const model = params.model || defaultModel;
+    const timeout = params.timeout || defaultTimeout || validationTimeout;
     const temperature = params.temperature || DEFAULT_TEMPERATURE;
     const maxTokens = params.maxTokens || DEFAULT_MAX_TOKENS;
 

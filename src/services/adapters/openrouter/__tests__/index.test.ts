@@ -1,5 +1,5 @@
+import { APP_CONFIG } from '../../../../model/config';
 import type { MakeOpenRouterRequest as MakeOpenRouterRequestFn } from '..';
-import { DEFAULT_MODEL } from '../constants';
 
 global.fetch = vi.fn();
 const mockFetch = vi.mocked(fetch);
@@ -109,10 +109,10 @@ describe('makeOpenRouterRequest', () => {
     });
 
     it('должен использовать модель по умолчанию когда не указана', async () => {
-        // Мокируем ответ с моделью по умолчанию из констант
+        // Мокируем ответ с моделью по умолчанию из конфига
         const mockResponse = {
             choices: [{ message: { content: 'Response' } }],
-            model: DEFAULT_MODEL,
+            model: APP_CONFIG.ai.defaultModel,
             usage: { total_tokens: 50 },
         };
 
@@ -127,8 +127,8 @@ describe('makeOpenRouterRequest', () => {
 
         const result = await makeOpenRouterRequest(params);
 
-        // Проверяем что используется модель по умолчанию (любая)
-        expect(result.model).toBe(DEFAULT_MODEL);
+        // Проверяем что используется модель по умолчанию из конфига
+        expect(result.model).toBe(APP_CONFIG.ai.defaultModel);
 
         // Проверяем что в запросе отправлена модель по умолчанию
         const fetchCall = mockFetch.mock.calls[0];
@@ -136,7 +136,7 @@ describe('makeOpenRouterRequest', () => {
             throw new Error('Expected fetch to be called with body');
         }
         const body = JSON.parse(fetchCall[1].body as string);
-        expect(body.model).toBe(DEFAULT_MODEL);
+        expect(body.model).toBe(APP_CONFIG.ai.defaultModel);
     });
 
     it('должен использовать базовый URL из конфигурации', async () => {
@@ -145,7 +145,7 @@ describe('makeOpenRouterRequest', () => {
 
         const mockResponse = {
             choices: [{ message: { content: 'Response' } }],
-            model: DEFAULT_MODEL,
+            model: APP_CONFIG.ai.defaultModel,
             usage: { total_tokens: 50 },
         };
 

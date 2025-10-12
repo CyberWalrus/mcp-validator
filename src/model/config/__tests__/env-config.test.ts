@@ -21,6 +21,11 @@ describe('createAppConfig', () => {
         const config = createAppConfig();
 
         expect(config).toEqual({
+            ai: {
+                defaultModel: 'openai/gpt-oss-120b',
+                maxTokens: 100000,
+                temperature: 0.5,
+            },
             logging: {
                 level: 'INFO',
             },
@@ -39,6 +44,9 @@ describe('createAppConfig', () => {
                 isTestMode: process.env.NODE_ENV === 'test',
                 nodePath: '',
             },
+            validation: {
+                timeout: 30000,
+            },
         });
     });
 
@@ -50,6 +58,9 @@ describe('createAppConfig', () => {
 
         const config = createAppConfig();
 
+        expect(config.ai.defaultModel).toBe('openai/gpt-oss-120b');
+        expect(config.ai.maxTokens).toBe(100000);
+        expect(config.ai.temperature).toBe(0.5);
         expect(config.openRouter.apiUrl).toBe('https://openrouter.ai/api/v1');
         expect(config.openRouter.timeout).toBe(30000);
         expect(config.logging.level).toBe('INFO');
@@ -59,6 +70,7 @@ describe('createAppConfig', () => {
             isTestMode: process.env.NODE_ENV === 'test',
             nodePath: '',
         });
+        expect(config.validation.timeout).toBe(30000);
     });
 
     it('должен выбрасывать ошибку при отсутствии обязательной переменной OPENROUTER_API_KEY', () => {
@@ -105,6 +117,13 @@ describe('reloadAppConfig', () => {
         reloadAppConfig();
 
         expect(getAppConfigError()).toBeNull();
+        expect(APP_CONFIG.ai).toEqual(
+            expect.objectContaining({
+                defaultModel: 'openai/gpt-oss-120b',
+                maxTokens: 100000,
+                temperature: 0.5,
+            }),
+        );
         expect(APP_CONFIG.openRouter).toEqual(
             expect.objectContaining({
                 apiKey: 'updated-key',
@@ -113,6 +132,7 @@ describe('reloadAppConfig', () => {
             }),
         );
         expect(APP_CONFIG.logging.level).toBe('DEBUG');
+        expect(APP_CONFIG.validation.timeout).toBe(30000);
     });
 
     it('должен устанавливать ошибку при отсутствии обязательных переменных', () => {
