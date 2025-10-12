@@ -21,6 +21,10 @@
     "code-quality",
     "testing"
   ],
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=20"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/CyberWalrus/mcp-validator.git"
