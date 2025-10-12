@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
@@ -21,7 +21,10 @@
     "code-quality",
     "testing"
   ],
-  "repository": "git@github.com:CyberWalrus/mcp-validator.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/CyberWalrus/mcp-validator.git"
+  },
   "author": "Andrey Pakhomov",
   "license": "MIT",
   "scripts": {
