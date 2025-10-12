@@ -1,0 +1,290 @@
+<architecture format="single" version="2.0">
+	<architecture_metadata version="1" language="ts">
+		<architecture_type>
+			layered_library
+		</architecture_type>
+		<package_name>
+			mcp-validator
+		</package_name>
+		<workspace_path>
+			.
+		</workspace_path>
+		<source_root>
+			src
+		</source_root>
+		<entrypoints>
+			<entrypoint path="src/index.ts" />
+		</entrypoints>
+		<ruleset>
+			morj-2025-09
+		</ruleset>
+		<source_revision>
+			git:faa5797787aaf84a89d489ca21adfb198b8cfd11
+		</source_revision>
+		<generated_at>
+			2025-10-12T00:00:00Z
+		</generated_at>
+		<validator_min_version>
+			1
+		</validator_min_version>
+	</architecture_metadata>
+	<package_root>
+		<source_directory name="src">
+			<!-- Слой: Server - MCP сервер и инициализация -->
+			<layer name="server" purpose="MCP сервер инициализация и конфигурация">
+				<module name="mcp-server">
+					<facade name="mcp-server.ts" role="function" />
+					<file name="index.ts" role="фасад" />
+				</module>
+				<module name="create-mcp-server">
+					<facade name="create-mcp-server.ts" role="function" />
+				</module>
+				<module name="setup-graceful-shutdown">
+					<facade name="setup-graceful-shutdown.ts" role="function" />
+				</module>
+			</layer>
+			<!-- Слой: API - MCP инструменты (тонкие обертки) -->
+			<layer name="api" purpose="MCP tools для внешних интерфейсов">
+				<module name="validate-tool">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="module-ai-docs.md" role="документация" />
+				</module>
+				<module name="test-prompt-tool">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="types.ts" role="types" />
+					<file name="module-ai-docs.md" role="документация" />
+					<test name="__tests__/index.test.ts" role="unit_test" />
+				</module>
+				<file name="index.ts" role="фасад слоя" />
+			</layer>
+			<!-- Слой: Services - бизнес-логика -->
+			<layer name="services" purpose="бизнес-логика и адаптеры">
+				<!-- Подслой: Adapters - адаптеры к внешним системам -->
+				<sublayer name="adapters" purpose="адаптеры к внешним системам">
+					<module name="mcp-server">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="initialize-mcp-server.ts" role="function" />
+						<file name="handle-mcp-request.ts" role="function" />
+						<file name="shutdown-mcp-server.ts" role="function" />
+						<file name="constants.ts" role="config" />
+						<file name="schemas.ts" role="schemas" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<directory name="helpers">
+							<file name="create-mcp-tools-list.ts" role="helper" />
+							<file name="format-mcp-error.ts" role="helper" />
+							<file name="validate-mcp-params.ts" role="helper" />
+						</directory>
+						<directory name="stability">
+							<file name="circuit-breaker.ts" role="helper" />
+							<file name="rate-limiter.ts" role="helper" />
+							<file name="retry-handler.ts" role="helper" />
+						</directory>
+						<test name="__tests__/initialize-mcp-server.test.ts" role="unit_test" />
+						<test name="__tests__/handle-mcp-request.test.ts" role="unit_test" />
+						<test name="__tests__/shutdown-mcp-server.test.ts" role="unit_test" />
+					</module>
+					<module name="openrouter">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="openrouter-client-factory.ts" role="function" />
+						<file name="openrouter-real-client.ts" role="class" />
+						<file name="constants.ts" role="config" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<test name="__tests__/openrouter-client-factory.test.ts" role="unit_test" />
+						<test name="__tests__/openrouter-real-client.test.ts" role="unit_test" />
+					</module>
+					<module name="file-reader">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="read-file-content.ts" role="function" />
+						<file name="read-file-sync.ts" role="function" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<directory name="helpers">
+							<file name="detect-encoding.ts" role="helper" />
+							<file name="resolve-path.ts" role="helper" />
+							<file name="validate-file.ts" role="helper" />
+						</directory>
+						<test name="__tests__/read-file-content.test.ts" role="unit_test" />
+						<test name="__tests__/read-file-sync.test.ts" role="unit_test" />
+					</module>
+					<module name="error-handler">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="render-error-response.ts" role="function" />
+						<file name="format-error-context.ts" role="function" />
+						<file name="load-error-template.ts" role="function" />
+						<file name="constants.ts" role="config" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<directory name="helpers">
+							<file name="format-stack-trace.ts" role="helper" />
+							<file name="sanitize-error.ts" role="helper" />
+						</directory>
+						<test name="__tests__/render-error-response.test.ts" role="unit_test" />
+						<test name="__tests__/format-error-context.test.ts" role="unit_test" />
+						<test name="__tests__/load-error-template.test.ts" role="unit_test" />
+					</module>
+				</sublayer>
+				<!-- Подслой: Workflows - бизнес-логика -->
+				<sublayer name="workflows" purpose="workflow бизнес-логики">
+					<module name="validation">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="validate-code.ts" role="function" />
+						<file name="constants.ts" role="config" />
+						<file name="schemas.ts" role="schemas" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<directory name="helpers">
+							<file name="load-validation-prompt.ts" role="helper" />
+							<file name="map-validation-type.ts" role="helper" />
+							<file name="validate-schema.ts" role="helper" />
+						</directory>
+						<test name="__tests__/validate-code.test.ts" role="unit_test" />
+					</module>
+					<module name="testing">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="run-parallel-tests.ts" role="function" />
+						<file name="analyze-test-consistency.ts" role="function" />
+						<file name="generate-test-report.ts" role="function" />
+						<file name="constants.ts" role="config" />
+						<file name="schemas.ts" role="schemas" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<directory name="helpers">
+							<file name="execute-single-test.ts" role="helper" />
+							<file name="calculate-metrics.ts" role="helper" />
+							<file name="format-report.ts" role="helper" />
+						</directory>
+						<test name="__tests__/run-parallel-tests.test.ts" role="unit_test" />
+						<test name="__tests__/analyze-test-consistency.test.ts" role="unit_test" />
+						<test name="__tests__/generate-test-report.test.ts" role="unit_test" />
+					</module>
+				</sublayer>
+			</layer>
+			<!-- Слой: Agents - AI агенты -->
+			<layer name="agents" purpose="AI агенты для валидации и тестирования">
+				<module name="agents">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="code-validator-agent.ts" role="agent" />
+					<file name="test-prompt-agent.ts" role="agent" />
+					<test name="__tests__/code-validator-agent.test.ts" role="unit_test" />
+				</module>
+			</layer>
+			<!-- Слой: Model - типы, схемы, конфигурация -->
+			<layer name="model" purpose="типы, схемы и конфигурация">
+				<module name="config">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="env-config.ts" role="config" />
+					<test name="__tests__/env-config.test.ts" role="unit_test" />
+				</module>
+				<module name="schemas">
+					<file name="main.ts" role="schemas" />
+				</module>
+				<module name="types">
+					<file name="main.ts" role="types" />
+				</module>
+				<module name="constants">
+					<file name="main.ts" role="config" />
+				</module>
+			</layer>
+			<!-- Слой: Tools (legacy) - дублирует api/ -->
+			<layer name="tools" purpose="legacy tools (дублирует api/)">
+				<module name="validate-tool">
+					<facade name="validate-tool.ts" role="function" />
+				</module>
+				<module name="test-prompt-tool">
+					<facade name="test-prompt-tool.ts" role="function" />
+				</module>
+			</layer>
+			<!-- Слой: E2E - интеграционные тесты -->
+			<layer name="e2e" purpose="E2E тесты и моки">
+				<file name="index.ts" role="фасад" />
+				<file name="constants.ts" role="config" />
+				<file name="helpers.ts" role="helpers" />
+				<file name="types.ts" role="types" />
+				<directory name="mocks">
+					<file name="mcp-client-simulator.ts" role="mock" />
+					<file name="openrouter-api-mocks.ts" role="mock" />
+					<file name="openrouter-test-client.ts" role="mock" />
+					<file name="test-data.ts" role="mock" />
+				</directory>
+				<test name="mcp-server-initialization.e2e.test.ts" role="e2e_test" />
+				<test name="mcp-server-stability.e2e.test.ts" role="e2e_test" />
+				<test name="validate-tool.e2e.test.ts" role="e2e_test" />
+				<test name="test-prompt-tool.e2e.test.ts" role="e2e_test" />
+				<test name="error-scenarios.e2e.test.ts" role="e2e_test" />
+				<test name="file-path-resolution.e2e.test.ts" role="e2e_test" />
+				<test name="function-preservation.e2e.test.ts" role="e2e_test" />
+				<test name="invalid-tool-parameters.e2e.test.ts" role="e2e_test" />
+				<test name="__tests__/e2e-base-structure.test.ts" role="e2e_test" />
+				<test name="__tests__/documentation-schema-consistency.e2e.test.ts" role="e2e_test" />
+				<test name="__tests__/mock-system.test.ts" role="e2e_test" />
+				<test name="__tests__/package-publication.e2e.test.ts" role="e2e_test" />
+				<test name="__tests__/prompt-validation-fix.e2e.test.ts" role="e2e_test" />
+			</layer>
+			<!-- Общие тесты -->
+			<file name="test-setup.ts" role="config" />
+			<test name="__tests__/refactoring-e2e-spec.test.ts" role="e2e_test" />
+			<test name="__tests__/zod-regression.test.ts" role="unit_test" />
+			<!-- Слой: Lib - вспомогательные библиотеки -->
+			<layer name="lib" purpose="вспомогательные библиотеки и утилиты">
+				<directory name="helpers">
+					<module name="logger">
+						<facade name="index.ts" role="unit_facade" />
+					</module>
+				</directory>
+			</layer>
+			<!-- Входная точка -->
+			<file name="index.ts" role="entrypoint" />
+		</source_directory>
+		<!-- Типы -->
+		<directory name="types">
+			<file name="declarations.d.ts" role="declarations" />
+			<file name="env.d.ts" role="declarations" />
+			<file name="global-vars.d.ts" role="declarations" />
+			<file name="vite-env.d.ts" role="declarations" />
+			<file name="vitest.d.ts" role="declarations" />
+		</directory>
+		<!-- Промпты -->
+		<directory name="prompts">
+			<directory name="errors">
+				<file name="file-error.md" role="template" />
+				<file name="system-error.md" role="template" />
+				<file name="validation-error.md" role="template" />
+				<directory name="enhanced">
+					<!-- enhanced error templates -->
+				</directory>
+			</directory>
+			<directory name="testing">
+				<file name="execute-prompt-test.md" role="template" />
+				<file name="test-prompt.md" role="template" />
+			</directory>
+			<directory name="tools">
+				<file name="cli-help.md" role="template" />
+				<file name="mcp-tools-description.md" role="template" />
+			</directory>
+			<directory name="validation">
+				<file name="validate-architecture.md" role="template" />
+				<file name="validate-code.md" role="template" />
+				<file name="validate-documentation.md" role="template" />
+				<file name="validate-prompts.md" role="template" />
+				<file name="validate-tests.md" role="template" />
+			</directory>
+		</directory>
+		<!-- Конфигурационные файлы -->
+		<config_files>
+			<file name="package.json" role="метаданные проекта" />
+			<file name="tsconfig.json" role="конфигурация TypeScript" />
+			<file name="vitest.config.ts" role="конфигурация unit тестов" />
+			<file name="vitest.e2e.config.ts" role="конфигурация E2E тестов" />
+			<file name="vitest.e2e.setup.ts" role="setup E2E тестов" />
+			<file name="eslint.config.ts" role="конфигурация линтера" />
+			<file name="yarn.lock" role="зависимости lock файл" />
+		</config_files>
+		<!-- Документация -->
+		<documentation>
+			<file name="LICENSE" role="лицензия" />
+			<file name="package-ai-docs.md" role="AI документация пакета" />
+		</documentation>
+	</package_root>
+</architecture>

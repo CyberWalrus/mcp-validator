@@ -14,15 +14,13 @@
  * - 9 типов валидации и параллельное тестирование промптов
  */
 
-// ИСПРАВЛЕНИЕ: Загрузка переменных окружения из .env файла
-import { config } from 'dotenv';
+// ИСПРАВЛЕНИЕ: Переменные окружения загружаются через встроенный --env-file флаг Node.js
 
 import { error, info } from './lib/helpers/logger/index';
 import { APP_CONFIG, getAppConfigError, reloadAppConfig } from './model/config';
 import { startMcpServer } from './server/mcp-server';
 import { setupGracefulShutdown } from './server/setup-graceful-shutdown';
 
-config();
 reloadAppConfig();
 
 function ensureConfiguration(): void {
