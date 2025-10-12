@@ -2,7 +2,7 @@ import { main } from './lib/cli/main';
 import { error } from './lib/helpers/logger/index';
 
 /** Запускает приложение и обрабатывает необработанные ошибки */
-export async function start(): Promise<void> {
+async function start(): Promise<void> {
     try {
         await main();
     } catch (err: unknown) {

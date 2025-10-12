@@ -1,21 +1,29 @@
 ---
 id: package-mcp-validator
-documentation_type: "ai-package-documentation"
+documentation_type: 'ai-package-documentation'
 package_context:
-  name: "mcp-validator"
-  type: "tool"
-  architecture_type: "layered_library"
-  main_exports: ["validate", "test-prompt"]
-  workspace_path: "."
-context7_refs:
-  ["@modelcontextprotocol/sdk", "openai", "zod", "typescript", "node.js"]
+    name: 'mcp-validator'
+    type: 'tool'
+    architecture_type: 'layered_library'
+    main_exports: ['validate', 'test-prompt']
+    workspace_path: '.'
+context7_refs: ['@modelcontextprotocol/sdk', 'openai', 'zod', 'typescript', 'node.js']
 module_docs:
-  type: "by_layer"
-  rule: "per_library"
-  targets: ["src/services/adapters/*", "src/services/workflows/*"]
+    type: 'by_layer'
+    rule: 'per_library'
+    targets:
+        [
+            'src/agents/*',
+            'src/tools/*',
+            'src/server',
+            'src/model/config',
+            'src/lib/*',
+            'src/services/adapters/*',
+            'src/services/workflows/*',
+        ]
 architecture_docs:
-  format: "single"
-  root: "architecture.xml"
+    format: 'single'
+    root: 'architecture.xml'
 ---
 
 # 📦 AI-документация: mcp-validator
@@ -30,6 +38,7 @@ architecture_docs:
 - Параллельное тестирование AI промптов на консистентность с анализом стабильности ответов
 - Интеграция с Cursor IDE через MCP SDK для seamless workflow разработки
 - Детальные отчеты об ошибках в markdown формате с практическими рекомендациями
+- Полная AI документация всех модулей для интеграции с AI ассистентами
   </package_purpose>
 
 <package_structure>
@@ -87,6 +96,17 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
                                                     OpenRouter API / Files
 ```
 
+**AI документация модулей:**
+
+- **Всего модулей с AI документацией:** 15
+- **Agents:** 2 модуля (code-validator-agent, test-prompt-agent)
+- **Tools:** 2 модуля (validate-tool, test-prompt-tool)
+- **Server:** 1 модуль (server)
+- **Model:** 1 модуль (config)
+- **Lib:** 4 модуля (cli, cache, logger, resource-resolver)
+- **Services/Adapters:** 3 модуля (openrouter, file-reader, error-handler)
+- **Services/Workflows:** 2 модуля (validation, testing)
+
 </architecture_overview>
 
 <detailed_modules>
@@ -102,6 +122,8 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 - `mcp-server.ts` - запуск MCP сервера в постоянном режиме
 - `create-mcp-server.ts` - фабрика создания MCP Server instance
 - `setup-graceful-shutdown.ts` - обработка SIGINT/SIGTERM для корректного завершения
+- `create-mcp-server/` - вспомогательные функции создания сервера
+- `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: tools
 
@@ -110,8 +132,14 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** validateTool, testPromptTool, handleValidateTool(), handleTestPromptTool()
 **Файлы:**
 
-- `validate-tool.ts` - MCP tool wrapper для валидации с полной реализацией
-- `test-prompt-tool.ts` - MCP tool wrapper для тестирования промптов с полной реализацией
+    - `validate-tool/` - MCP tool wrapper для валидации
+        - `handle-validate-tool.ts` - обработка MCP запроса валидации
+        - `format-successful-validation.ts` - форматирование результата
+        - `module-ai-docs.md` - AI документация модуля
+    - `test-prompt-tool/` - MCP tool wrapper для тестирования промптов
+        - `handle-test-prompt-tool.ts` - обработка MCP запроса тестирования
+        - `format-test-prompt-result.ts` - форматирование результата
+        - `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: services/workflows/validation
 
@@ -120,11 +148,13 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** validateCode()
 **Файлы:**
 
-- `validate-code.ts` - основная логика валидации с AI агентом
-- `helpers/` - 14 вспомогательных функций (prompt loading, type mapping, schema validation)
-- `schemas.ts` - Zod схемы для валидации параметров
-- `types.ts` - TypeScript типы workflow
-- `constants.ts` - константы типов валидации
+    - `index.ts` - публичный API модуля
+    - `validate-code.ts` - основная логика валидации с AI агентом
+    - `helpers/` - 14 вспомогательных функций (prompt loading, type mapping, schema validation)
+    - `schemas.ts` - Zod схемы для валидации параметров
+    - `types.ts` - TypeScript типы workflow
+    - `constants.ts` - константы типов валидации
+    - `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: services/workflows/testing
 
@@ -133,22 +163,29 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** runParallelTests(), analyzeTestConsistency(), generateTestReport()
 **Файлы:**
 
-- `run-parallel-tests.ts` - параллельный запуск N итераций промпта
-- `analyze-test-consistency.ts` - анализ разброса ответов
-- `generate-test-report.ts` - формирование отчета с метриками
-- `helpers/` - 10 вспомогательных функций
+    - `index.ts` - публичный API модуля
+    - `run-parallel-tests.ts` - параллельный запуск N итераций промпта
+    - `analyze-test-consistency.ts` - анализ разброса ответов
+    - `generate-test-report.ts` - формирование отчета с метриками
+    - `constants.ts` - константы тестирования
+    - `schemas.ts` - Zod схемы для тестирования
+    - `types.ts` - TypeScript типы workflow
+    - `helpers/` - 10 вспомогательных функций
+    - `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: services/adapters/openrouter
 
 **Статус:** ✅ Готов
 **Расположение:** `src/services/adapters/openrouter/`
-**Экспорты:** openrouterClientFactory(), OpenrouterRealClient
+**Экспорты:** getOpenRouterClient()
 **Файлы:**
 
+- `index.ts` - публичный API модуля
 - `openrouter-client-factory.ts` - фабрика создания клиента с mock support
 - `openrouter-real-client.ts` - реальный клиент OpenRouter API
 - `constants.ts` - default модели и настройки
 - `types.ts` - интерфейсы клиента
+- `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: services/adapters/file-reader
 
@@ -157,21 +194,28 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** readFileContent(), readFileSync()
 **Файлы:**
 
+- `index.ts` - публичный API модуля
 - `read-file-content.ts` - асинхронное чтение с encoding detection
 - `read-file-sync.ts` - синхронное чтение для CLI
+- `types.ts` - типы модуля
 - `helpers/` - 8 вспомогательных функций (encoding, path resolution, validation)
+- `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: services/adapters/error-handler
 
 **Статус:** ✅ Готов
 **Расположение:** `src/services/adapters/error-handler/`
-**Экспорты:** renderErrorResponse(), formatErrorContext(), loadErrorTemplate()
+**Экспорты:** renderErrorResponse()
 **Файлы:**
 
+- `index.ts` - публичный API модуля
 - `render-error-response.ts` - рендеринг markdown отчетов об ошибках
 - `format-error-context.ts` - форматирование контекстной информации
 - `load-error-template.ts` - загрузка шаблонов из `/prompts/errors/`
+- `constants.ts` - константы шаблонов
+- `types.ts` - типы модуля
 - `helpers/` - 3 вспомогательных функции
+- `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: agents
 
@@ -180,9 +224,17 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** codeValidatorAgent, testPromptAgent
 **Файлы:**
 
-- `code-validator-agent.ts` - AI агент для валидации кода (OpenAI SDK)
-- `test-prompt-agent.ts` - AI агент для тестирования промптов
-- `index.ts` - фасад экспорта агентов
+    - `code-validator-agent/` - AI агент для валидации кода (OpenAI SDK)
+        - `create-code-validator-agent.ts` - создание агента
+        - `validate-code-with-agent.ts` - валидация через агента
+        - `module-ai-docs.md` - AI документация модуля
+    - `test-prompt-agent/` - AI агент для тестирования промптов
+        - `create-test-prompt-agent.ts` - создание агента
+        - `test-prompt-with-agent.ts` - тестирование промпта
+        - `calculate-consistency-score.ts` - расчет консистентности
+        - `generate-test-summary.ts` - генерация сводки
+        - `module-ai-docs.md` - AI документация модуля
+    - `index.ts` - фасад экспорта агентов
 
 ### Модуль: model
 
@@ -191,10 +243,18 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** APP_CONFIG, Zod schemas, TypeScript types, constants
 **Файлы:**
 
-- `config/env-config.ts` - загрузка переменных окружения через .env
-- `schemas/main.ts` - централизованные Zod схемы
-- `types/main.ts` - централизованные TypeScript типы
-- `constants/main.ts` - константы приложения
+    - `config/` - конфигурация приложения
+        - `create-app-config.ts` - создание конфигурации
+        - `get-app-config-error.ts` - получение ошибок конфигурации
+        - `reload-app-config.ts` - перезагрузка конфигурации
+        - `config-constants.ts` - константы конфигурации
+        - `constants.ts` - базовые константы
+        - `schemas.ts` - Zod схемы валидации
+        - `types.ts` - типы конфигурации
+        - `module-ai-docs.md` - AI документация модуля
+    - `schemas/main.ts` - централизованные Zod схемы
+    - `types/main.ts` - централизованные TypeScript типы
+    - `constants/main.ts` - константы приложения
 
 ### Модуль: lib/cli
 
@@ -203,10 +263,53 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** showHelp(), showVersion(), startMcpServer()
 **Файлы:**
 
-- `show-help.ts` - отображение справки о доступных командах
-- `show-version.ts` - отображение версии приложения
-- `start-mcp-server.ts` - запуск MCP сервера через новую архитектуру
-- `index.ts` - фасад экспорта CLI функций
+    - `main.ts` - основной entry point CLI
+    - `show-help.ts` - отображение справки о доступных командах
+    - `show-version.ts` - отображение версии приложения
+    - `start-mcp-server.ts` - запуск MCP сервера через новую архитектуру
+    - `ensure-configuration.ts` - проверка конфигурации
+    - `module-ai-docs.md` - AI документация модуля
+
+### Модуль: lib/cache
+
+**Статус:** ✅ Готов
+**Расположение:** `src/lib/cache/`
+**Экспорты:** getPrompt(), initializePromptCache()
+**Файлы:**
+
+    - `get-prompt.ts` - получение промпта из кэша
+    - `initialize-prompt-cache.ts` - инициализация кэша промптов
+    - `prompt-cache-constants.ts` - константы кэша
+    - `types.ts` - типы модульной единицы
+    - `types-index.ts` - индекс типов
+    - `module-ai-docs.md` - AI документация модуля
+
+### Модуль: lib/helpers/logger
+
+**Статус:** ✅ Готов
+**Расположение:** `src/lib/helpers/logger/`
+**Экспорты:** debug(), info(), warn(), error(), setLogLevel()
+**Файлы:**
+
+    - `index.ts` - публичный API модуля
+    - `error.ts` - логирование ошибок
+    - `info.ts` - информационное логирование
+    - `helpers/log.ts` - основная функция логирования
+    - `helpers/should-log.ts` - проверка уровня
+    - `logger-constants.ts` - константы логгера
+    - `module-ai-docs.md` - AI документация модуля
+
+### Модуль: lib/helpers/resource-resolver
+
+**Статус:** ✅ Готов
+**Расположение:** `src/lib/helpers/resource-resolver/`
+**Экспорты:** getPackageResourceResolver()
+**Файлы:**
+
+    - `index.ts` - публичный API модуля
+    - `package-resource-resolver.ts` - основная реализация resolver
+    - `types.ts` - типы модуля
+    - `module-ai-docs.md` - AI документация модуля
 
 ### Модуль: end-to-end
 
@@ -215,16 +318,17 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Экспорты:** E2E тесты для интеграционного тестирования
 **Файлы:**
 
-- `mcp-server-initialization.e2e.test.ts` - тесты инициализации MCP сервера
-- `validate-tool.e2e.test.ts` - тесты validate tool
-- `test-prompt-tool.e2e.test.ts` - тесты test-prompt tool
-- `mocks/` - моки MCP клиентов и OpenRouter API
-  - `mcp-client-simulator.ts` - симулятор MCP клиента с интеграцией конфигурации
-  - `mcp-transport.ts` - транспортный слой для MCP соединений
-  - `mcp-operations.ts` - операции MCP клиента (initialize, callTool, listTools)
-  - `simulate-cursor-connection.ts` - функция симуляции подключения Cursor
-- 9 других e2e тестов для различных сценариев
-  </detailed_modules>
+    - `mcp-server-initialization.e2e.test.ts` - тесты инициализации MCP сервера
+    - `validate-tool.e2e.test.ts` - тесты validate tool
+    - `test-prompt-tool.e2e.test.ts` - тесты test-prompt tool
+    - `mocks/` - моки MCP клиентов и OpenRouter API
+        - `mcp-client-simulator.ts` - симулятор MCP клиента с интеграцией конфигурации
+        - `mcp-transport.ts` - транспортный слой для MCP соединений
+        - `mcp-operations.ts` - операции MCP клиента (initialize, callTool, listTools)
+        - `simulate-cursor-connection.ts` - функция симуляции подключения Cursor
+    - 9 других e2e тестов для различных сценариев
+
+</detailed_modules>
 
 <e2e_testing>
 **E2E тестирование:**
@@ -348,6 +452,7 @@ MCP сервер работает в постоянном режиме ожид�
 - Workflows не зависят от конкретных адаптеров, работают через интерфейсы
 - E2E тесты используют моки для стабильности и скорости выполнения
 - Graceful shutdown обеспечивает корректное завершение всех активных MCP сессий
+- Все модули имеют полную AI документацию (module-ai-docs.md) для интеграции с AI ассистентами
   </implementation_details>
 
 <development_commands>

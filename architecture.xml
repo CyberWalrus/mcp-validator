@@ -19,10 +19,10 @@
 			morj-2025-09
 		</ruleset>
 		<source_revision>
-			git:faa5797787aaf84a89d489ca21adfb198b8cfd11
+			git:HEAD
 		</source_revision>
 		<generated_at>
-			2025-10-12T00:00:00Z
+			2025-01-27T12:00:00Z
 		</generated_at>
 		<validator_min_version>
 			1
@@ -32,52 +32,53 @@
 		<source_directory name="src">
 			<!-- Слой: Server - MCP сервер и инициализация -->
 			<layer name="server" purpose="MCP сервер инициализация и конфигурация">
-				<module name="mcp-server">
-					<facade name="mcp-server.ts" role="function" />
-					<file name="index.ts" role="фасад" />
+				<module name="server">
+					<facade name="mcp-server.ts" role="unit_facade" />
+					<file name="create-mcp-server.ts" role="function" />
+					<file name="setup-graceful-shutdown.ts" role="function" />
+					<file name="module-ai-docs.md" role="документация" />
+					<directory name="create-mcp-server" role="helper" />
 				</module>
 			</layer>
-			<!-- Слой: API - MCP инструменты (тонкие обертки) -->
-			<layer name="api" purpose="MCP tools для внешних интерфейсов">
+			<!-- Слой: Tools - MCP инструменты (тонкие обертки) -->
+			<layer name="tools" purpose="MCP tools для внешних интерфейсов">
 				<module name="validate-tool">
 					<facade name="index.ts" role="unit_facade" />
+					<file name="handle-validate-tool.ts" role="function" />
+					<file name="format-successful-validation.ts" role="function" />
 					<file name="module-ai-docs.md" role="документация" />
 				</module>
 				<module name="test-prompt-tool">
 					<facade name="index.ts" role="unit_facade" />
+					<file name="handle-test-prompt-tool.ts" role="function" />
+					<file name="format-test-prompt-result.ts" role="function" />
+					<file name="module-ai-docs.md" role="документация" />
+				</module>
+			</layer>
+			<!-- Слой: Agents - AI агенты -->
+			<layer name="agents" purpose="AI агенты для валидации и тестирования">
+				<module name="code-validator-agent">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="create-code-validator-agent.ts" role="function" />
+					<file name="validate-code-with-agent.ts" role="function" />
 					<file name="types.ts" role="types" />
 					<file name="module-ai-docs.md" role="документация" />
-					<test name="__tests__/index.test.ts" role="unit_test" />
+					<test name="__tests__/code-validator-agent.test.ts" role="unit_test" />
 				</module>
-				<file name="index.ts" role="фасад слоя" />
+				<module name="test-prompt-agent">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="create-test-prompt-agent.ts" role="function" />
+					<file name="test-prompt-with-agent.ts" role="function" />
+					<file name="calculate-consistency-score.ts" role="function" />
+					<file name="generate-test-summary.ts" role="function" />
+					<file name="types.ts" role="types" />
+					<file name="module-ai-docs.md" role="документация" />
+				</module>
 			</layer>
 			<!-- Слой: Services - бизнес-логика -->
 			<layer name="services" purpose="бизнес-логика и адаптеры">
 				<!-- Подслой: Adapters - адаптеры к внешним системам -->
 				<sublayer name="adapters" purpose="адаптеры к внешним системам">
-					<module name="mcp-server">
-						<facade name="index.ts" role="unit_facade" />
-						<file name="initialize-mcp-server.ts" role="function" />
-						<file name="handle-mcp-request.ts" role="function" />
-						<file name="shutdown-mcp-server.ts" role="function" />
-						<file name="constants.ts" role="config" />
-						<file name="schemas.ts" role="schemas" />
-						<file name="types.ts" role="types" />
-						<file name="module-ai-docs.md" role="документация" />
-						<directory name="helpers">
-							<file name="create-mcp-tools-list.ts" role="helper" />
-							<file name="format-mcp-error.ts" role="helper" />
-							<file name="validate-mcp-params.ts" role="helper" />
-						</directory>
-						<directory name="stability">
-							<file name="circuit-breaker.ts" role="helper" />
-							<file name="rate-limiter.ts" role="helper" />
-							<file name="retry-handler.ts" role="helper" />
-						</directory>
-						<test name="__tests__/initialize-mcp-server.test.ts" role="unit_test" />
-						<test name="__tests__/handle-mcp-request.test.ts" role="unit_test" />
-						<test name="__tests__/shutdown-mcp-server.test.ts" role="unit_test" />
-					</module>
 					<module name="openrouter">
 						<facade name="index.ts" role="unit_facade" />
 						<file name="openrouter-client-factory.ts" role="function" />
@@ -85,8 +86,8 @@
 						<file name="constants.ts" role="config" />
 						<file name="types.ts" role="types" />
 						<file name="module-ai-docs.md" role="документация" />
+						<test name="__tests__/index.test.ts" role="unit_test" />
 						<test name="__tests__/openrouter-client-factory.test.ts" role="unit_test" />
-						<test name="__tests__/openrouter-real-client.test.ts" role="unit_test" />
 					</module>
 					<module name="file-reader">
 						<facade name="index.ts" role="unit_facade" />
@@ -95,10 +96,9 @@
 						<file name="types.ts" role="types" />
 						<file name="module-ai-docs.md" role="документация" />
 						<directory name="helpers">
-							<file name="detect-encoding.ts" role="helper" />
-							<file name="resolve-path.ts" role="helper" />
-							<file name="validate-file.ts" role="helper" />
+							<file name="file-operations.ts" role="helper" />
 						</directory>
+						<test name="__tests__/index.test.ts" role="unit_test" />
 						<test name="__tests__/read-file-content.test.ts" role="unit_test" />
 						<test name="__tests__/read-file-sync.test.ts" role="unit_test" />
 					</module>
@@ -111,8 +111,10 @@
 						<file name="types.ts" role="types" />
 						<file name="module-ai-docs.md" role="документация" />
 						<directory name="helpers">
-							<file name="format-stack-trace.ts" role="helper" />
-							<file name="sanitize-error.ts" role="helper" />
+							<file name="error-type-detector.ts" role="helper" />
+							<file name="system-info-collector.ts" role="helper" />
+							<file name="template-renderer.ts" role="helper" />
+							<file name="types.ts" role="types" />
 						</directory>
 						<test name="__tests__/render-error-response.test.ts" role="unit_test" />
 						<test name="__tests__/format-error-context.test.ts" role="unit_test" />
@@ -132,6 +134,9 @@
 							<file name="load-validation-prompt.ts" role="helper" />
 							<file name="map-validation-type.ts" role="helper" />
 							<file name="validate-schema.ts" role="helper" />
+							<file name="format-validation-result.ts" role="helper" />
+							<file name="detect-language-from-path.ts" role="helper" />
+							<file name="get-content-from-input.ts" role="helper" />
 						</directory>
 						<test name="__tests__/validate-code.test.ts" role="unit_test" />
 					</module>
@@ -148,6 +153,9 @@
 							<file name="execute-single-test.ts" role="helper" />
 							<file name="calculate-metrics.ts" role="helper" />
 							<file name="format-report.ts" role="helper" />
+							<file name="load-test-prompt.ts" role="helper" />
+							<file name="format-test-prompt.ts" role="helper" />
+							<file name="calculate-variance.ts" role="helper" />
 						</directory>
 						<test name="__tests__/run-parallel-tests.test.ts" role="unit_test" />
 						<test name="__tests__/analyze-test-consistency.test.ts" role="unit_test" />
@@ -155,20 +163,18 @@
 					</module>
 				</sublayer>
 			</layer>
-			<!-- Слой: Agents - AI агенты -->
-			<layer name="agents" purpose="AI агенты для валидации и тестирования">
-				<module name="agents">
-					<facade name="index.ts" role="unit_facade" />
-					<file name="code-validator-agent.ts" role="agent" />
-					<file name="test-prompt-agent.ts" role="agent" />
-					<test name="__tests__/code-validator-agent.test.ts" role="unit_test" />
-				</module>
-			</layer>
 			<!-- Слой: Model - типы, схемы, конфигурация -->
 			<layer name="model" purpose="типы, схемы и конфигурация">
 				<module name="config">
 					<facade name="index.ts" role="unit_facade" />
-					<file name="env-config.ts" role="config" />
+					<file name="create-app-config.ts" role="function" />
+					<file name="get-app-config-error.ts" role="function" />
+					<file name="reload-app-config.ts" role="function" />
+					<file name="config-constants.ts" role="config" />
+					<file name="constants.ts" role="config" />
+					<file name="schemas.ts" role="schemas" />
+					<file name="types.ts" role="types" />
+					<file name="module-ai-docs.md" role="документация" />
 					<test name="__tests__/env-config.test.ts" role="unit_test" />
 				</module>
 				<module name="schemas">
@@ -181,24 +187,62 @@
 					<file name="main.ts" role="config" />
 				</module>
 			</layer>
-			<!-- Слой: Tools (legacy) - дублирует api/ -->
-			<layer name="tools" purpose="legacy tools (дублирует api/)">
-				<module name="validate-tool">
-					<facade name="validate-tool.ts" role="function" />
-				</module>
-				<module name="test-prompt-tool">
-					<facade name="test-prompt-tool.ts" role="function" />
-				</module>
-			</layer>
 			<!-- Общие тесты -->
 			<file name="test-setup.ts" role="config" />
 			<test name="__tests__/refactoring-e2e-spec.test.ts" role="e2e_test" />
 			<test name="__tests__/zod-regression.test.ts" role="unit_test" />
 			<!-- Слой: Lib - вспомогательные библиотеки -->
 			<layer name="lib" purpose="вспомогательные библиотеки и утилиты">
+				<module name="cli">
+					<facade name="main.ts" role="unit_facade" />
+					<file name="show-help.ts" role="function" />
+					<file name="show-version.ts" role="function" />
+					<file name="start-mcp-server.ts" role="function" />
+					<file name="ensure-configuration.ts" role="helper" />
+					<file name="module-ai-docs.md" role="документация" />
+					<test name="__tests__/show-help.test.ts" role="unit_test" />
+					<test name="__tests__/show-version.test.ts" role="unit_test" />
+					<test name="__tests__/start-mcp-server.test.ts" role="unit_test" />
+				</module>
+				<module name="cache">
+					<facade name="index.ts" role="unit_facade" />
+					<file name="get-prompt.ts" role="function" />
+					<file name="initialize-prompt-cache.ts" role="function" />
+					<file name="prompt-cache-constants.ts" role="config" />
+					<file name="types.ts" role="types" />
+					<file name="types-index.ts" role="types" />
+					<file name="module-ai-docs.md" role="документация" />
+					<test name="__tests__/prompt-cache.test.ts" role="unit_test" />
+				</module>
 				<directory name="helpers">
 					<module name="logger">
 						<facade name="index.ts" role="unit_facade" />
+						<file name="error.ts" role="function" />
+						<file name="info.ts" role="function" />
+						<file name="helpers/log.ts" role="function" />
+						<file name="helpers/should-log.ts" role="function" />
+						<file name="logger-constants.ts" role="config" />
+						<file name="module-ai-docs.md" role="документация" />
+						<test name="__tests__/logger.test.ts" role="unit_test" />
+						<test name="helpers/__tests__/log.test.ts" role="unit_test" />
+						<test name="helpers/__tests__/should-log.test.ts" role="unit_test" />
+					</module>
+					<module name="resource-resolver">
+						<facade name="index.ts" role="unit_facade" />
+						<file name="package-resource-resolver.ts" role="function" />
+						<file name="types.ts" role="types" />
+						<file name="module-ai-docs.md" role="документация" />
+						<test name="__tests__/package-resource-resolver.test.ts" role="unit_test" />
+					</module>
+					<module name="schema-error-formatter">
+						<file name="index.ts" role="function" />
+						<file name="format-schema-error.ts" role="function" />
+						<file name="types.ts" role="types" />
+						<test name="__tests__/index.test.ts" role="unit_test" />
+					</module>
+					<module name="version">
+						<file name="get-package-version.ts" role="function" />
+						<file name="index.ts" role="function" />
 					</module>
 				</directory>
 			</layer>

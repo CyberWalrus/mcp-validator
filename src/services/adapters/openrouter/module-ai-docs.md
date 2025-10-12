@@ -73,22 +73,15 @@ const validationResult = parseValidationResponse(aiResponse.text);
 <module_structure>
 
 ```xml
-<module_root name="openrouter">
-  <main_files>
-    <file name="index.ts" role="публичный API - объединенный клиент"/>
-    <file name="openrouter-client-factory.ts" role="фабрика клиентов test/prod"/>
-    <file name="types.ts" role="типы OpenRouter интеграции"/>
-  </main_files>
-  <internal_files>
-    <!-- Модуль объединен, внутренних файлов нет -->
-  </internal_files>
-  <tests>
-    <directory name="__tests__">
-      <file name="index.test.ts" role="тесты основного клиента"/>
-      <file name="openrouter-client-factory.test.ts" role="тесты фабрики"/>
-    </directory>
-  </tests>
-</module_root>
+<module name="openrouter">
+    <facade name="index.ts" role="unit_facade" exports="getOpenRouterClient"/>
+    <file name="openrouter-client-factory.ts" role="function" purpose="фабрика клиентов test/prod"/>
+    <file name="openrouter-real-client.ts" role="class" purpose="реальный клиент OpenRouter API"/>
+    <file name="constants.ts" role="config" purpose="константы OpenRouter"/>
+    <file name="types.ts" role="types" purpose="типы модульной единицы"/>
+    <test name="__tests__/index.test.ts" role="unit_test" purpose="тесты основного клиента"/>
+    <test name="__tests__/openrouter-client-factory.test.ts" role="unit_test" purpose="тесты фабрики"/>
+</module>
 ```
 
 </module_structure>

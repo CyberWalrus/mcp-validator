@@ -63,19 +63,15 @@ const response = await handleMCPRequest({ prompt });
 <module_structure>
 
 ```xml
-<module_root name="prompt-cache">
-  <main_files>
-    <file name="prompt-cache.ts" role="инициализация и публичный API кэша"/>
-  </main_files>
-  <internal_files>
-    <file name="types.ts" role="типизация результатов и конфигурации путей"/>
-  </internal_files>
-  <tests>
-    <directory name="__tests__">
-      <file name="prompt-cache.test.ts" role="unit тесты загрузки и чтения промптов"/>
-    </directory>
-  </tests>
-</module_root>
+<module name="prompt-cache">
+    <facade name="index.ts" role="unit_facade" exports="getPrompt, initializePromptCache"/>
+    <file name="get-prompt.ts" role="function" purpose="получение промпта из кэша"/>
+    <file name="initialize-prompt-cache.ts" role="function" purpose="инициализация кэша промптов"/>
+    <file name="prompt-cache-constants.ts" role="config" purpose="константы кэша"/>
+    <file name="types.ts" role="types" purpose="типы модульной единицы"/>
+    <file name="types-index.ts" role="types" purpose="индекс типов"/>
+    <test name="__tests__/prompt-cache.test.ts" role="unit_test" purpose="unit тесты"/>
+</module>
 ```
 
 </module_structure>
