@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { initializePromptCache } from '../src/lib/cache/prompt-cache';
+import { initializePromptCache } from '../src/lib/cache';
 import { reloadAppConfig } from '../src/model/config';
 import { renderErrorResponse } from '../src/services/adapters/error-handler';
 // Импорты функций, которые ОБЯЗАТЕЛЬНО должны сохраниться

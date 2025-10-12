@@ -31,6 +31,9 @@ export const TestIterationResultSchema = z.object({
     /** Ошибка, если произошла */
     error: z.string().optional(),
 
+    /** Успешно ли выполнен тест */
+    isSuccess: z.boolean(),
+
     /** Номер итерации */
     iteration: z.number().min(1),
 
@@ -45,9 +48,6 @@ export const TestIterationResultSchema = z.object({
 
     /** Время начала выполнения */
     startTime: z.string(),
-
-    /** Успешно ли выполнен тест */
-    success: z.boolean(),
 });
 
 /** Схема анализа консистентности */
@@ -78,6 +78,9 @@ export const ParallelTestResultSchema = z.object({
 
     /** Количество неудачных тестов */
     failedTests: z.number().nonnegative(),
+
+    /** Успешно ли завершено тестирование */
+    isSuccess: z.boolean().optional(),
 
     /** Метаданные тестирования */
     metadata: z.object({

@@ -1,4 +1,4 @@
-import { getPrompt } from '../cache/prompt-cache';
+import { getPrompt } from '../cache';
 import { info } from '../helpers/logger';
 
 /** Показывает справку о доступных командах */

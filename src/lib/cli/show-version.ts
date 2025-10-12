@@ -1,5 +1,5 @@
 import { info } from '../helpers/logger';
-import { getPackageVersion } from '../helpers/version-resolver';
+import { getPackageVersion } from '../helpers/version';
 
 /** Показывает версию из package.json */
 export function showVersion(): void {

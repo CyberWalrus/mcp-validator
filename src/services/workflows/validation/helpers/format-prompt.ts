@@ -7,7 +7,6 @@ export function formatPrompt(template: string, context: ValidationContext): stri
     if (context.context) {
         formattedPrompt = formattedPrompt.replace('{CONTEXT}', context.context);
     } else {
-        // Удаляем секцию контекста если её нет с сохранением пробелов между словами
         formattedPrompt = formattedPrompt.replace(/\{CONTEXT\}/g, '');
     }
 
@@ -15,7 +14,6 @@ export function formatPrompt(template: string, context: ValidationContext): stri
         const additionalFilesSection = context.additionalFiles.join('\n\n');
         formattedPrompt = formattedPrompt.replace('{ADDITIONAL_FILES}', additionalFilesSection);
     } else {
-        // Удаляем секцию дополнительных файлов если их нет с сохранением пробелов между словами
         formattedPrompt = formattedPrompt.replace(/\{ADDITIONAL_FILES\}/g, '');
     }
 

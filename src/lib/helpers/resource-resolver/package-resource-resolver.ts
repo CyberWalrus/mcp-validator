@@ -1,72 +1,54 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { APP_CONFIG, getAppConfigError } from '../../../model/config';
 import type { ResourceResolver, ValidationType } from './types';
 
+/** Получает путь к Node.js из конфигурации */
 function getRuntimeNodePath(): string {
     const config = APP_CONFIG;
-
     const configError = getAppConfigError();
 
-    if (!config || configError) {
-        return '';
-    }
+    return !config || configError ? '' : config.runtime.nodePath;
+}
 
-    return config.runtime.nodePath;
+/** Проверяет является ли путь корнем пакета */
+function isPackageRoot(path: string): boolean {
+    try {
+        const packageJson = JSON.parse(readFileSync(join(path, 'package.json'), 'utf8')) as { name?: string };
+
+        return packageJson.name === '@morj/tools.mcp-validator';
+    } catch {
+        return false;
+    }
 }
 
 /** Получает путь к корню пакета из текущего модуля с dual-mode поддержкой */
 function getPackageRoot(): string {
-    const currentFileUrl = import.meta.url;
-    const currentFilePath = fileURLToPath(currentFileUrl);
-
-    // РЕЖИМ 1: Development (yarn workspace) - поиск вверх по дереву
+    const currentFilePath = fileURLToPath(import.meta.url);
     let searchDir = dirname(currentFilePath);
+
     while (searchDir !== dirname(searchDir)) {
-        try {
-            const packageJsonPath = join(searchDir, 'package.json');
-            if (existsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string };
-                if (packageJson.name === '@morj/tools.mcp-validator') {
-                    return searchDir;
-                }
-            }
-        } catch {
-            // Продолжаем поиск выше
+        if (isPackageRoot(searchDir)) {
+            return searchDir;
         }
         searchDir = dirname(searchDir);
     }
 
-    // РЕЖИМ 2: Installed (npm install -g) - поиск в node_modules
     const installedPaths = [
-        // Локальные node_modules (проект использует пакет)
         resolve(process.cwd(), 'node_modules/@morj/tools.mcp-validator'),
-        // Глобальные node_modules (npm install -g)
         resolve(getRuntimeNodePath(), '@morj/tools.mcp-validator'),
-        // Relative к текущему файлу в установленном пакете
         resolve(dirname(currentFilePath), '../../../../../'),
     ];
 
     for (const candidatePath of installedPaths) {
-        try {
-            const packageJsonPath = join(candidatePath, 'package.json');
-            if (existsSync(packageJsonPath)) {
-                const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string };
-                if (packageJson.name === '@morj/tools.mcp-validator') {
-                    return candidatePath;
-                }
-            }
-        } catch {
-            // Продолжаем поиск
+        if (isPackageRoot(candidatePath)) {
+            return candidatePath;
         }
     }
 
-    // Fallback к оригинальному относительному пути если поиск не удался
-    const currentDir = dirname(currentFilePath);
-
-    return join(currentDir, '../../../..');
+    return join(dirname(currentFilePath), '../../../..');
 }
 
 /** Создает resolver для ресурсов пакета */

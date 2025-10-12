@@ -2,10 +2,7 @@ import { reloadAppConfig } from '../../model/config';
 import { startMcpServer as startMcpServerCore } from '../../server/mcp-server';
 import { error as logError, info } from '../helpers/logger';
 
-/**
- * Запускает MCP сервер в постоянном режиме
- * @returns {Promise<void>}
- */
+/** Запускает MCP сервер в постоянном режиме */
 export async function startMcpServer(): Promise<void> {
     try {
         reloadAppConfig();

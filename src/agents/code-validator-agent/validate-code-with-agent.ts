@@ -1,7 +1,7 @@
-import { getPrompt } from '../../lib/cache/prompt-cache';
+import { getPrompt } from '../../lib/cache';
+import { getConfigOrThrow } from '../../lib/helpers/config/get-config-or-throw';
 import type { ValidationInput, ValidationResult } from '../../model/types/main';
 import { readFileContent } from '../../services/adapters/file-reader';
-import { getConfigOrThrow } from './get-config-or-throw';
 import type { AgentConfig } from './types';
 
 /** Валидация кода через CodeValidatorAgent */

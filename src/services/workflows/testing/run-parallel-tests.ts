@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { error, info } from '../../../lib/helpers/logger';
-import { getPackageVersion } from '../../../lib/helpers/version-resolver';
+import { getPackageVersion } from '../../../lib/helpers/version';
 import { APP_CONFIG, getAppConfigError } from '../../../model/config';
 import type { AppConfig } from '../../../model/types/main';
 import type { OpenRouterRequest, OpenRouterResponse } from '../../adapters/openrouter/types';
@@ -48,12 +48,8 @@ async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
         openRouterClient = await createOpenRouterClient();
     } else {
         // В обычном режиме используем реальный клиент
-        const realClient = await import('../../adapters/openrouter');
-        if ('makeOpenRouterRequest' in realClient && typeof realClient.makeOpenRouterRequest === 'function') {
-            openRouterClient = realClient.makeOpenRouterRequest;
-        } else {
-            throw new Error('Реальный клиент не содержит функцию makeOpenRouterRequest');
-        }
+        const { makeOpenRouterRequest } = await import('../../adapters/openrouter/openrouter-real-client');
+        openRouterClient = makeOpenRouterRequest;
     }
 
     return openRouterClient;

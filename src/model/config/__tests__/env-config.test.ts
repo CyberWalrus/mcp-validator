@@ -1,4 +1,4 @@
-import { APP_CONFIG, createAppConfig, getAppConfigError, reloadAppConfig } from '../env-config';
+import { APP_CONFIG, createAppConfig, getAppConfigError, reloadAppConfig } from '../index';
 
 describe('createAppConfig', () => {
     const originalEnv = process.env;
@@ -119,13 +119,13 @@ describe('reloadAppConfig', () => {
         reloadAppConfig();
     });
 
-    it('должен обновлять конфигурацию при изменении переменных окружения', () => {
+    it('должен обновлять конфигурацию при изменении переменных окружения', async () => {
         process.env.OPENROUTER_API_KEY = 'updated-key';
         process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v2';
         process.env.OPENROUTER_TIMEOUT = '15000';
         process.env.LOG_LEVEL = 'DEBUG';
 
-        reloadAppConfig();
+        await reloadAppConfig();
 
         expect(getAppConfigError()).toBeNull();
         expect(APP_CONFIG.ai).toEqual(
@@ -147,10 +147,10 @@ describe('reloadAppConfig', () => {
         expect(APP_CONFIG.validation.timeout).toBe(30000);
     });
 
-    it('должен устанавливать ошибку при отсутствии обязательных переменных', () => {
+    it('должен устанавливать ошибку при отсутствии обязательных переменных', async () => {
         delete process.env.OPENROUTER_API_KEY;
 
-        reloadAppConfig();
+        await reloadAppConfig();
 
         const configError = getAppConfigError();
         expect(configError).toBeInstanceOf(Error);

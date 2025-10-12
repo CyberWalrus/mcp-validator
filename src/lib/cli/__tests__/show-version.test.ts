@@ -4,13 +4,13 @@ import { showVersion } from '../show-version';
 
 // Мокируем зависимости
 vi.mock('../../helpers/logger');
-vi.mock('../../helpers/version-resolver');
+vi.mock('../../helpers/version');
 
 const mockInfo = vi.fn();
 const mockGetPackageVersion = vi.fn();
 
 vi.mocked(await import('../../helpers/logger')).info = mockInfo;
-vi.mocked(await import('../../helpers/version-resolver')).getPackageVersion = mockGetPackageVersion;
+vi.mocked(await import('../../helpers/version')).getPackageVersion = mockGetPackageVersion;
 
 describe('showVersion', () => {
     beforeEach(() => {

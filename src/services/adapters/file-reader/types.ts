@@ -1,18 +1,13 @@
 /** Параметры для чтения файла */
 export type FileInput = {
-    /** Путь к файлу */
     path: string;
-    /** Кодировка файла */
     encoding?: 'ascii' | 'utf8' | 'utf16le';
 };
 
 /** Результат чтения файла */
 export type FileResult = {
-    /** Содержимое файла */
     content: string;
-    /** Использованная кодировка */
     encoding: string;
-    /** Размер файла в байтах */
     size?: number;
 };
 

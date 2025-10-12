@@ -1,5 +1,5 @@
 import { APP_CONFIG } from '../../../../model/config';
-import type { MakeOpenRouterRequest as MakeOpenRouterRequestFn } from '..';
+import type { MakeOpenRouterRequest as MakeOpenRouterRequestFn } from '../types';
 
 global.fetch = vi.fn();
 const mockFetch = vi.mocked(fetch);
@@ -9,7 +9,7 @@ let makeOpenRouterRequest: MakeOpenRouterRequestFn;
 async function reloadConfig(): Promise<void> {
     const configModule = await import('../../../../model/config');
 
-    configModule.reloadAppConfig();
+    await configModule.reloadAppConfig();
 }
 
 describe('makeOpenRouterRequest', () => {
@@ -22,9 +22,9 @@ describe('makeOpenRouterRequest', () => {
         process.env.OPENROUTER_API_KEY = 'test-api-key';
         await reloadConfig();
 
-        const module = await import('..');
+        const { makeOpenRouterRequest: realMakeOpenRouterRequest } = await import('../openrouter-real-client');
 
-        makeOpenRouterRequest = module.makeOpenRouterRequest;
+        makeOpenRouterRequest = realMakeOpenRouterRequest;
     });
 
     afterEach(async () => {

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { InitializePromptCacheFn } from '../../lib/cache/prompt-cache';
+import type { initializePromptCache as initPromptCache } from '../../lib/cache';
 import type {
     CreateCodeValidatorAgent as CreateCodeValidatorAgentFn,
     ValidateCodeWithAgent as ValidateCodeWithAgentFn,
-} from '../code-validator-agent';
+} from '../code-validator-agent/types';
 
 // Мок OpenAI
 vi.mock('openai', () => ({
@@ -39,13 +39,16 @@ describe('CodeValidatorAgent', () => {
     let agent: ReturnType<CreateCodeValidatorAgentFn>;
     let createCodeValidatorAgent: CreateCodeValidatorAgentFn;
     let validateCodeWithAgent: ValidateCodeWithAgentFn;
-    let initializePromptCache: InitializePromptCacheFn;
+    let initializePromptCache: typeof initPromptCache;
 
     beforeEach(async () => {
         vi.resetModules();
         process.env.OPENROUTER_API_KEY = 'test-key';
 
-        const cacheModule = await import('../../lib/cache/prompt-cache');
+        const { reloadAppConfig } = await import('../../model/config');
+        await reloadAppConfig();
+
+        const cacheModule = await import('../../lib/cache');
         const agentModule = await import('../code-validator-agent');
 
         initializePromptCache = cacheModule.initializePromptCache;

@@ -82,12 +82,12 @@ export type TestIterationResult = {
     content: string;
     /** Время выполнения в мс */
     duration: number;
+    /** Успешно ли выполнена итерация */
+    isSuccess: boolean;
     /** Номер итерации */
     iteration: number;
     /** Использованная модель */
     model: string;
-    /** Успешно ли выполнена итерация */
-    success: boolean;
     /** Ошибка, если есть */
     error?: string;
 };

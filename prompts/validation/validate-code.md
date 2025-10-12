@@ -50,22 +50,32 @@ Systematic single-file code quality validation prevents technical debt, ensures 
 First, identify the file type to apply appropriate validation rules.
 </cognitive_triggers>
 
+**BARREL FILE CHECK:**
+If file contains ONLY `export { ... } from './module'` statements with no other code, it's a barrel file. For barrel files: multiple re-exports allowed, JSDoc not required, one-file-one-function rule doesn't apply, imports only from current directory/subdirectories.
+
+**CRITICAL: Check for Barrel File First**
+Before any other validation, check if this file is a barrel file:
+
+- Does it contain ONLY `export { ... } from './module'` statements?
+- Does it have NO other code (no functions, constants, types, or other statements)?
+- If YES, this is a BARREL FILE - apply barrel file rules and skip all other validations.
+
 **FILE TYPE DETECTION:**
 
-Determine file category based on content and name:
+Determine file category:
 
-- **Constants file** - Exports only constants (e.g., `constants.ts`, file with `export const` only). Multiple constant exports are ALLOWED and EXPECTED.
-- **Types file** - Exports only type definitions (e.g., `types.ts`, file with `type`/`interface` only). Multiple type exports are ALLOWED and EXPECTED.
-- **Schemas file** - Exports only validation schemas (e.g., `schemas.ts`, file with Zod/Yup schemas). Multiple schema exports are ALLOWED and EXPECTED.
-- **Function file** - Exports ONE main function/component (requiring one-file-one-function rule). May have 2-3 private (non-exported) helper functions under 10 lines each. Must NOT export types - move them to `types.ts`.
-- **Mixed file** - Exports multiple entity types (functions + types/constants) - CRITICAL violation, must be separated into different files.
+- **Barrel file** - Only `export { ... } from './module'` statements. Multiple re-exports allowed, JSDoc not required.
+- **Constants file** - Only `export const` statements. Multiple exports allowed.
+- **Types file** - Only `type`/`interface` definitions. Multiple exports allowed.
+- **Schemas file** - Only validation schemas. Multiple exports allowed.
+- **Function file** - ONE main function export. One-file-one-function rule applies.
+- **Mixed file** - Multiple entity types - CRITICAL violation.
 
 **IMPORTANT:**
 
-- The "one file = one function" rule applies ONLY to function files
-- Function files must export ONLY ONE function and NO types
-- Constants/Types/Schemas files should export multiple related entities of the same type
-- Helper functions in function files must be PRIVATE (not exported)
+- One-file-one-function rule applies ONLY to function files
+- Barrel files: multiple re-exports allowed, JSDoc not required
+- Barrel files: imports only from current directory/subdirectories
 
 <completion_criteria>
 File type identified, appropriate validation rules selected
@@ -81,7 +91,7 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 
 **File Structure:**
 
-- [ ] **One file = one function** - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, or files exporting only constants/types/schemas). Private (non-exported) helper functions are allowed (max 2-3, under 10 lines each).
+- [ ] **One file = one function** - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, barrel files, or files exporting only constants/types/schemas). Private (non-exported) helper functions are allowed (max 2-3, under 10 lines each).
 - [ ] **File size limit** - Max 150 lines of code (excluding comments and empty lines)
 - [ ] **Minimal helpers** - No more than 2-3 small private helper functions (prefer inline logic). Helper functions must NOT be exported.
 - [ ] **Entity consistency** - Files should focus on one entity type: either functions OR constants OR types OR schemas (mixing discouraged). Function files should NOT export types - move them to `types.ts`.
@@ -172,7 +182,7 @@ Ensure comprehensive documentation and type safety within the single file. Focus
 
 **DOCUMENTATION STANDARDS:**
 
-- [ ] **Single-line JSDoc only** - Strictly forbid multiline JSDoc with `@param`, `@returns` (only single-line Russian descriptions)
+- [ ] **Single-line JSDoc only** - Strictly forbid multiline JSDoc with `@param`, `@returns` (only single-line Russian descriptions). NOT required for barrel files.
 - [ ] **Type documentation** - JSDoc for type fields
 - [ ] **Type safety** - Proper TypeScript types without `any` (explicit types optional for constants with `as const`)
 - [ ] **Type over interface** - Strictly prefer `type` over `interface` declarations
@@ -247,10 +257,11 @@ Use this EXACT format optimized for MCP validator processing:
 - **[CRITICAL]** Using `interface` instead of `type`
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
 - **[CRITICAL]** Inline comments (`//`) inside function bodies
-- **[CRITICAL]** Missing JSDoc documentation
+- **[CRITICAL]** Missing JSDoc documentation (NOT applicable to barrel files)
+- **[CRITICAL]** Barrel file importing from external directories (barrel files must only import from current directory and subdirectories)
 - **[CRITICAL]** Deep nesting instead of guard clauses (applicable to function files)
 - **[CRITICAL]** Using default exports
-- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas files)
+- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas/barrel files)
 - **[CRITICAL]** Exporting helper functions (helpers must be private, not exported)
 - **[CRITICAL]** Excessive decomposition into tiny private functions (applicable to function files)
 - **[CRITICAL]** Mixing entity types (functions + constants/types in one file; should separate into different files)
@@ -265,7 +276,7 @@ Use this EXACT format optimized for MCP validator processing:
 1. **[BLOCKS MERGE]** Convert to ESM (remove `require`, `module.exports`)
 2. **[BLOCKS MERGE]** Replace `interface` with `type` declarations
 3. **[BLOCKS MERGE]** Add curly braces to all if/else statements (if function file)
-4. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format
+4. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format (NOT required for barrel files)
 5. **[BLOCKS MERGE]** Remove inline comments from function bodies
 6. **[BLOCKS MERGE]** Add explicit return types to all functions (if function file)
 7. **[BLOCKS MERGE]** Add proper prefixes to boolean variables
@@ -277,10 +288,11 @@ Use this EXACT format optimized for MCP validator processing:
 13. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function)
 14. **[HIGH]** Make helper functions private (remove `export` keyword)
 15. **[HIGH]** Combine small helper functions into main function body (if function file)
-16. **[HIGH]** Add Russian JSDoc for all functions (exported and private)
-17. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-18. **[LOW]** Replace for loops with array methods (if function file)
-19. **[LOW]** Improve variable naming descriptiveness
+16. **[HIGH]** Add Russian JSDoc for all functions (exported and private) - NOT required for barrel files
+17. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
+18. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+19. **[LOW]** Replace for loops with array methods (if function file)
+20. **[LOW]** Improve variable naming descriptiveness
 </recommendations>
 
 </validation_result>
@@ -350,6 +362,23 @@ export const ERROR_MESSAGES = {
 } as const;
 ```
 
+**Good Code Example (Barrel File):**
+
+```typescript
+export { createCodeValidatorAgent } from "./create-code-validator-agent";
+export { validateCodeWithAgent } from "./validate-code-with-agent";
+```
+
+**Bad Code Example (Barrel File with External Imports):**
+
+```typescript
+// WRONG: Importing from external directories
+export { createCodeValidatorAgent } from "./create-code-validator-agent";
+export { validateCodeWithAgent } from "./validate-code-with-agent";
+export { someExternalFunction } from "../external-module"; // ❌ External import
+export { anotherFunction } from "../../utils/helper"; // ❌ External import
+```
+
 **Bad Code Example (Function File with Multiple Violations):**
 
 ```typescript
@@ -371,7 +400,7 @@ export default class InputValidator {
 **Bad Code Example (Mixed File - Function + Type Export):**
 
 ```typescript
-import type { Config } from './types';
+import type { Config } from "./types";
 
 // WRONG: Exporting type from function file
 export type ValidationFunction = (input: unknown) => boolean;
@@ -379,7 +408,7 @@ export type ValidationFunction = (input: unknown) => boolean;
 /** Валидирует входные данные */
 export function validateInput(input: unknown): boolean {
   if (!input) return false;
-  return typeof input === 'object';
+  return typeof input === "object";
 }
 
 // CRITICAL: File exports both function AND type - should separate

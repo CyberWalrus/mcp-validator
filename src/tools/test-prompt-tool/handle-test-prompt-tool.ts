@@ -1,10 +1,13 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 import { createTestPromptAgent, testPromptWithAgent } from '../../agents/test-prompt-agent';
+import type { AgentConfig } from '../../agents/test-prompt-agent/types';
 import type { TestPromptInput } from '../../model/types/main';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
-import { getTestPromptAgent, setTestPromptAgent } from './clear-test-prompt-agent-cache';
 import { formatTestPromptResult } from './format-test-prompt-result';
+
+/** Глобальный кэш агента для повторного использования */
+let testPromptAgent: AgentConfig | null = null;
 
 /** MCP инструмент для параллельного тестирования промптов */
 export const testPromptTool: Tool = {
@@ -89,10 +92,8 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
             ...(typeof params.context === 'string' && { context: params.context }),
         };
 
-        let testPromptAgent = getTestPromptAgent();
         if (!testPromptAgent) {
             testPromptAgent = createTestPromptAgent();
-            setTestPromptAgent(testPromptAgent);
         }
 
         const result = await testPromptWithAgent(testPromptAgent, testInput);

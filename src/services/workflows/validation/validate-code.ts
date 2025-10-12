@@ -1,10 +1,12 @@
+import { extname } from 'node:path';
+
 import { error, info } from '../../../lib/helpers/logger';
 import { APP_CONFIG, getAppConfigError } from '../../../model/config';
 import type { AppConfig } from '../../../model/types/main';
 import type { OpenRouterRequest, OpenRouterResponse } from '../../adapters/openrouter/types';
-import { detectLanguageFromPath } from './helpers/detect-language-from-path';
 import { formatPrompt } from './helpers/format-prompt';
 import { getContentFromInput } from './helpers/get-content-from-input';
+import { LANGUAGE_MAP } from './helpers/language-extensions-map';
 import { loadValidationPrompt } from './helpers/load-validation-prompt';
 import { parseValidationResult } from './helpers/parse-validation-result';
 import { validateParams } from './helpers/validate-params';
@@ -16,6 +18,7 @@ type OpenRouterClientFunction = (request: OpenRouterRequest) => Promise<OpenRout
 // Кешируем импорт клиента
 let openRouterClient: OpenRouterClientFunction | null = null;
 
+/** Получает конфигурацию приложения или выбрасывает ошибку */
 function getConfigOrThrow(): AppConfig {
     const config = APP_CONFIG;
 
@@ -39,19 +42,13 @@ async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
     const config = getConfigOrThrow();
 
     if (config.runtime.environment === 'test' && config.runtime.isE2ETest) {
-        // В E2E тестах используем мок клиент через фабрику
         const { getOpenRouterClient: createOpenRouterClient } = await import(
             '../../adapters/openrouter/openrouter-client-factory'
         );
         openRouterClient = await createOpenRouterClient();
     } else {
-        // В обычном режиме используем реальный клиент
-        const realClient = await import('../../adapters/openrouter');
-        if ('makeOpenRouterRequest' in realClient && typeof realClient.makeOpenRouterRequest === 'function') {
-            openRouterClient = realClient.makeOpenRouterRequest;
-        } else {
-            throw new Error('Реальный клиент не содержит функцию makeOpenRouterRequest');
-        }
+        const { makeOpenRouterRequest } = await import('../../adapters/openrouter/openrouter-real-client');
+        openRouterClient = makeOpenRouterRequest;
     }
 
     return openRouterClient;
@@ -72,7 +69,10 @@ export async function validateCode(params: ValidationParams): Promise<Validation
         const content = await getContentFromInput(params);
 
         const language =
-            params.language || (params.input.type === 'file' ? detectLanguageFromPath(params.input.data) : 'text');
+            params.language ||
+            (params.input.type === 'file' && params.input.data
+                ? LANGUAGE_MAP[extname(params.input.data).toLowerCase()] || 'text'
+                : 'text');
 
         const context: ValidationContext = {
             code: content.main,
@@ -93,7 +93,6 @@ export async function validateCode(params: ValidationParams): Promise<Validation
             timeout: 30000,
         });
 
-        // Проверяем что response имеет правильную структуру
         if (typeof aiResponse !== 'object' || aiResponse === null) {
             throw new Error('Некорректный ответ от OpenRouter API');
         }

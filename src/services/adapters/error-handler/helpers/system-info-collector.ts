@@ -1,3 +1,5 @@
+import type { SystemInfo } from './types';
+
 /** Форматирует время работы в читаемом виде */
 function formatUptime(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
@@ -11,7 +13,7 @@ function formatUptime(seconds: number): string {
 }
 
 /** Собирает системную информацию для диагностики ошибок */
-export function collectSystemInfo() {
+export function collectSystemInfo(): SystemInfo {
     const memoryUsage = process.memoryUsage();
     const uptime = process.uptime();
 

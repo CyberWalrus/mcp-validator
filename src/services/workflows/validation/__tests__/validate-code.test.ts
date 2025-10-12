@@ -1,11 +1,14 @@
 import { readFileContent } from '../../../adapters/file-reader';
-import { makeOpenRouterRequest } from '../../../adapters/openrouter';
+import { makeOpenRouterRequest } from '../../../adapters/openrouter/openrouter-real-client';
 import type { ValidationParams } from '../types';
 import { validateCode } from '../validate-code';
 
 // Мокируем OpenRouter API клиент
-vi.mock('../../../adapters/openrouter');
-const mockMakeOpenRouterRequest = vi.mocked(makeOpenRouterRequest);
+const mockMakeOpenRouterRequest = vi.fn();
+
+vi.mock('../../../adapters/openrouter/openrouter-real-client', () => ({
+    makeOpenRouterRequest: mockMakeOpenRouterRequest,
+}));
 
 vi.mock('../helpers', () => ({
     detectLanguageFromPath: vi.fn().mockReturnValue('typescript'),
@@ -15,14 +18,6 @@ vi.mock('../helpers', () => ({
     validateParams: vi.fn(),
 }));
 
-vi.mock('../../adapters/openrouter', () => ({
-    makeOpenRouterRequest: vi.fn().mockResolvedValue({
-        duration: 1000,
-        model: 'claude-3-sonnet',
-        text: '# Mock validation result\n**Оценка:** 85/100\n**Статус:** ✅ Высокое качество',
-        tokensUsed: 100,
-    }),
-}));
 
 // ✅ Безопасное мокирование file-reader модуля
 vi.mock('../../../adapters/file-reader', async (importOriginal) => {

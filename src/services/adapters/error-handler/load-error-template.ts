@@ -1,4 +1,4 @@
-import { getPrompt } from '../../../lib/cache/prompt-cache';
+import { getPrompt } from '../../../lib/cache';
 import { ERROR_TYPE_TO_TEMPLATE } from './constants';
 
 /** Загружает markdown шаблон ошибки по типу из кэша */

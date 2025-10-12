@@ -7,10 +7,8 @@ import type { ErrorContext, RenderErrorResult } from './types';
 /** Основная функция для рендеринга markdown ошибок */
 export function renderErrorResponse(context: ErrorContext): RenderErrorResult {
     try {
-        // Определяем тип ошибки если не указан явно
         const errorType = context.errorType || detectErrorType(context.errorCode);
 
-        // Проверяем поддерживаемые типы
         if (!['system', 'validation', 'file'].includes(errorType)) {
             return {
                 content: '',
@@ -19,13 +17,8 @@ export function renderErrorResponse(context: ErrorContext): RenderErrorResult {
             };
         }
 
-        // Загружаем шаблон
         const template = loadErrorTemplate(errorType as 'file' | 'system' | 'validation');
-
-        // Подготавливаем данные для шаблона
         const templateVariables = formatErrorContext(context);
-
-        // Рендерим markdown
         const renderedContent = renderTemplate(template, templateVariables);
 
         return {

@@ -1,4 +1,4 @@
-import { APP_CONFIG } from '../../src/model/config/env-config';
+import { APP_CONFIG } from '../../src/model/config';
 import type { MCPTestClient } from '../types';
 import { createMcpClientSimulator } from './mcp-client-simulator';
 

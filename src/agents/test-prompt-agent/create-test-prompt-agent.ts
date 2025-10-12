@@ -1,10 +1,11 @@
 import OpenAI from 'openai';
 
-import { getPrompt } from '../../lib/cache/prompt-cache';
-import { getConfigOrThrow } from './get-config-or-throw';
+import { getPrompt } from '../../lib/cache';
+import { getConfigOrThrow } from '../../lib/helpers/config/get-config-or-throw';
+import type { TestPromptAgentResult } from './types';
 
 /** TestPromptAgent для параллельного тестирования промптов */
-export function createTestPromptAgent() {
+export function createTestPromptAgent(): TestPromptAgentResult {
     const config = getConfigOrThrow();
     const {
         openRouter: { apiKey, apiUrl },

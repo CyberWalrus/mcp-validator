@@ -1,7 +1,5 @@
-import { extname } from 'node:path';
-
 /** Карта расширений файлов и соответствующих языков программирования */
-const LANGUAGE_MAP: Record<string, string> = {
+export const LANGUAGE_MAP: Record<string, string> = {
     '.asm': 'assembly',
     '.bash': 'shell',
     '.c': 'c',
@@ -63,14 +61,3 @@ const LANGUAGE_MAP: Record<string, string> = {
     '.vbs': 'vbscript',
     '.zsh': 'shell',
 };
-
-/** Определяет язык программирования по пути к файлу */
-export function detectLanguageFromPath(filePath: string): string {
-    if (!filePath) {
-        return 'text';
-    }
-
-    const ext = extname(filePath).toLowerCase();
-
-    return LANGUAGE_MAP[ext] || 'text';
-}

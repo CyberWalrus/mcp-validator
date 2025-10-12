@@ -1,17 +1,20 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { GetPromptFn, InitializePromptCacheFn } from '../prompt-cache';
+import type { getPrompt as getPromptFn, initializePromptCache as initPromptCache } from '../index';
 
 const originalApiKey = process.env.OPENROUTER_API_KEY;
-let getPrompt: GetPromptFn;
-let initializePromptCache: InitializePromptCacheFn;
+let getPrompt: typeof getPromptFn;
+let initializePromptCache: typeof initPromptCache;
 
 beforeEach(async () => {
     vi.resetModules();
     process.env.OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'test-key';
 
-    const cacheModule = await import('../prompt-cache');
+    const { reloadAppConfig } = await import('../../../model/config');
+    await reloadAppConfig();
+
+    const cacheModule = await import('../index');
 
     getPrompt = cacheModule.getPrompt;
     initializePromptCache = cacheModule.initializePromptCache;

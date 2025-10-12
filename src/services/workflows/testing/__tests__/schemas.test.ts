@@ -83,12 +83,12 @@ describe('Testing Schemas', () => {
         it('должен валидировать успешный результат', () => {
             const successResult = {
                 endTime: '2024-01-01T10:00:01Z',
+                isSuccess: true,
                 iteration: 1,
                 model: 'claude-3-sonnet',
                 response: 'Успешный ответ',
                 responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             };
 
             const result = TestIterationResultSchema.safeParse(successResult);
@@ -102,27 +102,27 @@ describe('Testing Schemas', () => {
         it('должен валидировать результат с ошибкой', () => {
             const errorResult = {
                 error: 'Network timeout',
+                isSuccess: false,
                 iteration: 2,
                 responseTime: 500,
                 startTime: '2024-01-01T10:00:00Z',
-                success: false,
             };
 
             const result = TestIterationResultSchema.safeParse(errorResult);
 
             expect(result.success).toBe(true);
             if (result.success) {
-                expect(result.data.success).toBe(false);
+                expect(result.data.isSuccess).toBe(false);
                 expect(result.data.error).toBe('Network timeout');
             }
         });
 
         it('должен отклонять отрицательное время выполнения', () => {
             const invalidResult = {
+                isSuccess: true,
                 iteration: 1,
                 responseTime: -100,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             };
 
             const result = TestIterationResultSchema.safeParse(invalidResult);
@@ -132,10 +132,10 @@ describe('Testing Schemas', () => {
 
         it('должен отклонять недопустимый номер итерации', () => {
             const invalidResult = {
+                isSuccess: true,
                 iteration: 0,
                 responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             };
 
             const result = TestIterationResultSchema.safeParse(invalidResult);
@@ -208,11 +208,11 @@ describe('Testing Schemas', () => {
                 },
                 results: [
                     {
+                        isSuccess: true,
                         iteration: 1,
                         response: 'Ответ',
                         responseTime: 1000,
                         startTime: '2024-01-01T10:00:00Z',
-                        success: true,
                     },
                 ],
                 success: true,
@@ -235,6 +235,7 @@ describe('Testing Schemas', () => {
                 averageResponseTime: 0,
                 consistency: { analysis: 'Тест', score: 0 },
                 failedTests: 0,
+                isSuccess: false,
                 metadata: {
                     duration: 0,
                     endTime: '2024-01-01T10:00:00Z',
@@ -244,7 +245,6 @@ describe('Testing Schemas', () => {
                     validatorVersion: '2.0.0',
                 },
                 results: [],
-                success: false,
                 successfulTests: 0,
                 totalTests: -1,
             };

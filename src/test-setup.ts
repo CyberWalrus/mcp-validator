@@ -8,18 +8,12 @@ if (!process.env.LOG_LEVEL) {
     process.env.LOG_LEVEL = 'INFO';
 }
 
-async function initializePromptCacheForTests(): Promise<void> {
-    const { initializePromptCache } = await import('./lib/cache/prompt-cache');
+// Инициализируем конфигурацию и кэш промптов
+import { reloadAppConfig } from './model/config';
+import { initializePromptCache } from './lib/cache';
 
-    initializePromptCache();
-}
+// Сначала инициализируем конфигурацию
+await reloadAppConfig();
 
-await initializePromptCacheForTests();
-
-async function initializeAppConfigForTests(): Promise<void> {
-    const { reloadAppConfig } = await import('./model/config');
-
-    reloadAppConfig();
-}
-
-await initializeAppConfigForTests();
+// Затем инициализируем кэш промптов
+initializePromptCache();

@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { APP_CONFIG } from '../../src/model/config/env-config';
+import { APP_CONFIG } from '../../src/model/config';
 import type { MCPRequest, MCPResponse } from '../types';
 
 /** Конфигурация подключения к MCP серверу */

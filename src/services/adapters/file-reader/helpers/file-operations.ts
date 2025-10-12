@@ -1,6 +1,6 @@
 import { readFile as readFileAsync } from 'node:fs/promises';
 
-/** Попытка чтения файла с возвращением результата и ошибки */
+/** Читает файл и возвращает содержимое или ошибку */
 export async function tryReadFile(
     filePath: string,
     encoding: 'ascii' | 'utf8' | 'utf16le',

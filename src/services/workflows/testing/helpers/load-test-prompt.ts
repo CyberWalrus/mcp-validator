@@ -1,4 +1,4 @@
-import { getPrompt } from '../../../../lib/cache/prompt-cache';
+import { getPrompt } from '../../../../lib/cache';
 
 /** Загружает промпт для выполнения тестов из кэша */
 export function loadExecutePrompt(): string {

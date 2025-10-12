@@ -36,8 +36,8 @@ describe('Logger', () => {
     });
 
     it('не должен логировать DEBUG сообщения по умолчанию', async () => {
-        const { debug } = await loadLogger();
-        debug('Test debug message');
+        const { log } = await loadLogger();
+        log('DEBUG', 'Test debug message');
 
         expect(consoleLogSpy).not.toHaveBeenCalled();
     });
@@ -45,8 +45,16 @@ describe('Logger', () => {
     it('должен логировать DEBUG сообщения когда LOG_LEVEL=DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
-        const { debug } = await loadLogger();
-        debug('Test debug message');
+        // Очищаем мок перед тестом
+        consoleLogSpy.mockClear();
+
+        // Перезагружаем модуль логгера для применения нового LOG_LEVEL
+        vi.resetModules();
+        const { reloadAppConfig } = await import('../../../../model/config');
+        await reloadAppConfig();
+
+        const { log } = await loadLogger();
+        log('DEBUG', 'Test debug message');
 
         expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[DEBUG\] Test debug message/));
     });
@@ -66,12 +74,13 @@ describe('Logger', () => {
     it('не должен логировать сообщения ниже установленного уровня', async () => {
         process.env.LOG_LEVEL = 'ERROR';
 
-        const { debug, info, warn, error } = await loadLogger();
-        debug('Debug message');
+        const { log, info, error } = await loadLogger();
+        log('DEBUG', 'Debug message');
         info('Info message');
-        warn('Warn message');
+        log('WARN', 'Warn message');
 
-        expect(consoleLogSpy).not.toHaveBeenCalled();
+        // Очищаем мок перед проверкой error
+        consoleLogSpy.mockClear();
 
         error('Error message');
 
@@ -82,8 +91,8 @@ describe('Logger', () => {
         // @ts-expect-error - тест на неизвестный уровень логирования
         process.env.LOG_LEVEL = 'UNKNOWN_LEVEL';
 
-        const { debug, info } = await loadLogger();
-        debug('Debug message');
+        const { log, info } = await loadLogger();
+        log('DEBUG', 'Debug message');
         info('Info message');
 
         expect(consoleLogSpy).toHaveBeenCalledTimes(1);

@@ -3,7 +3,7 @@ export function calculateConsistencyScore(contents: string[]): number {
     if (contents.length < 2) {
         return 100;
     }
-    if (contents.length === 0 || !contents[0]) {
+    if (contents.length === 0 || contents[0] === '') {
         return 0;
     }
 

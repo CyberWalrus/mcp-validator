@@ -8,8 +8,7 @@ export function formatValidationResult(result: unknown): string {
         try {
             return JSON.stringify(result, null, 2);
         } catch {
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            return String(result);
+            return `[Object: ${result.constructor?.name || 'Unknown'}]`;
         }
     }
 

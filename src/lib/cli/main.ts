@@ -1,8 +1,9 @@
-import { setupGracefulShutdown } from '../../server/setup-graceful-shutdown';
-import { initializePromptCache } from '../cache/prompt-cache';
-import { error } from '../helpers/logger/index';
+import { initializePromptCache } from '../cache';
+import { error, info } from '../helpers/logger/index';
 import { ensureConfiguration } from './ensure-configuration';
-import { showHelp, showVersion, startMcpServer } from './index';
+import { showHelp } from './show-help';
+import { showVersion } from './show-version';
+import { startMcpServer } from './start-mcp-server';
 
 /** Основная функция приложения */
 export async function main(): Promise<void> {
@@ -22,12 +23,10 @@ export async function main(): Promise<void> {
 
     ensureConfiguration();
 
-    setupGracefulShutdown();
-
-    error('🚀 MCP Validator 2.0 запускается...');
-    error('🔧 Официальный MCP SDK + упрощенная архитектура');
-    error('📝 Все функции v1.x сохранены');
-    error('');
+    info('🚀 MCP Validator 2.0 запускается...');
+    info('🔧 Официальный MCP SDK + упрощенная архитектура');
+    info('📝 Все функции v1.x сохранены');
+    info('');
 
     try {
         await startMcpServer();

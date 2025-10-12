@@ -1,11 +1,11 @@
-/** Парсит результат валидации от AI модели */
+/** Парсит результат валидации от AI модели и возвращает объект с ошибками и статусом */
 export function parseValidationResult(aiResponse: string): {
     issues: string[];
     success: boolean;
     metadata?: Record<string, unknown>;
 } {
     const issues: string[] = [];
-    let success = true;
+    let isSuccess = true;
     const metadata: Record<string, unknown> = {};
 
     metadata.fullResponse = aiResponse;
@@ -28,19 +28,18 @@ export function parseValidationResult(aiResponse: string): {
     ];
 
     const lines = aiResponse.toLowerCase().split('\n');
-    let foundProblems = false;
+    let hasFoundProblems = false;
 
     for (const line of lines) {
         for (const indicator of problemIndicators) {
             if (line.includes(indicator) && line.length > indicator.length + 10) {
                 issues.push(line.trim());
-                foundProblems = true;
+                hasFoundProblems = true;
                 break;
             }
         }
     }
 
-    // Ищем положительные индикаторы
     const positiveIndicators = [
         'отлично',
         'excellent',
@@ -64,26 +63,22 @@ export function parseValidationResult(aiResponse: string): {
         }
     }
 
-    // Определяем успешность на основе найденных индикаторов
-    if (foundProblems) {
-        success = false;
+    if (hasFoundProblems) {
+        isSuccess = false;
     } else if (hasPositiveIndicators) {
-        success = true;
+        isSuccess = true;
     } else {
-        // Если нет явных индикаторов, считаем успешным если нет критичных слов
         const criticalWords = ['fail', 'провал', 'неудача', 'нет', 'невозможно', 'cannot'];
-        success = !criticalWords.some((word) => aiResponse.toLowerCase().includes(word));
+        isSuccess = !criticalWords.some((word) => aiResponse.toLowerCase().includes(word));
     }
 
-    // Извлекаем оценку если есть
     const scoreMatch = aiResponse.match(/(\d+)\/(\d+)|(\d+)%|score[:\s]*(\d+)/i);
     if (scoreMatch) {
         const score = parseInt(scoreMatch[1] || scoreMatch[3] || scoreMatch[4] || '0', 10);
         metadata.score = score;
 
-        // Если оценка низкая, считаем неуспешным
         if (score < 70) {
-            success = false;
+            isSuccess = false;
             if (issues.length === 0) {
                 issues.push(`Низкая оценка: ${score}`);
             }
@@ -93,6 +88,6 @@ export function parseValidationResult(aiResponse: string): {
     return {
         issues,
         metadata,
-        success,
+        success: isSuccess,
     };
 }

@@ -8,7 +8,7 @@ export async function testPromptWithAgent(agent: AgentConfig, input: TestPromptI
     try {
         const { prompt, iterations = 5, models = ['openai/gpt-oss-120b'] } = input;
 
-        const promises = Array.from({ length: iterations }, async (_, index) => {
+        const promises = Array.from({ length: iterations }, async (_, index): Promise<TestIterationResult> => {
             const iterationPrompt = `
 # Тестирование промпта (итерация ${index + 1}/${iterations})
 
@@ -45,9 +45,9 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
                 const result: TestIterationResult = {
                     content: responseContent || '',
                     duration,
+                    isSuccess: Boolean(responseContent),
                     iteration: index + 1,
                     model: models[0] || 'openai/gpt-oss-120b',
-                    success: Boolean(responseContent),
                 };
 
                 if (!responseContent) {
@@ -62,16 +62,16 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
                     content: '',
                     duration,
                     error: error instanceof Error ? error.message : String(error),
+                    isSuccess: false,
                     iteration: index + 1,
                     model: models[0] || 'openai/gpt-oss-120b',
-                    success: false,
                 };
             }
         });
 
         const results = await Promise.all(promises);
 
-        const successfulResults = results.filter((r) => r.success);
+        const successfulResults = results.filter((r) => r.isSuccess);
         const averageDuration = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
         const consistencyScore = calculateConsistencyScore(successfulResults.map((r) => r.content));
 

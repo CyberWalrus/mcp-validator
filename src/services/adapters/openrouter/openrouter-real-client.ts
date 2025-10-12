@@ -5,12 +5,13 @@ import type { AppConfig } from '../../../model/types/main';
 import { DEFAULT_HEADERS, DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE } from './constants';
 import type { OpenRouterRequest, OpenRouterResponse } from './types';
 
+/** Получает конфигурацию или бросает ошибку */
 function getConfigOrThrow(): AppConfig {
     const config = APP_CONFIG;
 
     const configError = getAppConfigError();
 
-    if (!config || configError) {
+    if (config === null || config === undefined || configError) {
         const message = configError?.message
             ? `Failed to load OpenRouter configuration: ${configError.message}`
             : 'Failed to load OpenRouter configuration';
@@ -93,5 +94,3 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
         throw error;
     }
 }
-
-export type MakeOpenRouterRequest = typeof makeOpenRouterRequest;

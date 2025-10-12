@@ -2,7 +2,7 @@ import type { TestIterationResult } from '../../model/types/main';
 
 /** Генерация краткого отчета о тестировании */
 export function generateTestSummary(results: TestIterationResult[], consistencyScore: number): string {
-    const successful = results.filter((r) => r.success).length;
+    const successful = results.filter((r) => r.isSuccess).length;
     const total = results.length;
     const successRate = Math.round((successful / total) * 100);
 

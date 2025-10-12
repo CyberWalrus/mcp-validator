@@ -1,10 +1,13 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 import { createCodeValidatorAgent, validateCodeWithAgent } from '../../agents/code-validator-agent';
+import type { AgentConfig } from '../../agents/code-validator-agent/types';
 import type { ValidationInput, ValidationType } from '../../model/types/main';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
-import { getCodeValidatorAgent, setCodeValidatorAgent } from './clear-agent-cache';
 import { formatSuccessfulValidation } from './format-successful-validation';
+
+/** Глобальный кэш агента для повторного использования */
+let codeValidatorAgent: AgentConfig | null = null;
 
 /** MCP инструмент для валидации кода через @modelcontextprotocol/sdk */
 export const validateTool: Tool = {
@@ -180,10 +183,8 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             language: typeof params.language === 'string' ? params.language : 'typescript',
         };
 
-        let codeValidatorAgent = getCodeValidatorAgent();
         if (!codeValidatorAgent) {
             codeValidatorAgent = createCodeValidatorAgent();
-            setCodeValidatorAgent(codeValidatorAgent);
         }
 
         const result = await validateCodeWithAgent(codeValidatorAgent, validationInput);

@@ -3,6 +3,8 @@
 /**
  * MCP Validator 2.0 - Entry Point
  *
+ * ИСКЛЮЧЕНИЕ: Entry point файл не следует правилу "один файл - одна функция"
+ *
  * Миграция на официальные SDK:
  * - @modelcontextprotocol/sdk для MCP протокола
  * - OpenAI SDK для агентной архитектуры

@@ -67,7 +67,7 @@ describe('formatValidationResult', () => {
         const result = formatValidationResult(obj);
 
         // Должен вернуться результат String() так как JSON.stringify упадет
-        expect(result).toBe('[object Object]');
+        expect(result).toBe('[Object: Object]');
     });
 
     it('должен обрабатывать пустую строку', () => {

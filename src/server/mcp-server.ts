@@ -1,6 +1,6 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
-import { initializePromptCache } from '../lib/cache/prompt-cache';
+import { initializePromptCache } from '../lib/cache';
 import { error, info } from '../lib/helpers/logger/index';
 import { createMcpServer } from './create-mcp-server';
 import { setupGracefulShutdown } from './setup-graceful-shutdown';

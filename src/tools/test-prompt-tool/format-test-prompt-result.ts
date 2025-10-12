@@ -30,11 +30,11 @@ ${results
     .map(
         (testResult) => `
 ### Итерация ${testResult.iteration}
-- **Статус:** ${testResult.success ? '✅ Успех' : '❌ Ошибка'}
+- **Статус:** ${testResult.isSuccess ? '✅ Успех' : '❌ Ошибка'}
 - **Время:** ${testResult.duration}мс
 - **Модель:** ${testResult.model}
 ${testResult.error ? `- **Ошибка:** ${testResult.error}` : ''}
-${testResult.success ? `- **Длина ответа:** ${testResult.content.length} символов` : ''}
+${testResult.isSuccess ? `- **Длина ответа:** ${testResult.content.length} символов` : ''}
 `,
     )
     .join('\n')}

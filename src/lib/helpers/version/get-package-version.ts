@@ -13,13 +13,15 @@ export function getPackageVersion(): string {
     try {
         const packageJsonPath = resolve(__dirname, '../../../package.json');
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version: string };
-        cachedVersion = packageJson.version || '2.0.0';
+        const version = packageJson.version || '2.0.0';
+        cachedVersion = version;
 
-        return cachedVersion;
+        return version;
     } catch {
-        cachedVersion = '2.0.0'; // Fallback версия
+        const fallbackVersion = '2.0.0';
+        cachedVersion = fallbackVersion;
 
-        return cachedVersion;
+        return fallbackVersion;
     }
 }
 
