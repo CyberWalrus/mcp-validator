@@ -1,5 +1,5 @@
 /** Константы конфигурации */
-export { DEFAULT_LOGGING_CONFIG, DEFAULT_OPENROUTER_CONFIG, PACKAGE_RESOURCE_PATHS } from '../constants/main';
+export { DEFAULT_LOGGING_CONFIG, DEFAULT_OPENROUTER_CONFIG, PACKAGE_RESOURCE_PATHS } from './constants';
 
 /** Схемы валидации конфигурации */
 export {
@@ -8,10 +8,19 @@ export {
     logLevelSchema,
     runtimeConfigSchema,
     validationConfigSchema,
-} from '../schemas/main';
+} from './schemas';
 
 /** Типы конфигурации */
-export type { AiConfig, AppConfig, LogLevel, RuntimeConfig, ValidationConfig } from '../types/main';
+export type {
+    AiConfig,
+    AppConfig,
+    LoggingConfig,
+    LogLevel,
+    OpenRouterConfig,
+    PathsConfig,
+    RuntimeConfig,
+    ValidationConfig,
+} from './types';
 
 /** Константы конфигурации приложения */
 export { APP_CONFIG, CACHED_CONFIG, CONFIG_STATE } from './config-constants';

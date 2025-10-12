@@ -2,7 +2,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 import { createTestPromptAgent, testPromptWithAgent } from '../../agents/test-prompt-agent';
 import type { AgentConfig } from '../../agents/test-prompt-agent/types';
-import type { TestPromptInput } from '../../model/types/main';
+import type { TestPromptInput, TestPromptResult } from '../../model/types/main';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
 import { formatTestPromptResult } from './format-test-prompt-result';
 
@@ -96,7 +96,7 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
             testPromptAgent = createTestPromptAgent();
         }
 
-        const result = await testPromptWithAgent(testPromptAgent, testInput);
+        const result: TestPromptResult = await testPromptWithAgent(testPromptAgent, testInput);
 
         if (result.success) {
             return {

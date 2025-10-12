@@ -2,7 +2,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 import { createCodeValidatorAgent, validateCodeWithAgent } from '../../agents/code-validator-agent';
 import type { AgentConfig } from '../../agents/code-validator-agent/types';
-import type { ValidationInput, ValidationType } from '../../model/types/main';
+import type { ValidationInput, ValidationResult, ValidationType } from '../../model/types/main';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
 import { formatSuccessfulValidation } from './format-successful-validation';
 
@@ -187,7 +187,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             codeValidatorAgent = createCodeValidatorAgent();
         }
 
-        const result = await validateCodeWithAgent(codeValidatorAgent, validationInput);
+        const result: ValidationResult = await validateCodeWithAgent(codeValidatorAgent, validationInput);
 
         if (result.success) {
             return {

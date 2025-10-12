@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 import { getPrompt } from '../../lib/cache';
-import { getConfigOrThrow } from '../../lib/helpers/config/get-config-or-throw';
+import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
 import type { CodeValidatorAgentResult } from './types';
 
 /** CodeValidatorAgent для валидации кода с загрузкой промптов из .md файлов */

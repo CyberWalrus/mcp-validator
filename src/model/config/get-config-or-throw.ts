@@ -1,5 +1,5 @@
-import { APP_CONFIG, getAppConfigError } from '../../../model/config';
-import type { AppConfig } from '../../../model/types/main';
+import type { AppConfig } from '.';
+import { APP_CONFIG, getAppConfigError } from '.';
 
 /** Получение конфигурации с проверкой ошибок @throws {Error} При недоступности конфигурации */
 export function getConfigOrThrow(): AppConfig {

@@ -1,4 +1,4 @@
-import type { LogLevel } from '../../../../model/types/main';
+import type { LogLevel } from '../../../../model/config';
 import { shouldLog } from './should-log';
 
 /** Выводит сообщение в консоль если уровень логирования позволяет */

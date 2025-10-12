@@ -1,22 +1,25 @@
 import { getPrompt } from '../../lib/cache';
-import { getConfigOrThrow } from '../../lib/helpers/config/get-config-or-throw';
+import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
 import type { ValidationInput, ValidationResult } from '../../model/types/main';
 import { readFileContent } from '../../services/adapters/file-reader';
 import type { AgentConfig } from './types';
 
 /** Валидация кода через CodeValidatorAgent */
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function validateCodeWithAgent(agent: AgentConfig, input: ValidationInput): Promise<ValidationResult> {
+export async function validateCodeWithAgent(
+    agent: AgentConfig,
+    validationInput: ValidationInput,
+): Promise<ValidationResult> {
     try {
-        const correctPrompt = getPrompt(`validate-${input.validationType}.md`);
+        const correctPrompt = getPrompt(`validate-${validationInput.validationType}.md`);
         agent.instructions = correctPrompt;
 
         let content = '';
 
-        if (input.input.type === 'file') {
+        if (validationInput.input.type === 'file') {
             const fileResult = await readFileContent({
-                encoding: input.input.encoding || 'utf8',
-                path: input.input.data,
+                encoding: validationInput.input.encoding || 'utf8',
+                path: validationInput.input.data,
             });
 
             if (!fileResult.success) {
@@ -24,19 +27,19 @@ export async function validateCodeWithAgent(agent: AgentConfig, input: Validatio
                     issues: [`Ошибка чтения файла: ${fileResult.error}`],
                     score: 0,
                     success: false,
-                    type: input.validationType,
+                    type: validationInput.validationType,
                 };
             }
 
             content = fileResult.content!;
-        } else if (input.input.type === 'content') {
-            content = input.input.data;
+        } else if (validationInput.input.type === 'content') {
+            content = validationInput.input.data;
         } else {
             return {
                 issues: ['Неподдерживаемый тип входных данных'],
                 score: 0,
                 success: false,
-                type: input.validationType,
+                type: validationInput.validationType,
             };
         }
 
@@ -44,11 +47,11 @@ export async function validateCodeWithAgent(agent: AgentConfig, input: Validatio
 # Входные данные для валидации
 
 ## Код для валидации:
-\`\`\`${input.language || 'typescript'}
+\`\`\`${validationInput.language || 'typescript'}
 ${content}
 \`\`\`
 
-${input.context ? `## Контекст:\n${input.context}` : ''}
+${validationInput.context ? `## Контекст:\n${validationInput.context}` : ''}
 
 Выполни валидацию согласно инструкциям выше.
 `;
@@ -112,7 +115,7 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
                 recommendations: responseText,
                 score,
                 success: score >= 70,
-                type: input.validationType,
+                type: validationInput.validationType,
             };
         }
 
@@ -120,14 +123,14 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
             issues: ['Не удалось получить результат валидации от агента'],
             score: 0,
             success: false,
-            type: input.validationType,
+            type: validationInput.validationType,
         };
-    } catch (error) {
+    } catch (err) {
         return {
-            issues: [`Ошибка валидации: ${error instanceof Error ? error.message : String(error)}`],
+            issues: [`Ошибка валидации: ${err instanceof Error ? err.message : String(err)}`],
             score: 0,
             success: false,
-            type: input.validationType,
+            type: validationInput.validationType,
         };
     }
 }

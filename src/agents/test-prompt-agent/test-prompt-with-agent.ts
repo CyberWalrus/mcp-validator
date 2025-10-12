@@ -4,9 +4,9 @@ import { generateTestSummary } from './generate-test-summary';
 import type { AgentConfig } from './types';
 
 /** Параллельное тестирование промпта через TestPromptAgent */
-export async function testPromptWithAgent(agent: AgentConfig, input: TestPromptInput): Promise<TestPromptResult> {
+export async function testPromptWithAgent(agent: AgentConfig, testInput: TestPromptInput): Promise<TestPromptResult> {
     try {
-        const { prompt, iterations = 5, models = ['openai/gpt-oss-120b'] } = input;
+        const { prompt, iterations = 5, models = ['openai/gpt-oss-120b'] } = testInput;
 
         const promises = Array.from({ length: iterations }, async (_, index): Promise<TestIterationResult> => {
             const iterationPrompt = `
@@ -15,7 +15,7 @@ export async function testPromptWithAgent(agent: AgentConfig, input: TestPromptI
 ## Промпт для тестирования:
 ${prompt}
 
-${input.context ? `## Контекст:\n${input.context}` : ''}
+${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
 
 Выполни данный промпт и дай полный ответ согласно инструкциям выше.
 `;
@@ -55,13 +55,13 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
                 }
 
                 return result;
-            } catch (error) {
+            } catch (err) {
                 const duration = Date.now() - startTime;
 
                 return {
                     content: '',
                     duration,
-                    error: error instanceof Error ? error.message : String(error),
+                    error: err instanceof Error ? err.message : String(err),
                     isSuccess: false,
                     iteration: index + 1,
                     model: models[0] || 'openai/gpt-oss-120b',
@@ -84,15 +84,15 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
             summary: generateTestSummary(results, consistencyScore),
             totalIterations: iterations,
         };
-    } catch (error) {
+    } catch (err) {
         return {
             averageDuration: 0,
             consistencyScore: 0,
-            error: `Ошибка тестирования промпта: ${error instanceof Error ? error.message : String(error)}`,
+            error: `Ошибка тестирования промпта: ${err instanceof Error ? err.message : String(err)}`,
             results: [],
             success: false,
             successfulIterations: 0,
-            totalIterations: input.iterations || 5,
+            totalIterations: testInput.iterations || 5,
         };
     }
 }
