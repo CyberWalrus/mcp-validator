@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,9 +10,26 @@ import type { AppConfig } from '../types/main';
 function getPackageRoot(): string {
     const currentFileUrl = import.meta.url;
     const currentFilePath = fileURLToPath(currentFileUrl);
-    const currentDir = dirname(currentFilePath);
+    let searchDir = dirname(currentFilePath);
 
-    return join(currentDir, '../../..');
+    // Поиск package.json вверх по директориям (работает и для dev, и для собранного кода)
+    while (searchDir !== dirname(searchDir)) {
+        try {
+            const packageJsonPath = join(searchDir, 'package.json');
+            if (existsSync(packageJsonPath)) {
+                const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string };
+                if (packageJson.name === 'mcp-validator') {
+                    return searchDir;
+                }
+            }
+        } catch {
+            // Продолжаем поиск
+        }
+        searchDir = dirname(searchDir);
+    }
+
+    // Fallback для dev режима
+    return join(dirname(currentFilePath), '../../..');
 }
 
 /** Формирует конфигурацию приложения из переменных окружения */

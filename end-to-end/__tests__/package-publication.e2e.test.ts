@@ -32,14 +32,18 @@ describe('Package Publication E2E', () => {
             // Основные файлы
             expect(existsSync(join(packageRoot, 'README.md'))).toBe(true);
             expect(existsSync(join(packageRoot, 'package.json'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'LICENSE'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'CHANGELOG.md'))).toBe(true);
 
             // Директории с промптами
             expect(existsSync(resourceResolver.resolveErrorTemplatesDir())).toBe(true);
             expect(existsSync(join(packageRoot, 'prompts', 'validation'))).toBe(true);
             expect(existsSync(join(packageRoot, 'prompts', 'testing'))).toBe(true);
 
-            // ИСПРАВЛЕНИЕ: В v2.0 используем tsx без компиляции
-            // expect(existsSync(join(packageRoot, 'dist'))).toBe(true);
+            // Собранный код
+            expect(existsSync(join(packageRoot, 'lib'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'lib', 'index.js'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'lib', 'index.d.ts'))).toBe(true);
         });
 
         it('должен содержать все промпты валидации', () => {
@@ -76,12 +80,12 @@ describe('Package Publication E2E', () => {
         it('созданный пакет должен содержать все необходимые файлы', () => {
             const packageRoot = join(packageJsonPath, '..');
 
-            // ИСПРАВЛЕНИЕ: npm pack --dry-run возвращает только название пакета
-            // Проверим, что файлы существуют физически
+            // Проверим, что файлы существуют физически перед публикацией
             expect(existsSync(join(packageRoot, 'package.json'))).toBe(true);
             expect(existsSync(join(packageRoot, 'README.md'))).toBe(true);
-            // В v2.0 используем tsx без dist папки
-            expect(existsSync(join(packageRoot, 'src'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'LICENSE'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'lib'))).toBe(true);
+            expect(existsSync(join(packageRoot, 'lib', 'index.js'))).toBe(true);
             expect(existsSync(join(packageRoot, 'prompts'))).toBe(true);
 
             // Проверим что pack команда выполняется успешно
@@ -99,8 +103,7 @@ describe('Package Publication E2E', () => {
             const packageRoot = join(packageJsonPath, '..');
 
             expect(() => {
-                // ИСПРАВЛЕНИЕ: Используем tsx вместо скомпилированного файла
-                execSync('tsx src/index.ts --help', {
+                execSync('node lib/index.js --help', {
                     cwd: packageRoot,
                     stdio: 'pipe',
                 });
@@ -110,8 +113,7 @@ describe('Package Publication E2E', () => {
         it('должен показывать версию', () => {
             const packageRoot = join(packageJsonPath, '..');
 
-            // ИСПРАВЛЕНИЕ: Используем tsx вместо скомпилированного файла и читаем stderr (где выводится info())
-            const versionOutput = execSync('tsx src/index.ts --version 2>&1', {
+            const versionOutput = execSync('node lib/index.js --version 2>&1', {
                 cwd: packageRoot,
                 encoding: 'utf8',
             });

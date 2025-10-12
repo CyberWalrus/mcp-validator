@@ -18,7 +18,7 @@ function isPackageRoot(path: string): boolean {
     try {
         const packageJson = JSON.parse(readFileSync(join(path, 'package.json'), 'utf8')) as { name?: string };
 
-        return packageJson.name === '@morj/tools.mcp-validator';
+        return packageJson.name === 'mcp-validator';
     } catch {
         return false;
     }
@@ -36,9 +36,14 @@ function getPackageRoot(): string {
         searchDir = dirname(searchDir);
     }
 
+    const builtCodeRoot = resolve(dirname(currentFilePath), '..');
+    if (isPackageRoot(builtCodeRoot)) {
+        return builtCodeRoot;
+    }
+
     const installedPaths = [
-        resolve(process.cwd(), 'node_modules/@morj/tools.mcp-validator'),
-        resolve(getRuntimeNodePath(), '@morj/tools.mcp-validator'),
+        resolve(process.cwd(), 'node_modules/mcp-validator'),
+        resolve(getRuntimeNodePath(), 'mcp-validator'),
         resolve(dirname(currentFilePath), '../../../../../'),
     ];
 
@@ -48,6 +53,7 @@ function getPackageRoot(): string {
         }
     }
 
+    // Fallback для dev режима
     return join(dirname(currentFilePath), '../../../..');
 }
 

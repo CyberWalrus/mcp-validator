@@ -1,0 +1,38 @@
+# Исходники (собранный код в lib/)
+src/
+end-to-end/
+
+# Конфигурационные файлы
+.cursor/
+tsconfig.json
+vitest.config.ts
+vitest.e2e.config.ts
+vitest.e2e.setup.ts
+eslint.config.ts
+tsup.config.ts
+
+# Тесты
+*.test.ts
+*.e2e.test.ts
+__tests__/
+__mocks__/
+
+# Переменные окружения
+.env
+.env.*
+!.env.example
+
+# Отчеты и временные файлы
+reports/
+coverage/
+*.log
+
+# Документация для разработчиков
+architecture.xml
+package-ai-docs.md
+.cursor/
+
+# Git
+.git/
+.gitignore
+
