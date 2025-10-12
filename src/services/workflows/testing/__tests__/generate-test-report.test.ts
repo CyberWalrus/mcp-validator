@@ -1,4 +1,4 @@
-import { generateShortReport, generateTestReport } from '../generate-test-report';
+import { generateTestReport } from '../generate-test-report';
 import type { ParallelTestResult } from '../types';
 
 describe('generateTestReport', () => {
@@ -128,75 +128,5 @@ describe('generateTestReport', () => {
         expect(report).toContain('| Модель | Тестов | Успешных | Успешность | Среднее время |');
         expect(report).toContain('claude-3-sonnet');
         expect(report).toContain('claude-3-haiku');
-    });
-});
-
-describe('generateShortReport', () => {
-    const mockResult: ParallelTestResult = {
-        averageResponseTime: 1000,
-        consistency: {
-            analysis: 'Промпт показывает отличную консистентность',
-            anomalies: [],
-            patterns: ['Стабильная длина ответов', 'Единообразная структура'],
-            recommendations: ['Промпт готов к продакшену', 'Рассмотрите тестирование на краевых случаях'],
-            score: 85,
-        },
-        failedTests: 0,
-        metadata: {
-            context: 'Тестовый контекст',
-            duration: 3000,
-            endTime: '2024-01-01T10:00:03Z',
-            models: ['claude-3-sonnet'],
-            originalPrompt: 'Тестовый промпт',
-            startTime: '2024-01-01T10:00:00Z',
-            validatorVersion: '2.0.0',
-        },
-        results: [],
-        success: true,
-        successfulTests: 3,
-        totalTests: 3,
-    };
-
-    it('должен генерировать краткий отчет', () => {
-        const report = generateShortReport(mockResult);
-
-        expect(report).toContain('# 🧪 Результат тестирования промпта');
-        expect(report).toContain('**Оценка качества:** 85/100');
-        expect(report).toContain('**Статус:** ✅ **Высокая консистентность**');
-        expect(report).toContain('**Успешность:** 100.0% (3/3)');
-        expect(report).toContain('**Среднее время:** 1000мс');
-    });
-
-    it('должен включать анализ и рекомендации', () => {
-        const report = generateShortReport(mockResult);
-
-        expect(report).toContain('## 📊 Анализ');
-        expect(report).toContain('Промпт показывает отличную консистентность');
-        expect(report).toContain('## 💡 Основные рекомендации');
-        expect(report).toContain('1. Промпт готов к продакшену');
-        expect(report).toContain('2. Рассмотрите тестирование на краевых случаях');
-    });
-
-    it('должен ограничивать количество рекомендаций до 3', () => {
-        const mockWithManyRecommendations = {
-            ...mockResult,
-            consistency: {
-                ...mockResult.consistency,
-                recommendations: [
-                    'Рекомендация 1',
-                    'Рекомендация 2',
-                    'Рекомендация 3',
-                    'Рекомендация 4',
-                    'Рекомендация 5',
-                ],
-            },
-        };
-
-        const report = generateShortReport(mockWithManyRecommendations);
-
-        expect(report).toContain('1. Рекомендация 1');
-        expect(report).toContain('2. Рекомендация 2');
-        expect(report).toContain('3. Рекомендация 3');
-        expect(report).not.toContain('4. Рекомендация 4');
     });
 });

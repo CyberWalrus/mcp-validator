@@ -214,37 +214,6 @@ function generateTechnicalDetails(result: ParallelTestResult): string {
 - Анализ консистентности: Включен`;
 }
 
-/** Генерирует краткий отчет для отображения в UI */
-export function generateShortReport(result: ParallelTestResult): string {
-    const successRate = ((result.successfulTests / result.totalTests) * 100).toFixed(1);
-
-    return `# 🧪 Результат тестирования промпта
-
-**Оценка качества:** ${result.consistency.score}/100  
-**Статус:** ${getConsistencyStatus(result.consistency.score)}  
-**Успешность:** ${successRate}% (${result.successfulTests}/${result.totalTests})  
-**Среднее время:** ${result.averageResponseTime}мс  
-
-## 📊 Анализ
-
-${result.consistency.analysis}
-
-${
-    result.consistency.recommendations
-        ? `## 💡 Основные рекомендации
-
-${result.consistency.recommendations
-    .slice(0, 3)
-    .map((r, i) => `${i + 1}. ${r}`)
-    .join('\n')}`
-        : ''
-}
-
----
-
-🧪 **Тестирование промпта завершено**`;
-}
-
 /** Генерирует секцию продвинутого AI анализа */
 function generateAIAnalysisSection(consistency: ConsistencyAnalysis): string {
     if (!consistency.hasAiAnalysis || !consistency.aiAnalysis) {

@@ -36,12 +36,6 @@
 					<facade name="mcp-server.ts" role="function" />
 					<file name="index.ts" role="фасад" />
 				</module>
-				<module name="create-mcp-server">
-					<facade name="create-mcp-server.ts" role="function" />
-				</module>
-				<module name="setup-graceful-shutdown">
-					<facade name="setup-graceful-shutdown.ts" role="function" />
-				</module>
 			</layer>
 			<!-- Слой: API - MCP инструменты (тонкие обертки) -->
 			<layer name="api" purpose="MCP tools для внешних интерфейсов">
@@ -213,7 +207,6 @@
 		</source_directory>
 		<!-- E2E тесты -->
 		<directory name="end-to-end">
-			<file name="index.ts" role="фасад" />
 			<file name="constants.ts" role="config" />
 			<file name="types.ts" role="types" />
 			<directory name="helpers">
