@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'test-prompt-tool'
     path: 'src/tools/test-prompt-tool'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'MCP tool обертка для тестирования промптов на консистентность'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

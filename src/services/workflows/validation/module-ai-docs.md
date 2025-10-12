@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'validation'
     path: 'src/services/workflows/validation'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'валидация кода и промптов через AI модели - основной модуль пакета'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

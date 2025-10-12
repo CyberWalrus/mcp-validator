@@ -102,7 +102,7 @@ describe('getPackageResourceResolver', () => {
             expect(errorPath).toMatch(/prompts\/errors\/validation-error\.md$/);
         });
 
-        it('должен поддерживать поиск пакета по имени @morj/tools.mcp-validator', () => {
+        it('должен поддерживать поиск пакета по имени mcp-validator', () => {
             const resolver = getPackageResourceResolver();
 
             const packageJsonPath = resolver.resolvePackageJsonPath();

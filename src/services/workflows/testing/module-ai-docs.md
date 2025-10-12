@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'testing'
     path: 'src/services/workflows/testing'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'параллельное тестирование промптов на консистентность AI ответов'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

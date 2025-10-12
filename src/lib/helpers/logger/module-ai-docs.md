@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'logger'
     path: 'src/lib/helpers/logger'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'система структурированного логирования с уровнями и JSON форматом'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

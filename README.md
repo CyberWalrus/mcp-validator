@@ -4,11 +4,25 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/mcp-validator.svg)](https://nodejs.org)
 
+## 📋 Оглавление
+
+- [Общая информация](#общая-информация)
+- [Подключение к Cursor IDE](#подключение-к-cursor-ide)
+- [Локальный запуск](#локальный-запуск)
+- [Переменные окружения](#переменные-окружения)
+- [Инструменты MCP](#инструменты-mcp)
+- [CLI режим](#cli-режим)
+- [Troubleshooting](#troubleshooting)
+- [Требования](#требования)
+- [Дополнительные ресурсы](#дополнительные-ресурсы)
+
+## Общая информация
+
 MCP Validator — инструмент для валидации кода, тестов, архитектуры и промптов через AI с использованием Model Context Protocol (MCP).
 
-## ✨ Возможности
+### ✨ Возможности
 
-- ✅ **Валидация кода** — проверка TypeScript, JavaScript, Go и других языков
+- ✅ **Валидация кода** — проверка TypeScript, JavaScript, Go, Python, Rust и других языков
 - 🧪 **Валидация тестов** — анализ качества и полноты тестового покрытия
 - 🏗️ **Валидация архитектуры** — проверка архитектурных решений
 - 🔒 **Проверка безопасности** — поиск уязвимостей в коде
@@ -18,35 +32,36 @@ MCP Validator — инструмент для валидации кода, те�
 - 📋 **Валидация задач** — анализ требований и спецификаций
 - 🤖 **Тестирование промптов** — параллельное тестирование на консистентность (3-10 итераций)
 
-## 📦 Установка
+**Поддерживаемые языки:** TypeScript, JavaScript, Go, Python, Rust, Java, C#, PHP, Ruby, Swift, Kotlin
 
-```bash
-npm install mcp-validator
-# или
-yarn add mcp-validator
-```
+### 🚀 Быстрый старт
 
-## 🔑 Получение API ключа
+**1. Получите API ключ OpenRouter:**
+
+- Перейдите на [OpenRouter](https://openrouter.ai/keys)
+- Создайте новый API ключ
+
+**2. Настройте Cursor IDE:**
+
+- Добавьте конфигурацию в `~/.cursor/mcp.json` (см. раздел ниже)
+- Перезапустите Cursor IDE
+
+**3. Первая валидация:**
+
+- Откройте любой TypeScript файл в Cursor
+- Выделите код и используйте `@validate` для проверки качества
+
+### 🔑 Получение API ключа
 
 1. Перейдите на [OpenRouter](https://openrouter.ai/)
 2. Зарегистрируйтесь или войдите в аккаунт
 3. Перейдите в раздел [Keys](https://openrouter.ai/keys)
 4. Создайте новый API ключ
-5. Скопируйте ключ и добавьте в переменные окружения:
+5. Скопируйте ключ для использования в конфигурации
 
-```bash
-export OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
-```
+## Подключение к Cursor IDE
 
-Или создайте файл `.env` в корне проекта:
-
-```env
-OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
-```
-
-## 🚀 Использование через MCP
-
-### Настройка в Cursor
+### Настройка MCP сервера
 
 Добавьте в конфигурацию MCP (`~/.cursor/mcp.json`):
 
@@ -55,7 +70,7 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
     "mcpServers": {
         "mcp-validator": {
             "command": "npx",
-            "args": ["mcp-validator"],
+            "args": ["-y", "mcp-validator"],
             "env": {
                 "OPENROUTER_API_KEY": "sk-or-v1-xxxxxxxxxxxxxx"
             }
@@ -64,9 +79,228 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
 }
 ```
 
-### Доступные инструменты
+#### Расширенная конфигурация
 
-#### 1️⃣ validate — Универсальная валидация
+Для полной настройки с дополнительными параметрами:
+
+```json
+{
+    "mcpServers": {
+        "mcp-validator": {
+            "command": "npx",
+            "args": ["-y", "mcp-validator"],
+            "env": {
+                "OPENROUTER_API_KEY": "sk-or-v1-xxxxxxxxxxxxxx",
+                "OPENROUTER_API_URL": "https://openrouter.ai/api/v1",
+                "LOG_LEVEL": "DEBUG",
+                "OPENROUTER_TIMEOUT": "30000",
+                "DEFAULT_AI_MODEL": "openai/gpt-4o-mini",
+                "AI_MAX_TOKENS": "50000",
+                "AI_TEMPERATURE": "0.7",
+                "VALIDATION_TIMEOUT": "60000",
+                "PROMPTS_PATH": "./custom-prompts"
+            }
+        }
+    }
+}
+```
+
+### Проверка подключения
+
+После настройки `mcp.json`:
+
+1. **Перезапустите Cursor IDE** для загрузки новой конфигурации
+2. **Проверьте статус** в панели MCP (обычно в нижней части IDE)
+3. **Используйте инструменты** через команды Cursor или автодополнение
+
+### Устранение проблем подключения
+
+Если MCP сервер не подключается:
+
+```bash
+# Проверьте, что пакет установлен
+npx mcp-validator --version
+
+# Проверьте конфигурацию
+cat ~/.cursor/mcp.json | jq '.mcpServers["mcp-validator"]'
+
+# Проверьте логи в Cursor
+# Откройте Developer Tools (Cmd+Option+I) и посмотрите консоль
+```
+
+## Cursor Rules
+
+В пакет включены готовые правила для Cursor IDE, которые автоматизируют разработку и обеспечивают качество кода.
+
+### 📁 Структура `.cursor.example/`
+
+- **`rules/`** — правила воркфлоу:
+    - `code-workflow.mdc` — процесс разработки кода с проверками качества
+    - `prompt-workflow.mdc` — создание и валидация AI промптов
+    - `ai-docs-workflow.mdc` — генерация AI-документации
+    - `critique-workflow.mdc` — анализ и улучшение кода/промптов
+    - `core-system-instructions.mdc` — базовые принципы работы AI
+
+- **`docs/`** — документация и шаблоны:
+    - `architecture-*.md` — шаблоны архитектур (FSD, Layered Library и др.)
+    - `ai-module-template.md` — шаблон документации модулей
+    - `ai-package-template.md` — шаблон документации пакетов
+    - `code-standards.md` — стандарты кодирования
+
+- **`commands/`** — команды для git workflow:
+    - `commit.md` — правила создания коммитов
+    - `сhangelog.md` — генерация changelog
+
+### 🚀 Как использовать
+
+1. **Скопируйте правила в свой проект:**
+
+    ```bash
+    cp -r .cursor.example .cursor
+    ```
+
+2. **Перезапустите Cursor IDE** для загрузки новых правил
+
+3. **Пользуйтесь автоматизацией:**
+    - AI будет следовать правилам воркфлоу при разработке
+    - Автоматическая генерация документации
+    - Проверка качества кода и архитектуры
+    - Соблюдение стандартов коммитов
+
+### 💡 Польза
+
+- **Автоматизация разработки** — AI следует установленным процессам
+- **Качество кода** — автоматические проверки и исправления
+- **AI-документация** — генерация документации для модулей и пакетов
+- **Консистентность** — единые стандарты во всей команде
+
+## Локальный запуск
+
+### Установка
+
+```bash
+npm install mcp-validator
+# или
+yarn add mcp-validator
+```
+
+### Настройка переменных окружения
+
+Создайте файл `.env` в корне проекта:
+
+```env
+# Обязательные настройки
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
+
+# Основные настройки
+NODE_ENV=production
+LOG_LEVEL=INFO
+PROMPTS_PATH=./custom-prompts
+
+# Настройки AI
+DEFAULT_AI_MODEL=openai/gpt-4o-mini
+AI_MAX_TOKENS=50000
+AI_TEMPERATURE=0.7
+
+# Таймауты
+VALIDATION_TIMEOUT=60000
+PARALLEL_TEST_TIMEOUT=180000
+
+# MCP сервер
+MCP_SERVER_NAME=my-validator
+MCP_SERVER_DESCRIPTION="Custom MCP validator for my project"
+```
+
+### Запуск MCP сервера
+
+```bash
+# Запуск через npx
+npx mcp-validator
+
+# Или установка глобально
+npm install -g mcp-validator
+mcp-validator
+```
+
+## Переменные окружения
+
+### 🔑 Обязательные
+
+| Переменная           | Описание                | Пример                    |
+| -------------------- | ----------------------- | ------------------------- |
+| `OPENROUTER_API_KEY` | API ключ для OpenRouter | `sk-or-v1-xxxxxxxxxxxxxx` |
+
+### ⚙️ Основные настройки
+
+| Переменная     | Описание                         | По умолчанию  | Возможные значения                  |
+| -------------- | -------------------------------- | ------------- | ----------------------------------- |
+| `NODE_ENV`     | Среда выполнения                 | `development` | `development`, `production`, `test` |
+| `LOG_LEVEL`    | Уровень логирования              | `INFO`        | `DEBUG`, `INFO`, `WARN`, `ERROR`    |
+| `PROMPTS_PATH` | Путь к пользовательским промптам | `prompts`     | Любой путь к папке                  |
+
+### 🤖 Настройки AI
+
+| Переменная           | Описание                        | По умолчанию                   | Диапазон                |
+| -------------------- | ------------------------------- | ------------------------------ | ----------------------- |
+| `DEFAULT_AI_MODEL`   | Модель AI по умолчанию          | `openai/gpt-oss-120b`          | Любая модель OpenRouter |
+| `AI_MAX_TOKENS`      | Максимальное количество токенов | `100000`                       | 1-1000000               |
+| `AI_TEMPERATURE`     | Температура генерации           | `0.5`                          | 0.0-2.0                 |
+| `OPENROUTER_API_URL` | URL OpenRouter API              | `https://openrouter.ai/api/v1` | Любой валидный URL      |
+| `OPENROUTER_TIMEOUT` | Таймаут OpenRouter запросов     | `30000`                        | миллисекунды            |
+
+### ⏱️ Настройки таймаутов
+
+| Переменная              | Описание                      | По умолчанию | Единицы      |
+| ----------------------- | ----------------------------- | ------------ | ------------ |
+| `VALIDATION_TIMEOUT`    | Таймаут валидации             | `30000`      | миллисекунды |
+| `PARALLEL_TEST_TIMEOUT` | Таймаут тестирования промптов | `120000`     | миллисекунды |
+| `REQUEST_TIMEOUT`       | Таймаут HTTP запросов         | `30000`      | миллисекунды |
+| `OPENROUTER_TIMEOUT`    | Таймаут OpenRouter запросов   | `30000`      | миллисекунды |
+
+### 🔧 Настройки MCP сервера
+
+| Переменная               | Описание             | По умолчанию                     |
+| ------------------------ | -------------------- | -------------------------------- |
+| `MCP_SERVER_NAME`        | Имя MCP сервера      | `mcp-validator`                  |
+| `MCP_SERVER_DESCRIPTION` | Описание сервера     | `Production-ready MCP validator` |
+| `MCP_PROTOCOL_VERSION`   | Версия MCP протокола | `2024-11-05`                     |
+| `MCP_SERVER_VERSION`     | Версия сервера       | Из `package.json`                |
+
+### 🧪 Настройки для разработки
+
+| Переменная     | Описание                    | По умолчанию | Значения        |
+| -------------- | --------------------------- | ------------ | --------------- |
+| `IS_TEST_MODE` | Флаг тестового режима       | `false`      | `true`, `false` |
+| `MCP_E2E_TEST` | Флаг E2E тестирования       | `false`      | `true`, `false` |
+| `NODE_PATH`    | Путь для разрешения модулей | `""`         | Путь к папке    |
+
+### 🚀 Расширенные настройки
+
+| Переменная              | Описание                       | По умолчанию | Единицы      |
+| ----------------------- | ------------------------------ | ------------ | ------------ |
+| `MAX_PARALLEL_REQUESTS` | Максимум параллельных запросов | `5`          | количество   |
+| `HEARTBEAT_INTERVAL`    | Интервал heartbeat             | `30000`      | миллисекунды |
+| `REQUEST_BUFFER_SIZE`   | Размер буфера запросов         | `1048576`    | байты (1MB)  |
+
+### 🔧 Скрытые/внутренние переменные
+
+Эти переменные используются внутренне системой и обычно не требуют настройки:
+
+| Переменная                    | Описание                      | По умолчанию                              | Назначение       |
+| ----------------------------- | ----------------------------- | ----------------------------------------- | ---------------- |
+| `OPENROUTER_MOCK_CLIENT_PATH` | Путь к мок клиенту для тестов | `end-to-end/mocks/openrouter-test-client` | E2E тестирование |
+
+## Инструменты MCP
+
+После успешного подключения MCP сервера в Cursor IDE будут доступны следующие инструменты:
+
+> **💡 Как использовать:** В Cursor IDE инструменты MCP доступны через:
+>
+> - **Автодополнение** — начните печатать название инструмента
+> - **Команды** — используйте `@` для вызова инструментов
+> - **Контекстное меню** — правый клик на файле/коде
+
+### 1️⃣ validate — Универсальная валидация
 
 **Валидация кода:**
 
@@ -94,80 +328,6 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
 }
 ```
 
-**Валидация архитектуры:**
-
-```typescript
-{
-  "validationType": "architecture",
-  "input": {
-    "type": "file",
-    "data": "/path/to/architecture.xml"
-  }
-}
-```
-
-**Проверка безопасности:**
-
-```typescript
-{
-  "validationType": "security",
-  "input": {
-    "type": "content",
-    "data": "const password = 'hardcoded123';"
-  },
-  "language": "typescript"
-}
-```
-
-**Анализ производительности:**
-
-```typescript
-{
-  "validationType": "performance",
-  "input": {
-    "type": "file",
-    "data": "/path/to/component.tsx"
-  },
-  "language": "typescript"
-}
-```
-
-**Валидация документации:**
-
-```typescript
-{
-  "validationType": "documentation",
-  "input": {
-    "type": "file",
-    "data": "/path/to/README.md"
-  }
-}
-```
-
-**Валидация промптов:**
-
-```typescript
-{
-  "validationType": "prompts",
-  "input": {
-    "type": "content",
-    "data": "Your AI prompt text here"
-  }
-}
-```
-
-**Валидация задач:**
-
-```typescript
-{
-  "validationType": "tasks",
-  "input": {
-    "type": "content",
-    "data": "User story or requirement specification"
-  }
-}
-```
-
 **Кастомная валидация:**
 
 ```typescript
@@ -182,20 +342,7 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
 }
 ```
 
-**Валидация из URL:**
-
-```typescript
-{
-  "validationType": "code",
-  "input": {
-    "type": "url",
-    "data": "https://raw.githubusercontent.com/user/repo/main/file.ts"
-  },
-  "language": "typescript"
-}
-```
-
-#### 2️⃣ test-prompt — Тестирование промптов на консистентность
+### 2️⃣ test-prompt — Тестирование промптов на консистентность
 
 ```typescript
 {
@@ -214,7 +361,7 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxx
 - Повторяющиеся паттерны в ответах
 - Детальный отчет по каждой итерации
 
-## 🖥️ CLI режим
+## CLI режим
 
 ```bash
 # Показать справку
@@ -224,24 +371,7 @@ mcp-validator --help
 mcp-validator --version
 ```
 
-## ⚙️ Переменные окружения
-
-### Обязательные
-
-- `OPENROUTER_API_KEY` — API ключ для OpenRouter ([получить здесь](https://openrouter.ai/keys))
-
-### Опциональные
-
-- `PROMPTS_PATH` — путь к пользовательским промптам (по умолчанию: `prompts`)
-- `LOG_LEVEL` — уровень логирования: `DEBUG`, `INFO`, `WARN`, `ERROR` (по умолчанию: `INFO`)
-- `DEFAULT_AI_MODEL` — модель AI по умолчанию (по умолчанию: `openai/gpt-oss-120b`)
-- `AI_MAX_TOKENS` — максимальное количество токенов (по умолчанию: `100000`)
-- `AI_TEMPERATURE` — температура генерации 0-2 (по умолчанию: `0.5`)
-- `VALIDATION_TIMEOUT` — таймаут валидации в мс (по умолчанию: `30000`)
-
-Полный список переменных окружения смотрите в файле `.env.example`.
-
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Ошибка: "OPENROUTER_API_KEY is required"
 
@@ -320,25 +450,14 @@ mcp-validator --version
 2. Проверьте лимиты вашего API ключа
 3. Подождите несколько минут и повторите попытку
 
-## 📋 Требования
+## Требования
 
 - Node.js >= 20
 - API ключ OpenRouter ([получить бесплатно](https://openrouter.ai/))
 
-## 📄 Лицензия
-
-MIT
-
-## 👤 Автор
-
-Andrey Pakhomov
-
-## 🤝 Вклад в проект
-
-Приветствуются issues и pull requests на [GitHub](https://github.com/CyberWalrus/mcp-validator)!
-
-## 📚 Дополнительные ресурсы
+## Дополнительные ресурсы
 
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [OpenRouter Documentation](https://openrouter.ai/docs)
 - [Cursor IDE](https://cursor.sh/)
+- [CHANGELOG](CHANGELOG.md) — история изменений

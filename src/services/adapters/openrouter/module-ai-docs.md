@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'openrouter'
     path: 'src/services/adapters/openrouter'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'объединенный клиент OpenRouter API - результат рефакторинга v1.1.0'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

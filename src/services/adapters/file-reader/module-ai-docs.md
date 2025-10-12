@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'file-reader'
     path: 'src/services/adapters/file-reader'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'чтение файлов различных форматов с поддержкой кодировок'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:

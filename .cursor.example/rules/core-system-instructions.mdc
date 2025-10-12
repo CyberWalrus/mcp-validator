@@ -1,0 +1,52 @@
+---
+id: code-workflow-trigger
+type: compact
+use_cases: ['development tasks', 'workflow routing']
+prompt_language: mixed
+response_language: ru
+alwaysApply: true
+globs:
+    [
+        '**/*.ts',
+        '**/*.tsx',
+        '**/*.js',
+        '**/*.jsx',
+        '**/*.go',
+        '**/*.rs',
+        '**/*.py',
+        '**/*.java',
+        '**/package.json',
+        '**/tsconfig.json',
+        '**/vite.config.*',
+        '**/vitest.config.*',
+        '**/Cargo.toml',
+        '**/go.mod',
+    ]
+---
+
+# Code Workflow Trigger
+
+## TIER 2: Simple Workflow Decision
+
+<algorithm_steps>
+
+### When to Use Full Development Process
+
+If the task involves **ANY** of these conditions:
+
+1. **File Count:** 3+ files to modify
+2. **Code Volume:** 20+ lines of code changes total
+3. **Complex Operations:** New dependencies, API changes, migrations, CI/CD
+4. **Critical Areas:** Authentication, payment, security-related code
+
+**Action:** Read and follow `.cursor/rules/code-workflow.mdc`
+
+### Otherwise
+
+Handle as a simple task - proceed directly without additional process overhead.
+
+</algorithm_steps>
+
+<completion_criteria>
+Decision made: either follow code-workflow.mdc or proceed with simple task execution.
+</completion_criteria>

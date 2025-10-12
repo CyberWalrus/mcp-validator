@@ -5,7 +5,7 @@ ai_documentation_version: '2.0.0'
 module_context:
     name: 'config'
     path: 'src/model/config'
-    parent_package: '@morj/tools.mcp-validator'
+    parent_package: 'mcp-validator'
     purpose: 'конфигурация приложения через переменные окружения'
 target_models: ['claude', 'gpt', 'gemini', 'qwen']
 size_limits:
