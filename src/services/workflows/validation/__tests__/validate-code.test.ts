@@ -1,5 +1,4 @@
 import { readFileContent } from '../../../adapters/file-reader';
-import { makeOpenRouterRequest } from '../../../adapters/openrouter/openrouter-real-client';
 import type { ValidationParams } from '../types';
 import { validateCode } from '../validate-code';
 
@@ -17,7 +16,6 @@ vi.mock('../helpers', () => ({
     loadValidationPrompt: vi.fn().mockReturnValue('Mock prompt template'),
     validateParams: vi.fn(),
 }));
-
 
 // ✅ Безопасное мокирование file-reader модуля
 vi.mock('../../../adapters/file-reader', async (importOriginal) => {

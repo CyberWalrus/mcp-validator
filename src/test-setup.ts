@@ -1,3 +1,7 @@
+// Инициализируем конфигурацию и кэш промптов
+import { initializePromptCache } from './lib/cache';
+import { reloadAppConfig } from './model/config';
+
 export {};
 
 if (!process.env.OPENROUTER_API_KEY) {
@@ -8,12 +12,6 @@ if (!process.env.LOG_LEVEL) {
     process.env.LOG_LEVEL = 'INFO';
 }
 
-// Инициализируем конфигурацию и кэш промптов
-import { reloadAppConfig } from './model/config';
-import { initializePromptCache } from './lib/cache';
-
-// Сначала инициализируем конфигурацию
 await reloadAppConfig();
 
-// Затем инициализируем кэш промптов
 initializePromptCache();
