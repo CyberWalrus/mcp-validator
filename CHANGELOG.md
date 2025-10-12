@@ -1,9 +1,36 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [0.2.0] - 2025-10-12
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Added
+
+- 📚 **Расширенная документация и примеры для Cursor IDE**
+    - Полный набор правил и workflow для разработки (.cursor.example/rules/)
+    - Шаблоны документации для модулей и пакетов
+    - Примеры архитектурных решений (FSD, Layered, Monolith)
+    - Стандарты кодирования и тестирования
+    - Команды для генерации changelog и работы с промптами
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/23937ae33a9802fac14d6d9294be5d906acc859d" target="_blank">23937ae</a>
+
+### Changed
+
+- **Улучшения архитектуры и документации**
+    - Рефакторинг структуры модулей в architecture.xml
+    - Обновление AI документации для всех модулей
+    - Улучшение CLI и кэш модулей
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/60b69f11dc6593f55a59e759e15416e42191f2da" target="_blank">60b69f1</a>
+
+- **Рефакторинг процесса запуска приложения**
+    - Добавлена функция `start` для обработки необработанных ошибок
+    - Улучшены пути импорта для конфигурации
+    - Расширена обработка ошибок в тестировании промптов
+    - Удалены устаревшие методы получения конфигурации
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/bbe7a5e381fd2f6dd02d1da841941d086a42bbba" target="_blank">bbe7a5e</a>
+
+- **Исправления и улучшения**
+    - Обновлен формат URL репозитория в package.json
+    - Улучшена навигация и читаемость README
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/f66bf44c96ad39fedfa86c18d0b1d8a0265e02d1" target="_blank">f66bf44</a>
 
 ## [0.1.0] - 2025-10-12
 
