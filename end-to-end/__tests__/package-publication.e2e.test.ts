@@ -2,8 +2,8 @@ import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getPackageResourceResolver } from '../../lib/helpers/resource-resolver';
-import type { ValidationType } from '../../lib/helpers/resource-resolver/types';
+import { getPackageResourceResolver } from '../../src/lib/helpers/resource-resolver';
+import type { ValidationType } from '../../src/lib/helpers/resource-resolver/types';
 
 describe('Package Publication E2E', () => {
     const resourceResolver = getPackageResourceResolver();
@@ -15,7 +15,7 @@ describe('Package Publication E2E', () => {
 
             const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
-            expect(packageJson.name).toBe('@morj/tools.mcp-validator');
+            expect(packageJson.name).toBe('mcp-validator');
             expect(packageJson.version).toMatch(/^\d+\.\d+\.\d+/);
             expect(packageJson.description).toBeDefined();
             expect(packageJson.main).toBeDefined();
@@ -58,38 +58,6 @@ describe('Package Publication E2E', () => {
                 const errorPath = resourceResolver.resolveErrorTemplatePath(type);
                 expect(existsSync(errorPath)).toBe(true);
             });
-        });
-    });
-
-    describe('Build Process', () => {
-        it.skip('должен успешно собираться', () => {
-            // ОТКЛЮЧЕНО: может создать проблемы с зависимостями в E2E тестах
-            expect(() => {
-                execSync('yarn build', {
-                    cwd: join(packageJsonPath, '..'),
-                    stdio: 'pipe',
-                });
-            }).not.toThrow();
-        });
-
-        it.skip('должен проходить все тесты', () => {
-            // ОТКЛЮЧЕНО: создает рекурсию yarn test -> этот же тест -> бесконечный цикл
-            expect(() => {
-                execSync('yarn test', {
-                    cwd: join(packageJsonPath, '..'),
-                    stdio: 'pipe',
-                });
-            }).not.toThrow();
-        });
-
-        // ВРЕМЕННО ОТКЛЮЧЕН: линтер запускается отдельно в CI/CD
-        it.skip('должен проходить линтер', () => {
-            expect(() => {
-                execSync('yarn lint', {
-                    cwd: join(packageJsonPath, '..'),
-                    stdio: 'pipe',
-                });
-            }).not.toThrow();
         });
     });
 
@@ -142,8 +110,8 @@ describe('Package Publication E2E', () => {
         it('должен показывать версию', () => {
             const packageRoot = join(packageJsonPath, '..');
 
-            // ИСПРАВЛЕНИЕ: Используем tsx вместо скомпилированного файла
-            const versionOutput = execSync('tsx src/index.ts --version', {
+            // ИСПРАВЛЕНИЕ: Используем tsx вместо скомпилированного файла и читаем stderr (где выводится info())
+            const versionOutput = execSync('tsx src/index.ts --version 2>&1', {
                 cwd: packageRoot,
                 encoding: 'utf8',
             });

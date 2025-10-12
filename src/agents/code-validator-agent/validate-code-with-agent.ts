@@ -5,6 +5,7 @@ import { getConfigOrThrow } from './get-config-or-throw';
 import type { AgentConfig } from './types';
 
 /** Валидация кода через CodeValidatorAgent */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function validateCodeWithAgent(agent: AgentConfig, input: ValidationInput): Promise<ValidationResult> {
     try {
         const correctPrompt = getPrompt(`validate-${input.validationType}.md`);
@@ -57,8 +58,11 @@ ${input.context ? `## Контекст:\n${input.context}` : ''}
         let tokensUsed = 0;
 
         if (config.runtime.isTestMode) {
-            const mockClient = await import('../../e2e/mocks/openrouter-test-client');
-            const mockResponse = await mockClient.makeOpenRouterRequest({
+            const { getOpenRouterClient } = await import(
+                '../../services/adapters/openrouter/openrouter-client-factory'
+            );
+            const mockClient = await getOpenRouterClient();
+            const mockResponse = await mockClient({
                 prompt: validationPrompt,
             });
             responseContent = mockResponse.text;

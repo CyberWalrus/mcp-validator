@@ -128,4 +128,3 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
         };
     }
 }
-

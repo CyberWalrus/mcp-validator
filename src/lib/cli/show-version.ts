@@ -3,5 +3,6 @@ import { getPackageVersion } from '../helpers/version-resolver';
 
 /** Показывает версию из package.json */
 export function showVersion(): void {
-    info(getPackageVersion());
+    const version = getPackageVersion();
+    info(`mcp-validator v${version}`);
 }

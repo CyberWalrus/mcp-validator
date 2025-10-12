@@ -15,7 +15,12 @@ export async function waitForServerReady(mcpProcess: ChildProcess): Promise<void
         const handlers = {
             onData: (data: Buffer) => {
                 output += data.toString();
-                if (output.includes('MCP сервер готов') || output.includes('Server ready')) {
+                // Сервер пишет в stderr, так что проверяем output и errorOutput
+                if (
+                    output.includes('готов к работе') ||
+                    errorOutput.includes('готов к работе') ||
+                    output.includes('Server ready')
+                ) {
                     clearTimeout(timeout);
                     mcpProcess.stdout?.off('data', handlers.onData);
                     mcpProcess.stderr?.off('data', handlers.onError);
@@ -24,7 +29,15 @@ export async function waitForServerReady(mcpProcess: ChildProcess): Promise<void
             },
             onError: (data: Buffer) => {
                 errorOutput += data.toString();
-                if (errorOutput.includes('Error') || errorOutput.includes('Failed')) {
+                // Проверяем готовность сервера в stderr (где info() выводит логи)
+                if (errorOutput.includes('готов к работе') || errorOutput.includes('Server ready')) {
+                    clearTimeout(timeout);
+                    mcpProcess.stdout?.off('data', handlers.onData);
+                    mcpProcess.stderr?.off('data', handlers.onError);
+                    resolve();
+                }
+                // Только критические ошибки прерывают запуск
+                if (errorOutput.includes('💥 Критическая ошибка') || errorOutput.includes('Failed')) {
                     clearTimeout(timeout);
                     mcpProcess.stdout?.off('data', handlers.onData);
                     mcpProcess.stderr?.off('data', handlers.onError);

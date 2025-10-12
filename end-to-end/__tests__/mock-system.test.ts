@@ -10,10 +10,12 @@ describe('E2E система моков', () => {
     });
 
     it('должен экспортировать симулятор MCP клиента', async () => {
-        const { MCPClientSimulator, simulateCursorConnection } = await import('../mocks/mcp-client-simulator');
+        const { createMcpClientSimulator } = await import('../mocks/mcp-client-simulator');
+        const { simulateCursorConnection } = await import('../mocks/simulate-cursor-connection');
 
-        expect(MCPClientSimulator).toBeDefined();
+        expect(createMcpClientSimulator).toBeDefined();
         expect(simulateCursorConnection).toBeDefined();
+        expect(typeof createMcpClientSimulator).toBe('function');
         expect(typeof simulateCursorConnection).toBe('function');
     });
 

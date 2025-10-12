@@ -196,32 +196,6 @@
 					<facade name="test-prompt-tool.ts" role="function" />
 				</module>
 			</layer>
-			<!-- Слой: E2E - интеграционные тесты -->
-			<layer name="e2e" purpose="E2E тесты и моки">
-				<file name="index.ts" role="фасад" />
-				<file name="constants.ts" role="config" />
-				<file name="helpers.ts" role="helpers" />
-				<file name="types.ts" role="types" />
-				<directory name="mocks">
-					<file name="mcp-client-simulator.ts" role="mock" />
-					<file name="openrouter-api-mocks.ts" role="mock" />
-					<file name="openrouter-test-client.ts" role="mock" />
-					<file name="test-data.ts" role="mock" />
-				</directory>
-				<test name="mcp-server-initialization.e2e.test.ts" role="e2e_test" />
-				<test name="mcp-server-stability.e2e.test.ts" role="e2e_test" />
-				<test name="validate-tool.e2e.test.ts" role="e2e_test" />
-				<test name="test-prompt-tool.e2e.test.ts" role="e2e_test" />
-				<test name="error-scenarios.e2e.test.ts" role="e2e_test" />
-				<test name="file-path-resolution.e2e.test.ts" role="e2e_test" />
-				<test name="function-preservation.e2e.test.ts" role="e2e_test" />
-				<test name="invalid-tool-parameters.e2e.test.ts" role="e2e_test" />
-				<test name="__tests__/e2e-base-structure.test.ts" role="e2e_test" />
-				<test name="__tests__/documentation-schema-consistency.e2e.test.ts" role="e2e_test" />
-				<test name="__tests__/mock-system.test.ts" role="e2e_test" />
-				<test name="__tests__/package-publication.e2e.test.ts" role="e2e_test" />
-				<test name="__tests__/prompt-validation-fix.e2e.test.ts" role="e2e_test" />
-			</layer>
 			<!-- Общие тесты -->
 			<file name="test-setup.ts" role="config" />
 			<test name="__tests__/refactoring-e2e-spec.test.ts" role="e2e_test" />
@@ -237,6 +211,42 @@
 			<!-- Входная точка -->
 			<file name="index.ts" role="entrypoint" />
 		</source_directory>
+		<!-- E2E тесты -->
+		<directory name="end-to-end">
+			<file name="index.ts" role="фасад" />
+			<file name="constants.ts" role="config" />
+			<file name="types.ts" role="types" />
+			<directory name="helpers">
+				<file name="cleanup-e2e-environment.ts" role="helper" />
+				<file name="index.ts" role="фасад" />
+				<file name="setup-e2e-environment.ts" role="helper" />
+				<file name="wait-for-server-ready.ts" role="helper" />
+			</directory>
+			<directory name="mocks">
+				<file name="mcp-client-simulator.ts" role="mock" />
+				<file name="openrouter-api-mocks.ts" role="mock" />
+				<file name="openrouter-test-client.ts" role="mock" />
+				<file name="test-data.ts" role="mock" />
+			</directory>
+			<directory name="__tests__">
+				<directory name="__mocks__">
+					<file name="test-file.ts" role="mock" />
+				</directory>
+				<test name="documentation-schema-consistency.e2e.test.ts" role="e2e_test" />
+				<test name="e2e-base-structure.test.ts" role="e2e_test" />
+				<test name="mock-system.test.ts" role="e2e_test" />
+				<test name="package-publication.e2e.test.ts" role="e2e_test" />
+				<test name="prompt-validation-fix.e2e.test.ts" role="e2e_test" />
+			</directory>
+			<test name="error-scenarios.e2e.test.ts" role="e2e_test" />
+			<test name="file-path-resolution.e2e.test.ts" role="e2e_test" />
+			<test name="function-preservation.e2e.test.ts" role="e2e_test" />
+			<test name="invalid-tool-parameters.e2e.test.ts" role="e2e_test" />
+			<test name="mcp-server-initialization.e2e.test.ts" role="e2e_test" />
+			<test name="mcp-server-stability.e2e.test.ts" role="e2e_test" />
+			<test name="test-prompt-tool.e2e.test.ts" role="e2e_test" />
+			<test name="validate-tool.e2e.test.ts" role="e2e_test" />
+		</directory>
 		<!-- Типы -->
 		<directory name="types">
 			<file name="declarations.d.ts" role="declarations" />

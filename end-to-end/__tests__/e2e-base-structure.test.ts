@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 describe('E2E модуль - базовая структура', () => {
     it('должен экспортировать основные типы для E2E тестирования', async () => {
         // TypeScript типы проверяются на этапе компиляции
@@ -26,9 +24,14 @@ describe('E2E модуль - базовая структура', () => {
     });
 
     it('должен экспортировать все через фасад модуля', async () => {
-        const e2eModule = await import('../index');
+        // Фасад модуля был удален, так как папка end-to-end не должна экспортировать ничего наружу
+        // Проверяем что основные модули доступны напрямую
+        const typesModule = await import('../types');
+        const constantsModule = await import('../constants');
+        const helpersModule = await import('../helpers');
 
-        expect(e2eModule).toBeDefined();
-        expect(Object.keys(e2eModule).length).toBeGreaterThan(0);
+        expect(typesModule).toBeDefined();
+        expect(constantsModule).toBeDefined();
+        expect(helpersModule).toBeDefined();
     });
 });

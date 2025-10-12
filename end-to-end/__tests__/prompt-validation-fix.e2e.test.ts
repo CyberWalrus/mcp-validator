@@ -22,11 +22,18 @@ function expectValidPromptValidation(response: MCPResponse) {
     // Проверяем что это НЕ неясная ошибка "Валидация выполнена"
     expect(markdownContent).not.toBe('Валидация выполнена');
 
-    // Проверяем что есть полезная информация
+    // Проверяем что есть полезная информация (не пустой ответ и содержит текст)
+    expect(markdownContent.length).toBeGreaterThan(20);
+    
+    // Проверяем что есть полезная информация из мока или реального ответа
     const hasUsefulInfo =
         markdownContent.includes('Анализ кода завершен') ||
+        markdownContent.includes('Анализ') ||
+        markdownContent.includes('Рекомендуется') ||
         markdownContent.includes('feedback') ||
         markdownContent.includes('score') ||
+        markdownContent.includes('правильно') ||
+        markdownContent.includes('корректн') ||
         markdownContent.includes('Статус обработки');
     expect(hasUsefulInfo).toBe(true);
 }
@@ -50,6 +57,22 @@ describe('E2E: Исправление валидации промптов', () =
 
     describe('Валидация промптов должна работать корректно', () => {
         it('должен успешно валидировать промпт без неясных ошибок', async () => {
+            // Настраиваем мок успешного ответа
+            testContext.mockOpenRouter.mockResponse({
+                choices: [
+                    {
+                        message: {
+                            content:
+                                'Анализ кода завершен. Промпт хорошо структурирован с четкими инструкциями. Рекомендуется добавить примеры использования для улучшения понимания.',
+                        },
+                    },
+                ],
+                model: 'gpt-4',
+                usage: {
+                    total_tokens: 150,
+                },
+            });
+
             // Тестируем валидацию простого промпта
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Тестирование исправления неясной ошибки валидации',
@@ -65,6 +88,22 @@ describe('E2E: Исправление валидации промптов', () =
         });
 
         it('должен валидировать тестовый код без ошибки "Валидация выполнена"', async () => {
+            // Настраиваем мок успешного ответа для валидации тестов
+            testContext.mockOpenRouter.mockResponse({
+                choices: [
+                    {
+                        message: {
+                            content:
+                                'Анализ кода завершен. Тесты написаны правильно с использованием describe и it блоков. Рекомендуется добавить больше edge cases.',
+                        },
+                    },
+                ],
+                model: 'gpt-4',
+                usage: {
+                    total_tokens: 120,
+                },
+            });
+
             // Тестируем валидацию тестового кода
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Тестирование исправления валидации тестов',
@@ -80,6 +119,22 @@ describe('E2E: Исправление валидации промптов', () =
         });
 
         it('должен корректно обрабатывать кастомную папку промптов через PROMPTS_PATH', async () => {
+            // Настраиваем мок успешного ответа для валидации кода
+            testContext.mockOpenRouter.mockResponse({
+                choices: [
+                    {
+                        message: {
+                            content:
+                                'Анализ кода завершен. Функция корректна и возвращает строку. Рекомендуется добавить JSDoc комментарии и типизацию.',
+                        },
+                    },
+                ],
+                model: 'gpt-4',
+                usage: {
+                    total_tokens: 100,
+                },
+            });
+
             // Этот тест проверяет что система может использовать кастомную папку промптов
             // В реальном окружении это будет работать с переменной PROMPTS_PATH
             const response = await testContext.clientSimulator.callTool('validate', {

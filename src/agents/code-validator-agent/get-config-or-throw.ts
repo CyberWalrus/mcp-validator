@@ -15,4 +15,3 @@ export function getConfigOrThrow(): AppConfig {
 
     return config;
 }
-

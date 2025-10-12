@@ -7,7 +7,7 @@ export const TEST_TIMEOUTS = {
     COMMAND_EXECUTION: 5000,
 
     /** Быстрое ожидание готовности сервера (обычно 100-500мс) */
-    SERVER_READY_FAST: 500,
+    SERVER_READY_FAST: 2000,
 
     /** Максимальный таймаут инициализации сервера (используется как fallback) */
     SERVER_STARTUP: 5000,

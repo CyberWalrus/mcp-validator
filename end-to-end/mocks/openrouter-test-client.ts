@@ -1,4 +1,4 @@
-import type { OpenRouterRequest, OpenRouterResponse } from '../../services/adapters/openrouter/types';
+import type { OpenRouterRequest, OpenRouterResponse } from '../../src/services/adapters/openrouter/types';
 import type { MockedOpenRouterResponse } from '../types';
 
 /** Глобальная очередь мок-ответов для тестирования */

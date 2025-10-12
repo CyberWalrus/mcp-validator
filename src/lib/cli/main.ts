@@ -1,4 +1,5 @@
 import { setupGracefulShutdown } from '../../server/setup-graceful-shutdown';
+import { initializePromptCache } from '../cache/prompt-cache';
 import { error } from '../helpers/logger/index';
 import { ensureConfiguration } from './ensure-configuration';
 import { showHelp, showVersion, startMcpServer } from './index';
@@ -8,6 +9,8 @@ export async function main(): Promise<void> {
     const args = process.argv.slice(2);
 
     if (args.includes('--help') || args.includes('-h')) {
+        ensureConfiguration();
+        initializePromptCache();
         showHelp();
         process.exit(0);
     }
@@ -36,4 +39,3 @@ export async function main(): Promise<void> {
         process.exit(1);
     }
 }
-

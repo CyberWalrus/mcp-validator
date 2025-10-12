@@ -31,6 +31,7 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
         openRouter: {
             apiKey: env.OPENROUTER_API_KEY,
             apiUrl: env.OPENROUTER_API_URL,
+            mockClientPath: env.OPENROUTER_MOCK_CLIENT_PATH,
             timeout: env.OPENROUTER_TIMEOUT,
         },
         paths: {
@@ -80,6 +81,7 @@ function createFallbackConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         openRouter: {
             apiKey: '',
             apiUrl: 'https://openrouter.ai/api/v1',
+            mockClientPath: 'end-to-end/mocks/openrouter-test-client',
             timeout: 30000,
         },
         paths: {

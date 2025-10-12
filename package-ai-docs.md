@@ -75,7 +75,7 @@ architecture_docs:
 - **agents/** - AI агенты для валидации кода (OpenAI SDK)
 - **model/** - конфигурация, типы, схемы, константы
 - **lib/cli/** - CLI функции для управления приложением
-- **e2e/** - E2E тесты с моками MCP клиентов и OpenRouter API
+- **end-to-end/** - E2E тесты с моками MCP клиентов и OpenRouter API
 
 **Взаимодействие модулей:**
 
@@ -208,10 +208,10 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 - `start-mcp-server.ts` - запуск MCP сервера через новую архитектуру
 - `index.ts` - фасад экспорта CLI функций
 
-### Модуль: e2e
+### Модуль: end-to-end
 
 **Статус:** ✅ Готов
-**Расположение:** `src/e2e/`
+**Расположение:** `end-to-end/`
 **Экспорты:** E2E тесты для интеграционного тестирования
 **Файлы:**
 
@@ -219,6 +219,10 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 - `validate-tool.e2e.test.ts` - тесты validate tool
 - `test-prompt-tool.e2e.test.ts` - тесты test-prompt tool
 - `mocks/` - моки MCP клиентов и OpenRouter API
+  - `mcp-client-simulator.ts` - симулятор MCP клиента с интеграцией конфигурации
+  - `mcp-transport.ts` - транспортный слой для MCP соединений
+  - `mcp-operations.ts` - операции MCP клиента (initialize, callTool, listTools)
+  - `simulate-cursor-connection.ts` - функция симуляции подключения Cursor
 - 9 других e2e тестов для различных сценариев
   </detailed_modules>
 
@@ -227,31 +231,31 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 
 ### 1. MCP Server инициализация
 
-- **Файл:** `src/e2e/mcp-server-initialization.e2e.test.ts`
+- **Файл:** `end-to-end/mcp-server-initialization.e2e.test.ts`
 - **Покрытие:** запуск MCP сервера, регистрация tools, корректное завершение
 - **Статус:** работает
 
 ### 2. Validate tool полный цикл
 
-- **Файл:** `src/e2e/validate-tool.e2e.test.ts`
+- **Файл:** `end-to-end/validate-tool.e2e.test.ts`
 - **Покрытие:** валидация файлов, URL, контента; все 9 типов валидации
 - **Статус:** работает
 
 ### 3. Test-prompt tool полный цикл
 
-- **Файл:** `src/e2e/test-prompt-tool.e2e.test.ts`
+- **Файл:** `end-to-end/test-prompt-tool.e2e.test.ts`
 - **Покрытие:** параллельное тестирование, анализ консистентности, отчеты
 - **Статус:** работает
 
 ### 4. Обработка ошибок
 
-- **Файл:** `src/e2e/error-scenarios.e2e.test.ts`
+- **Файл:** `end-to-end/error-scenarios.e2e.test.ts`
 - **Покрытие:** невалидные параметры, missing файлы, API ошибки, timeout
 - **Статус:** работает
 
 ### 5. Стабильность MCP сервера
 
-- **Файл:** `src/e2e/mcp-server-stability.e2e.test.ts`
+- **Файл:** `end-to-end/mcp-server-stability.e2e.test.ts`
 - **Покрытие:** долгосрочные сессии, множественные запросы, graceful shutdown
 - **Статус:** работает
 
@@ -311,6 +315,32 @@ MCP сервер работает в постоянном режиме ожид�
 Шаблоны ошибок хранятся в `/prompts/errors/` и динамически загружаются через `loadErrorTemplate()`.
 
 **Причина:** Легкость обновления шаблонов без изменения кода, переиспользование в разных контекстах
+
+### 6. Рефакторинг мок клиента с интеграцией конфигурации
+
+Мок клиент MCP (`end-to-end/mocks/mcp-client-simulator.ts`) использует конфигурацию приложения для подключения к серверу вместо хардкодинга настроек.
+
+**Особенности:**
+
+- Разделение на модули: `mcp-transport.ts` (транспорт), `mcp-operations.ts` (операции), `simulate-cursor-connection.ts` (фабрика)
+- Использование `APP_CONFIG` для получения параметров подключения
+- Проверка режима E2E тестирования перед созданием симулятора
+- Соответствие архитектурным принципам проекта (функции вместо классов, один файл = одна функция)
+
+**Причина:** Унификация конфигурации, упрощение тестирования, соответствие принципам проекта
+
+### 7. Настройка пути к мок клиенту OpenRouter через конфигурацию
+
+Путь к мок клиенту OpenRouter теперь настраивается через переменную окружения `OPENROUTER_MOCK_CLIENT_PATH` вместо хардкодинга в коде.
+
+**Особенности:**
+
+- Добавлено поле `mockClientPath` в конфигурацию OpenRouter
+- Значение по умолчанию: `end-to-end/mocks/openrouter-test-client`
+- Возможность переопределения через переменную окружения `OPENROUTER_MOCK_CLIENT_PATH`
+- Обновлена фабрика клиента для использования конфигурации
+
+**Причина:** Гибкость настройки, возможность использования разных мок клиентов в разных окружениях
 
 **Важные детали архитектуры:**
 

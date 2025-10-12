@@ -32,8 +32,9 @@ export async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
 
     if (isTestMode) {
         // В тестовом режиме используем мок клиент
-        const mockClient = await import('../../../e2e/mocks/openrouter-test-client');
-        if ('makeOpenRouterRequest' in mockClient && typeof mockClient.makeOpenRouterRequest === 'function') {
+        const { mockClientPath } = config.openRouter;
+        const mockClient = (await import(mockClientPath)) as { makeOpenRouterRequest?: OpenRouterClientFunction };
+        if (mockClient.makeOpenRouterRequest) {
             cachedClient = mockClient.makeOpenRouterRequest;
         } else {
             throw new Error('Мок клиент не содержит функцию makeOpenRouterRequest');

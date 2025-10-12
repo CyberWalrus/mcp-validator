@@ -33,6 +33,7 @@
     },
     "include": [
         "src",
+        "end-to-end",
         "types",
         "./*.ts",
         "./*.tsx",

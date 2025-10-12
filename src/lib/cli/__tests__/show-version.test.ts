@@ -28,7 +28,7 @@ describe('showVersion', () => {
         showVersion();
 
         expect(mockGetPackageVersion).toHaveBeenCalledTimes(1);
-        expect(mockInfo).toHaveBeenCalledWith(testVersion);
+        expect(mockInfo).toHaveBeenCalledWith(`mcp-validator v${testVersion}`);
     });
 
     it('должен показывать версию из package.json', () => {
@@ -38,6 +38,6 @@ describe('showVersion', () => {
         showVersion();
 
         expect(mockGetPackageVersion).toHaveBeenCalledTimes(1);
-        expect(mockInfo).toHaveBeenCalledWith(testVersion);
+        expect(mockInfo).toHaveBeenCalledWith(`mcp-validator v${testVersion}`);
     });
 });

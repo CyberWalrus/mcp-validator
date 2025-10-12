@@ -39,13 +39,11 @@ async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
     const config = getConfigOrThrow();
 
     if (config.runtime.environment === 'test' && config.runtime.isE2ETest) {
-        // В E2E тестах используем мок клиент
-        const mockClient = await import('../../../e2e/mocks/openrouter-test-client');
-        if ('makeOpenRouterRequest' in mockClient && typeof mockClient.makeOpenRouterRequest === 'function') {
-            openRouterClient = mockClient.makeOpenRouterRequest;
-        } else {
-            throw new Error('Мок клиент не содержит функцию makeOpenRouterRequest');
-        }
+        // В E2E тестах используем мок клиент через фабрику
+        const { getOpenRouterClient: createOpenRouterClient } = await import(
+            '../../adapters/openrouter/openrouter-client-factory'
+        );
+        openRouterClient = await createOpenRouterClient();
     } else {
         // В обычном режиме используем реальный клиент
         const realClient = await import('../../adapters/openrouter');

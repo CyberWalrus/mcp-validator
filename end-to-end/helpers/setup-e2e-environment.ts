@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 
 import { TEST_TIMEOUTS } from '../constants';
-import { MCPClientSimulator } from '../mocks/mcp-client-simulator';
+import { createMcpClientSimulator } from '../mocks/mcp-client-simulator';
 import { MockOpenRouterAPI } from '../mocks/openrouter-api-mocks';
 import { clearMockResponses } from '../mocks/openrouter-test-client';
 import type { E2ETestContext } from '../types';
@@ -31,7 +31,7 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
 
     await waitForServerReady(mcpProcess);
 
-    const clientSimulator = new MCPClientSimulator();
+    const clientSimulator = createMcpClientSimulator();
     clientSimulator.connectToProcess(mcpProcess);
 
     const mockOpenRouter = new MockOpenRouterAPI();

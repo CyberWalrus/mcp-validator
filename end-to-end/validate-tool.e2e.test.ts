@@ -317,7 +317,7 @@ Returns list of users`,
             });
 
             // Получаем абсолютный путь к нашему тестовому файлу
-            const testFilePath = resolve(__dirname, '__mocks__', 'test-file.ts');
+            const testFilePath = resolve(__dirname, '__tests__', '__mocks__', 'test-file.ts');
 
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'E2E тест чтения реального файла',
@@ -351,7 +351,7 @@ Returns list of users`,
             });
 
             // Используем относительный путь к тестовому файлу от корня проекта
-            const relativeTestFilePath = 'executables/tools/mcp-validator/src/e2e/__tests__/__mocks__/test-file.ts';
+            const relativeTestFilePath = 'end-to-end/__tests__/__mocks__/test-file.ts';
 
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'E2E тест чтения файла по относительному пути',

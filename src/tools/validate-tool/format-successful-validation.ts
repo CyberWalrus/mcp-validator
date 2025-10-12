@@ -28,4 +28,3 @@ export function formatSuccessfulValidation(result: ValidationResult): string {
 
     return content;
 }
-

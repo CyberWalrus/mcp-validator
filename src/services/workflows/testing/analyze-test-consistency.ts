@@ -181,14 +181,18 @@ function analyzeTimeConsistency(results: TestIterationResult[]): {
     const times = results.map((r) => r.responseTime);
     const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
     const variance = calculateVariance(times, avgTime);
-    const coefficientOfVariation = variance / avgTime;
+
+    // Избегаем деления на ноль
+    const coefficientOfVariation = avgTime > 0 ? variance / avgTime : 0;
 
     const score = Math.max(0, Math.min(100, 100 - coefficientOfVariation * 50));
 
     const patterns: string[] = [];
     const anomalies: string[] = [];
 
-    if (coefficientOfVariation < 0.3) {
+    if (avgTime === 0) {
+        patterns.push('Мгновенное выполнение (мок-режим)');
+    } else if (coefficientOfVariation < 0.3) {
         patterns.push(
             `Стабильное время выполнения (${Math.round(avgTime)}мс ±${Math.round(coefficientOfVariation * 100)}%)`,
         );

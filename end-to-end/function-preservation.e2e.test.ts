@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { initializePromptCache } from '../lib/cache/prompt-cache';
-import { reloadAppConfig } from '../model/config';
-import { renderErrorResponse } from '../services/adapters/error-handler';
+import { initializePromptCache } from '../src/lib/cache/prompt-cache';
+import { reloadAppConfig } from '../src/model/config';
+import { renderErrorResponse } from '../src/services/adapters/error-handler';
 // Импорты функций, которые ОБЯЗАТЕЛЬНО должны сохраниться
-import { readFileContent } from '../services/adapters/file-reader';
+import { readFileContent } from '../src/services/adapters/file-reader';
 
 /** E2E тесты сохранения критических функций при миграции */
 describe('🔒 Сохранение функций при миграции на официальные SDK', () => {

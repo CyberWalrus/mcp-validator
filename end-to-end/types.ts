@@ -33,6 +33,8 @@ export type MockedOpenRouterResponse = {
 
 /** Клиент для тестирования MCP */
 export type MCPTestClient = {
+    /** Подключиться к процессу */
+    connectToProcess: (process: ChildProcess) => void;
     /** Вызвать инструмент */
     callTool: (name: string, args: unknown) => Promise<ToolCallResponse>;
     /** Инициализировать соединение */

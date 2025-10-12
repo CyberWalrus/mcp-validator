@@ -145,6 +145,8 @@ export type AppConfig = {
         readonly apiKey: string;
         /** URL API OpenRouter */
         readonly apiUrl: string;
+        /** Путь к мок клиенту для тестирования */
+        readonly mockClientPath: string;
         /** Таймаут запросов в миллисекундах */
         readonly timeout: number;
     };

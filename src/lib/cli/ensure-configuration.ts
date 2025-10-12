@@ -16,4 +16,3 @@ export function ensureConfiguration(): void {
         process.exit(1);
     }
 }
-

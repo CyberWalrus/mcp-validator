@@ -8,7 +8,7 @@ export default defineConfig({
     test: {
         coverage: {
             enabled: false,
-            include: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/__tests__/**', '!src/e2e/**'],
+            include: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/__tests__/**'],
             provider: 'v8',
             reporter: ['text', 'json', 'html'],
             reportsDirectory: './coverage/e2e',
@@ -27,7 +27,7 @@ export default defineConfig({
             OPENROUTER_API_KEY: 'test-key-for-e2e',
         },
         globals: true,
-        include: ['src/e2e/**/*.e2e.test.ts'],
+        include: ['end-to-end/**/*.e2e.test.ts'],
         outputFile: {
             junit: './reports/e2e-junit.xml',
         },

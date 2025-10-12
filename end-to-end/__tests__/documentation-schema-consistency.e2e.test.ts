@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { ParallelTestParamsSchema } from '../../services/workflows/testing/schemas';
-import { ValidationParamsSchema } from '../../services/workflows/validation/schemas';
+import { ParallelTestParamsSchema } from '../../src/services/workflows/testing/schemas';
+import { ValidationParamsSchema } from '../../src/services/workflows/validation/schemas';
 
 describe('Documentation Schema Consistency E2E', () => {
     it('должен валидировать примеры из документации MCP инструментов', () => {

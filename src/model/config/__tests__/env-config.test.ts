@@ -32,6 +32,7 @@ describe('createAppConfig', () => {
             openRouter: {
                 apiKey: 'test-api-key',
                 apiUrl: 'https://api.openrouter.ai/api/v1',
+                mockClientPath: 'end-to-end/mocks/openrouter-test-client',
                 timeout: 30000,
             },
             paths: {
@@ -63,6 +64,7 @@ describe('createAppConfig', () => {
         expect(config.ai.temperature).toBe(0.5);
         expect(config.openRouter.apiUrl).toBe('https://openrouter.ai/api/v1');
         expect(config.openRouter.timeout).toBe(30000);
+        expect(config.openRouter.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
         expect(config.logging.level).toBe('INFO');
         expect(config.runtime).toEqual({
             environment: process.env.NODE_ENV ?? 'development',
@@ -91,6 +93,15 @@ describe('createAppConfig', () => {
         process.env.OPENROUTER_TIMEOUT = 'not-a-number';
 
         expect(() => createAppConfig()).toThrow();
+    });
+
+    it('должен использовать кастомный путь к мок клиенту из переменной окружения', () => {
+        process.env.OPENROUTER_API_KEY = 'test-key';
+        process.env.OPENROUTER_MOCK_CLIENT_PATH = 'custom/path/to/mock-client';
+
+        const config = createAppConfig();
+
+        expect(config.openRouter.mockClientPath).toBe('custom/path/to/mock-client');
     });
 });
 
@@ -128,6 +139,7 @@ describe('reloadAppConfig', () => {
             expect.objectContaining({
                 apiKey: 'updated-key',
                 apiUrl: 'https://api.openrouter.ai/api/v2',
+                mockClientPath: 'end-to-end/mocks/openrouter-test-client',
                 timeout: 15000,
             }),
         );

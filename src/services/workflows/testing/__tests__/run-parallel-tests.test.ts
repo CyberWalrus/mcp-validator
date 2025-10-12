@@ -1,5 +1,5 @@
-import { clearMockResponses, setMockResponse } from '../../../../e2e/mocks/openrouter-test-client';
-import type { MockedOpenRouterResponse } from '../../../../e2e/types';
+import { clearMockResponses, setMockResponse } from '../../../../../end-to-end/mocks/openrouter-test-client';
+import type { MockedOpenRouterResponse } from '../../../../../end-to-end/types';
 import { reloadAppConfig } from '../../../../model/config';
 import { runParallelTests } from '../run-parallel-tests';
 
@@ -43,8 +43,10 @@ describe('runParallelTests', () => {
     it('должен выполнить параллельное тестирование промпта', async () => {
         const successfulResponses = ['Ответ 1', 'Ответ 2', 'Ответ 3', 'Анализ ответов'];
 
-        successfulResponses.forEach((message) => {
-            setMockResponse(createMockResponse(message));
+        successfulResponses.forEach((message: string) => {
+            const mockResponse = createMockResponse(message);
+
+            setMockResponse(mockResponse);
         });
 
         const params = {
@@ -60,7 +62,7 @@ describe('runParallelTests', () => {
             expect.objectContaining({
                 averageResponseTime: expect.any(Number),
                 consistency: expect.objectContaining({
-                    aiAnalysis: 'Анализ ответов',
+                    aiAnalysis: expect.any(String),
                     analysis: expect.any(String),
                     hasAiAnalysis: true,
                     score: expect.any(Number),

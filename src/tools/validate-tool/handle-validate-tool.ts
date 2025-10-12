@@ -223,4 +223,3 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
         };
     }
 }
-

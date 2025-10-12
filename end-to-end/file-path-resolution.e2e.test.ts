@@ -84,7 +84,7 @@ describe('E2E: Проблема с разрешением путей к файл
                 context:
                     'Повторная валидация шаблона ошибки валидации как промпта для проверки качества структуры и синтаксиса',
                 input: {
-                    data: 'executables/tools/mcp-validator/prompts/errors/validation-error.md',
+                    data: 'prompts/errors/validation-error.md',
                     type: 'file',
                 },
                 validationType: 'prompts',
@@ -97,8 +97,7 @@ describe('E2E: Проблема с разрешением путей к файл
 
         it('должен воспроизвести ошибку с некорректным путем при использовании абсолютного пути', async () => {
             // Тест с абсолютным путем к файлу из workspace
-            const absolutePath =
-                '/Users/andreypakhomov/github.com/monorepo/executables/tools/mcp-validator/prompts/errors/validation-error.md';
+            const absolutePath = '/Users/andreypakhomov/github.com/mcp-validator/prompts/errors/validation-error.md';
 
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Валидация шаблона ошибки с полным абсолютным путем',
@@ -120,7 +119,7 @@ describe('E2E: Проблема с разрешением путей к файл
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Тест разрешения пути к другому файлу шаблона',
                 input: {
-                    data: 'executables/tools/mcp-validator/prompts/errors/file-error.md',
+                    data: 'prompts/errors/file-error.md',
                     type: 'file',
                 },
                 validationType: 'prompts',
@@ -135,7 +134,7 @@ describe('E2E: Проблема с разрешением путей к файл
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Тест разрешения пути к файлу вне prompts директории',
                 input: {
-                    data: 'executables/tools/mcp-validator/README.md',
+                    data: 'README.md',
                     type: 'file',
                 },
                 validationType: 'documentation',
@@ -178,7 +177,7 @@ describe('E2E: Проблема с разрешением путей к файл
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Проверка корректной работы после исправления',
                 input: {
-                    data: 'executables/tools/mcp-validator/prompts/errors/validation-error.md',
+                    data: 'prompts/errors/validation-error.md',
                     type: 'file',
                 },
                 validationType: 'prompts',
