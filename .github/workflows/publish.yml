@@ -1,131 +1,153 @@
-name: Publish Package
+name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [main]
+    push:
+        branches: [main]
 
 permissions:
-  contents: write
-  packages: write
+    contents: write
+    packages: write
 
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      should-publish: ${{ steps.check.outputs.should-publish }}
-      version: ${{ steps.check.outputs.version }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "yarn"
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "yarn"
 
-      - name: Check if version exists in npm
-        id: check
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Checking if version $VERSION exists in npm..."
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
 
-          # Check if the version exists in npm registry
-          if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
-            echo "Version $VERSION already exists in npm"
-            echo "should-publish=false" >> $GITHUB_OUTPUT
-          else
-            echo "Version $VERSION not found in npm, will publish"
-            echo "should-publish=true" >> $GITHUB_OUTPUT
-          fi
+            - name: Run tests
+              run: yarn test
 
-          # Output version for use in other jobs
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+            - name: Run linter
+              run: yarn lint
 
-  publish:
-    needs: check-version
-    if: needs.check-version.outputs.should-publish == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    test-windows:
+        runs-on: windows-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "yarn"
-          registry-url: "https://registry.npmjs.org"
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "yarn"
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
 
-      - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+            - name: Run tests on Windows
+              run: yarn test
 
-      - name: Extract changelog section for current version
-        run: |
-          VERSION="${{ needs.check-version.outputs.version }}"
-          awk "/^## \\[$VERSION\\]/,/^## \\[/{if(/^## \\[$VERSION\\]/)p=1; if(/^## \\[/ && !/^## \\[$VERSION\\]/)exit; if(p)print}" CHANGELOG.md > release_notes.md
-          echo "Extracted changelog for version $VERSION:"
-          cat release_notes.md
+            - name: Run linter on Windows
+              run: yarn lint
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.check-version.outputs.version }}
-          name: Release v${{ needs.check-version.outputs.version }}
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Проверяем версию и публикуем только если нужно
+    check-version-and-publish:
+        needs: [test, test-windows]
+        runs-on: ubuntu-latest
+        outputs:
+            published: ${{ steps.publish.outputs.published }}
+            version: ${{ steps.check.outputs.version }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-  test-only:
-    needs: check-version
-    if: needs.check-version.outputs.should-publish == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "yarn"
+                  registry-url: "https://registry.npmjs.org"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "yarn"
+            - name: Check if version exists in npm
+              id: check
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "Checking if version $VERSION exists in npm..."
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+                  # Check if the version exists in npm registry
+                  if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
+                    echo "Version $VERSION already exists in npm"
+                    echo "should-publish=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "Version $VERSION not found in npm, will publish"
+                    echo "should-publish=true" >> $GITHUB_OUTPUT
+                  fi
 
-      - name: Run tests
-        run: yarn test
+                  # Output version for use in other jobs
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Run linter
-        run: yarn lint
+            - name: Install dependencies
+              if: steps.check.outputs.should-publish == 'true'
+              run: yarn install --frozen-lockfile
 
-  test-windows:
-    needs: check-version
-    if: needs.check-version.outputs.should-publish == 'false'
-    runs-on: windows-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+            - name: Build package
+              if: steps.check.outputs.should-publish == 'true'
+              run: yarn build
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "yarn"
+            - name: Publish to npm
+              if: steps.check.outputs.should-publish == 'true'
+              id: publish
+              run: |
+                  npm publish
+                  echo "published=true" >> $GITHUB_OUTPUT
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+            - name: Extract changelog section for current version
+              if: steps.check.outputs.should-publish == 'true'
+              run: |
+                  VERSION="${{ steps.check.outputs.version }}"
+                  echo "Extracting changelog for version: $VERSION"
 
-      - name: Run tests on Windows
-        run: yarn test
+                  # Используем более надежный способ извлечения секции
+                  # Ищем строку с версией и извлекаем до следующей секции ##
+                  awk -v version="$VERSION" '
+                    BEGIN { in_section = 0 }
+                    /^## \[/ { 
+                      if ($0 ~ "\\[" version "\\]") {
+                        in_section = 1
+                        print
+                        next
+                      } else if (in_section) {
+                        exit
+                      }
+                    }
+                    in_section { print }
+                  ' CHANGELOG.md > release_notes.md
 
-      - name: Run linter on Windows
-        run: yarn lint
+                  echo "Extracted changelog content:"
+                  cat release_notes.md
+
+                  # Проверяем, что файл не пустой
+                  if [ ! -s release_notes.md ]; then
+                    echo "Warning: No changelog content found for version $VERSION"
+                    echo "Creating fallback release notes..."
+                    echo "## [$VERSION] - $(date +%Y-%m-%d)" > release_notes.md
+                    echo "" >> release_notes.md
+                    echo "### Changes" >> release_notes.md
+                    echo "- See [Full Changelog](https://github.com/CyberWalrus/mcp-validator/commits/v$VERSION) for details" >> release_notes.md
+                  fi
+
+            - name: Create GitHub Release
+              if: steps.check.outputs.should-publish == 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.check.outputs.version }}
+                  name: Release v${{ steps.check.outputs.version }}
+                  body_path: release_notes.md
+                  draft: false
+                  prerelease: false
+                  generate_release_notes: true
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
