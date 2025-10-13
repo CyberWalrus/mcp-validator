@@ -2,7 +2,11 @@ import type { ConsistencyAnalysis } from '../types';
 
 /** Генерирует секцию рекомендаций */
 export function generateRecommendationsSection(consistency: ConsistencyAnalysis): string {
-    if (!consistency.recommendations || consistency.recommendations.length === 0) {
+    if (
+        consistency.recommendations === null ||
+        consistency.recommendations === undefined ||
+        consistency.recommendations.length === 0
+    ) {
         return '';
     }
 

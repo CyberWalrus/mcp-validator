@@ -7,13 +7,13 @@ export function validateTestParams(params: ParallelTestParams): void {
     const config = APP_CONFIG;
     const { validation } = config;
 
-    if (!validation) {
+    if (validation === null || validation === undefined) {
         throw new Error('Validation configuration is not available');
     }
 
     const { limits } = validation;
 
-    if (!params.prompt || params.prompt.trim().length === 0) {
+    if (params.prompt === null || params.prompt === undefined || params.prompt.trim().length === 0) {
         throw new Error('Промпт не может быть пустым');
     }
 

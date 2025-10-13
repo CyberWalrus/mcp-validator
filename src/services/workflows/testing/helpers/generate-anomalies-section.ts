@@ -2,7 +2,7 @@ import type { ConsistencyAnalysis } from '../types';
 
 /** Генерирует секцию обнаруженных аномалий */
 export function generateAnomaliesSection(consistency: ConsistencyAnalysis): string {
-    if (!consistency.anomalies || consistency.anomalies.length === 0) {
+    if (consistency.anomalies === null || consistency.anomalies === undefined || consistency.anomalies.length === 0) {
         return '';
     }
 

@@ -6,7 +6,7 @@ export function generateModelStatistics(results: TestIterationResult[]): string 
 
     results.forEach((result) => {
         const model = result.model || 'Unknown';
-        if (!modelStats.has(model)) {
+        if (modelStats.has(model) === false) {
             modelStats.set(model, { avgTime: 0, successful: 0, times: [], total: 0 });
         }
 
