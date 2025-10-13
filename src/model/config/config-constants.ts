@@ -1,20 +1,20 @@
-import type { AppConfig } from '../types/main';
+import type { AppConfig } from './types';
 
 /** Кэшированная конфигурация приложения */
 export const CACHED_CONFIG: AppConfig = {
-    ai: {
-        defaultModel: 'openai/gpt-oss-120b',
-        maxTokens: 100000,
-        temperature: 0.5,
+    api: {
+        key: '',
+        mockClientPath: 'end-to-end/mocks/openrouter-test-client',
+        provider: 'openrouter',
+        url: 'https://openrouter.ai/api/v1',
     },
     logging: {
         level: 'INFO',
     },
-    openRouter: {
-        apiKey: '',
-        apiUrl: 'https://openrouter.ai/api/v1',
-        mockClientPath: 'end-to-end/mocks/openrouter-test-client',
-        timeout: 30000,
+    model: {
+        maxTokens: 100000,
+        name: 'openai/gpt-oss-120b',
+        temperature: 0.5,
     },
     paths: {
         errors: '',
@@ -23,11 +23,29 @@ export const CACHED_CONFIG: AppConfig = {
     runtime: {
         environment: 'development',
         isE2ETest: false,
-        isTestMode: false,
         nodePath: '',
     },
+    testing: {
+        consistencyThresholds: {
+            anomalyLengthMultiplier: 0.5,
+            anomalyLongMultiplier: 2.0,
+            anomalySlowMultiplier: 1.5,
+            timeLow: 0.3,
+            varianceHigh: 0.7,
+            varianceLow: 0.2,
+            varianceMedium: 0.5,
+        },
+    },
+    timeouts: {
+        apiRequest: 30000,
+        validation: 30000,
+    },
     validation: {
-        timeout: 30000,
+        limits: {
+            contextMaxLength: 5000,
+            timeoutMax: 120000,
+            timeoutMin: 1000,
+        },
     },
 };
 

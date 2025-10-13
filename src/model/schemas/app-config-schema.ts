@@ -42,24 +42,6 @@ export const timeoutsConfigSchema = z.object({
     validation: z.coerce.number().positive('TIMEOUT_VALIDATION must be a positive number').default(30000),
 });
 
-/** Схема валидации лимитов валидации */
-export const validationLimitsSchema = z.object({
-    contextMaxLength: z.number().positive('Context max length must be positive').default(5000),
-    timeoutMax: z.number().positive('Timeout maximum must be positive').default(120000),
-    timeoutMin: z.number().positive('Timeout minimum must be positive').default(1000),
-});
-
-/** Схема валидации порогов консистентности */
-export const consistencyThresholdsSchema = z.object({
-    anomalyLengthMultiplier: z.number().positive().default(0.5),
-    anomalyLongMultiplier: z.number().positive().default(2.0),
-    anomalySlowMultiplier: z.number().positive().default(1.5),
-    timeLow: z.number().min(0).max(1).default(0.3),
-    varianceHigh: z.number().min(0).max(1).default(0.7),
-    varianceLow: z.number().min(0).max(1).default(0.2),
-    varianceMedium: z.number().min(0).max(1).default(0.5),
-});
-
 /** Схема валидации полной конфигурации приложения */
 export const appConfigSchema = z.object({
     api: apiConfigSchema,
@@ -67,11 +49,5 @@ export const appConfigSchema = z.object({
     model: modelConfigSchema,
     paths: pathsConfigSchema,
     runtime: runtimeConfigSchema,
-    testing: z
-        .object({
-            consistencyThresholds: consistencyThresholdsSchema,
-        })
-        .optional(),
     timeouts: timeoutsConfigSchema,
-    validation: z.object({ limits: validationLimitsSchema }).optional(),
 });

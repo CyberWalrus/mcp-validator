@@ -3,14 +3,16 @@
 import type { z } from 'zod';
 
 import type {
-    aiConfigSchema,
+    apiConfigSchema,
     appConfigSchema,
+    consistencyThresholdsSchema,
     loggingConfigSchema,
     logLevelSchema,
-    openRouterConfigSchema,
+    modelConfigSchema,
     pathsConfigSchema,
     runtimeConfigSchema,
-    validationConfigSchema,
+    timeoutsConfigSchema,
+    validationLimitsSchema,
 } from './schemas';
 
 // ========== ЛОГИРОВАНИЕ ==========
@@ -83,8 +85,6 @@ export type TestPromptInput = {
     context?: string;
     /** Количество итераций */
     iterations?: number;
-    /** Список моделей для тестирования */
-    models?: string[];
     /** Таймаут для каждого запроса */
     timeout?: number;
 };
@@ -127,11 +127,14 @@ export type TestPromptResult = {
 
 // ========== КОНФИГУРАЦИЯ ПРИЛОЖЕНИЯ ==========
 
-/** Настройки AI моделей */
-export type AiConfig = z.infer<typeof aiConfigSchema>;
+/** Настройки AI модели */
+export type ModelConfig = z.infer<typeof modelConfigSchema>;
 
-/** Настройки OpenRouter API */
-export type OpenRouterConfig = z.infer<typeof openRouterConfigSchema>;
+/** Настройки API провайдера */
+export type ApiConfig = z.infer<typeof apiConfigSchema>;
+
+/** Настройки таймаутов */
+export type TimeoutsConfig = z.infer<typeof timeoutsConfigSchema>;
 
 /** Настройки логирования */
 export type LoggingConfig = z.infer<typeof loggingConfigSchema>;
@@ -139,11 +142,14 @@ export type LoggingConfig = z.infer<typeof loggingConfigSchema>;
 /** Настройки путей к ресурсам */
 export type PathsConfig = z.infer<typeof pathsConfigSchema>;
 
-/** Настройки валидации */
-export type ValidationConfig = z.infer<typeof validationConfigSchema>;
-
 /** Настройки среды выполнения приложения */
 export type RuntimeConfig = z.infer<typeof runtimeConfigSchema>;
+
+/** Настройки лимитов валидации */
+export type ValidationLimitsConfig = z.infer<typeof validationLimitsSchema>;
+
+/** Настройки порогов консистентности */
+export type ConsistencyThresholdsConfig = z.infer<typeof consistencyThresholdsSchema>;
 
 /** Конфигурация приложения */
 export type AppConfig = z.infer<typeof appConfigSchema>;

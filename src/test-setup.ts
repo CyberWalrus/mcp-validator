@@ -1,17 +1,18 @@
-// Инициализируем конфигурацию и кэш промптов
 import { initializePromptCache } from './lib/cache';
 import { reloadAppConfig } from './model/config';
 
-export {};
+/** Инициализирует тестовое окружение */
+export async function initTestEnvironment(): Promise<void> {
+    if (!process.env.API_KEY) {
+        process.env.API_KEY = 'test-api-key';
+    }
 
-if (!process.env.OPENROUTER_API_KEY) {
-    process.env.OPENROUTER_API_KEY = 'test-api-key';
+    if (!process.env.LOG_LEVEL) {
+        process.env.LOG_LEVEL = 'INFO';
+    }
+
+    await reloadAppConfig();
+    initializePromptCache();
 }
 
-if (!process.env.LOG_LEVEL) {
-    process.env.LOG_LEVEL = 'INFO';
-}
-
-await reloadAppConfig();
-
-initializePromptCache();
+await initTestEnvironment();

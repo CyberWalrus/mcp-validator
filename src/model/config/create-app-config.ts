@@ -12,7 +12,6 @@ function getPackageRoot(): string {
     const currentFilePath = fileURLToPath(currentFileUrl);
     let searchDir = dirname(currentFilePath);
 
-    // Поиск package.json вверх по директориям (работает и для dev, и для собранного кода)
     while (searchDir !== dirname(searchDir)) {
         try {
             const packageJsonPath = join(searchDir, 'package.json');
@@ -22,13 +21,11 @@ function getPackageRoot(): string {
                     return searchDir;
                 }
             }
-        } catch {
-            // Продолжаем поиск
-        }
+            // eslint-disable-next-line no-empty
+        } catch {}
         searchDir = dirname(searchDir);
     }
 
-    // Fallback для dev режима
     return join(dirname(currentFilePath), '../../..');
 }
 
@@ -37,19 +34,19 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
     const packageRoot = getPackageRoot();
 
     const rawConfig = {
-        ai: {
-            defaultModel: env.DEFAULT_AI_MODEL,
-            maxTokens: env.AI_MAX_TOKENS,
-            temperature: env.AI_TEMPERATURE,
+        api: {
+            key: env.API_KEY,
+            mockClientPath: env.API_MOCK_CLIENT_PATH,
+            provider: 'openrouter' as const,
+            url: env.API_URL,
         },
         logging: {
             level: env.LOG_LEVEL,
         },
-        openRouter: {
-            apiKey: env.OPENROUTER_API_KEY,
-            apiUrl: env.OPENROUTER_API_URL,
-            mockClientPath: env.OPENROUTER_MOCK_CLIENT_PATH,
-            timeout: env.OPENROUTER_TIMEOUT,
+        model: {
+            maxTokens: env.AI_MAX_TOKENS,
+            name: env.AI_MODEL,
+            temperature: env.AI_TEMPERATURE,
         },
         paths: {
             errors: join(packageRoot, PACKAGE_RESOURCE_PATHS.ERRORS),
@@ -58,11 +55,11 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
         runtime: {
             environment: env.NODE_ENV ?? 'development',
             isE2ETest: env.MCP_E2E_TEST === 'true',
-            isTestMode: env.NODE_ENV === 'test' || env.MCP_E2E_TEST === 'true',
             nodePath: env.NODE_PATH || '',
         },
-        validation: {
-            timeout: env.VALIDATION_TIMEOUT,
+        timeouts: {
+            apiRequest: env.TIMEOUT_API_REQUEST,
+            validation: env.TIMEOUT_VALIDATION,
         },
     };
 

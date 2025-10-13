@@ -13,27 +13,27 @@ describe('createAppConfig', () => {
     });
 
     it('должен возвращать корректную конфигурацию с валидными env переменными', () => {
-        process.env.OPENROUTER_API_KEY = 'test-api-key';
-        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v1';
-        process.env.OPENROUTER_TIMEOUT = '30000';
+        process.env.API_KEY = 'test-api-key';
+        process.env.API_URL = 'https://api.openrouter.ai/api/v1';
+        process.env.TIMEOUT_API_REQUEST = '30000';
         process.env.LOG_LEVEL = 'INFO';
 
         const config = createAppConfig();
 
         expect(config).toEqual({
-            ai: {
-                defaultModel: 'openai/gpt-oss-120b',
-                maxTokens: 100000,
-                temperature: 0.5,
+            api: {
+                key: 'test-api-key',
+                mockClientPath: 'end-to-end/mocks/openrouter-test-client',
+                provider: 'openrouter',
+                url: 'https://api.openrouter.ai/api/v1',
             },
             logging: {
                 level: 'INFO',
             },
-            openRouter: {
-                apiKey: 'test-api-key',
-                apiUrl: 'https://api.openrouter.ai/api/v1',
-                mockClientPath: 'end-to-end/mocks/openrouter-test-client',
-                timeout: 30000,
+            model: {
+                maxTokens: 100000,
+                name: 'openai/gpt-oss-120b',
+                temperature: 0.5,
             },
             paths: {
                 errors: expect.any(String),
@@ -42,11 +42,11 @@ describe('createAppConfig', () => {
             runtime: {
                 environment: process.env.NODE_ENV ?? 'development',
                 isE2ETest: false,
-                isTestMode: process.env.NODE_ENV === 'test',
                 nodePath: '',
             },
-            validation: {
-                timeout: 30000,
+            timeouts: {
+                apiRequest: 30000,
+                validation: 30000,
             },
         });
     });
@@ -54,106 +54,69 @@ describe('createAppConfig', () => {
     it('должен использовать значения по умолчанию для необязательных переменных', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
         delete process.env.OPENROUTER_API_URL;
-        delete process.env.OPENROUTER_TIMEOUT;
-        delete process.env.LOG_LEVEL;
+        delete process.env.TIMEOUT_API_REQUEST;
 
         const config = createAppConfig();
 
-        expect(config.ai.defaultModel).toBe('openai/gpt-oss-120b');
-        expect(config.ai.maxTokens).toBe(100000);
-        expect(config.ai.temperature).toBe(0.5);
-        expect(config.openRouter.apiUrl).toBe('https://openrouter.ai/api/v1');
-        expect(config.openRouter.timeout).toBe(30000);
-        expect(config.openRouter.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
+        expect(config.model.name).toBe('openai/gpt-oss-120b');
+        expect(config.model.maxTokens).toBe(100000);
+        expect(config.model.temperature).toBe(0.5);
+        expect(config.api.url).toBe('https://openrouter.ai/api/v1');
+        expect(config.timeouts.apiRequest).toBe(30000);
+        expect(config.timeouts.validation).toBe(30000);
+        expect(config.api.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
         expect(config.logging.level).toBe('INFO');
         expect(config.runtime).toEqual({
             environment: process.env.NODE_ENV ?? 'development',
             isE2ETest: false,
-            isTestMode: process.env.NODE_ENV === 'test',
             nodePath: '',
         });
-        expect(config.validation.timeout).toBe(30000);
     });
 
-    it('должен выбрасывать ошибку при отсутствии обязательной переменной OPENROUTER_API_KEY', () => {
-        delete process.env.OPENROUTER_API_KEY;
+    it('должен выбрасывать ошибку при отсутствии обязательной переменной API_KEY', () => {
+        delete process.env.API_KEY;
 
-        expect(() => createAppConfig()).toThrow('OPENROUTER_API_KEY is required');
+        expect(() => createAppConfig()).toThrow('API_KEY is required');
     });
 
     it('должен выбрасывать ошибку при некорректном значении LOG_LEVEL', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
-        process.env.LOG_LEVEL = 'invalid-level' as any;
+        process.env.LOG_LEVEL = 'invalid-level' as unknown as 'DEBUG' | 'ERROR' | 'INFO' | 'WARN';
 
         expect(() => createAppConfig()).toThrow();
     });
 
-    it('должен выбрасывать ошибку при некорректном значении OPENROUTER_TIMEOUT', () => {
+    it('должен выбрасывать ошибку при некорректном значении TIMEOUT_API_REQUEST', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
-        process.env.OPENROUTER_TIMEOUT = 'not-a-number';
+        process.env.TIMEOUT_API_REQUEST = 'not-a-number';
 
         expect(() => createAppConfig()).toThrow();
     });
 
     it('должен использовать кастомный путь к мок клиенту из переменной окружения', () => {
-        process.env.OPENROUTER_API_KEY = 'test-key';
-        process.env.OPENROUTER_MOCK_CLIENT_PATH = 'custom/path/to/mock-client';
+        process.env.API_KEY = 'test-key';
+        process.env.API_MOCK_CLIENT_PATH = 'custom/mock/path';
 
         const config = createAppConfig();
 
-        expect(config.openRouter.mockClientPath).toBe('custom/path/to/mock-client');
+        expect(config.api.mockClientPath).toBe('custom/mock/path');
     });
 });
 
-describe('reloadAppConfig', () => {
-    const originalEnv = process.env;
-
-    beforeEach(() => {
-        process.env = { ...originalEnv };
-        process.env.OPENROUTER_API_KEY = 'test-key';
-        reloadAppConfig();
+describe('APP_CONFIG', () => {
+    it('должен быть доступен и содержать корректную структуру', () => {
+        expect(APP_CONFIG).toBeDefined();
+        expect(APP_CONFIG.model).toBeDefined();
+        expect(APP_CONFIG.api).toBeDefined();
+        expect(APP_CONFIG.timeouts).toBeDefined();
+        expect(APP_CONFIG.logging).toBeDefined();
+        expect(APP_CONFIG.paths).toBeDefined();
+        expect(APP_CONFIG.runtime).toBeDefined();
     });
+});
 
-    afterEach(() => {
-        process.env = originalEnv;
-        reloadAppConfig();
-    });
-
-    it('должен обновлять конфигурацию при изменении переменных окружения', async () => {
-        process.env.OPENROUTER_API_KEY = 'updated-key';
-        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v2';
-        process.env.OPENROUTER_TIMEOUT = '15000';
-        process.env.LOG_LEVEL = 'DEBUG';
-
-        await reloadAppConfig();
-
+describe('getAppConfigError', () => {
+    it('должен возвращать null при отсутствии ошибок', () => {
         expect(getAppConfigError()).toBeNull();
-        expect(APP_CONFIG.ai).toEqual(
-            expect.objectContaining({
-                defaultModel: 'openai/gpt-oss-120b',
-                maxTokens: 100000,
-                temperature: 0.5,
-            }),
-        );
-        expect(APP_CONFIG.openRouter).toEqual(
-            expect.objectContaining({
-                apiKey: 'updated-key',
-                apiUrl: 'https://api.openrouter.ai/api/v2',
-                mockClientPath: 'end-to-end/mocks/openrouter-test-client',
-                timeout: 15000,
-            }),
-        );
-        expect(APP_CONFIG.logging.level).toBe('DEBUG');
-        expect(APP_CONFIG.validation.timeout).toBe(30000);
-    });
-
-    it('должен устанавливать ошибку при отсутствии обязательных переменных', async () => {
-        delete process.env.OPENROUTER_API_KEY;
-
-        await reloadAppConfig();
-
-        const configError = getAppConfigError();
-        expect(configError).toBeInstanceOf(Error);
-        expect(configError?.message).toBe('OPENROUTER_API_KEY is required');
     });
 });

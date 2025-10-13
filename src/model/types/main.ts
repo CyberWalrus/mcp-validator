@@ -70,8 +70,6 @@ export type TestPromptInput = {
     context?: string;
     /** Количество итераций */
     iterations?: number;
-    /** Список моделей для тестирования */
-    models?: string[];
     /** Таймаут для каждого запроса */
     timeout?: number;
 };
@@ -114,53 +112,64 @@ export type TestPromptResult = {
 
 // ========== КОНФИГУРАЦИЯ ПРИЛОЖЕНИЯ ==========
 
-/** Настройки AI моделей */
-export type AiConfig = {
-    /** Модель по умолчанию */
-    readonly defaultModel: string;
+/** Настройки AI модели */
+export type ModelConfig = {
     /** Максимальное количество токенов */
     readonly maxTokens: number;
+    /** Название модели */
+    readonly name: string;
     /** Температура генерации */
     readonly temperature: number;
 };
 
-/** Настройки валидации */
-export type ValidationConfig = {
-    /** Таймаут валидации в миллисекундах */
-    readonly timeout: number;
+/** Настройки API провайдера */
+export type ApiConfig = {
+    /** API ключ */
+    readonly key: string;
+    /** Путь к мок клиенту для тестирования */
+    readonly mockClientPath: string;
+    /** Провайдер API */
+    readonly provider: 'openrouter';
+    /** URL API */
+    readonly url: string;
+};
+
+/** Настройки таймаутов */
+export type TimeoutsConfig = {
+    /** Таймаут для API запросов в миллисекундах */
+    readonly apiRequest: number;
+    /** Таймаут для процесса валидации в миллисекундах */
+    readonly validation: number;
+};
+
+/** Настройки логирования */
+export type LoggingConfig = {
+    /** Уровень логирования */
+    readonly level: LogLevel;
+};
+
+/** Пути к ресурсам */
+export type PathsConfig = {
+    /** Путь к директории с шаблонами ошибок */
+    readonly errors: string;
+    /** Путь к директории с промптами */
+    readonly prompts: string;
 };
 
 /** Конфигурация приложения */
 export type AppConfig = {
-    /** Настройки AI моделей */
-    readonly ai: AiConfig;
+    /** Настройки API провайдера */
+    readonly api: ApiConfig;
     /** Настройки логирования */
-    readonly logging: {
-        /** Уровень логирования */
-        readonly level: LogLevel;
-    };
-    /** Настройки OpenRouter API */
-    readonly openRouter: {
-        /** API ключ для OpenRouter */
-        readonly apiKey: string;
-        /** URL API OpenRouter */
-        readonly apiUrl: string;
-        /** Путь к мок клиенту для тестирования */
-        readonly mockClientPath: string;
-        /** Таймаут запросов в миллисекундах */
-        readonly timeout: number;
-    };
+    readonly logging: LoggingConfig;
+    /** Настройки AI модели */
+    readonly model: ModelConfig;
     /** Пути к ресурсам */
-    readonly paths: {
-        /** Путь к директории с шаблонами ошибок */
-        readonly errors: string;
-        /** Путь к директории с промптами */
-        readonly prompts: string;
-    };
+    readonly paths: PathsConfig;
     /** Настройки среды выполнения */
     readonly runtime: RuntimeConfig;
-    /** Настройки валидации */
-    readonly validation: ValidationConfig;
+    /** Настройки таймаутов */
+    readonly timeouts: TimeoutsConfig;
 };
 
 /** Настройки среды выполнения приложения */
@@ -169,8 +178,6 @@ export type RuntimeConfig = {
     readonly environment: string;
     /** Флаг запуска в режиме E2E тестирования */
     readonly isE2ETest: boolean;
-    /** Флаг тестового режима */
-    readonly isTestMode: boolean;
     /** Значение переменной NODE_PATH */
     readonly nodePath: string;
 };
