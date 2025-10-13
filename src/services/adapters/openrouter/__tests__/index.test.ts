@@ -18,8 +18,7 @@ describe('makeOpenRouterRequest', () => {
         vi.clearAllMocks();
         vi.useFakeTimers();
 
-        // Всегда мокируем API ключ для тестов
-        process.env.OPENROUTER_API_KEY = 'test-api-key';
+        process.env.API_KEY = 'test-api-key';
         await reloadConfig();
 
         const { makeOpenRouterRequest: realMakeOpenRouterRequest } = await import('../openrouter-real-client');
@@ -29,8 +28,8 @@ describe('makeOpenRouterRequest', () => {
 
     afterEach(async () => {
         vi.useRealTimers();
-        delete process.env.OPENROUTER_API_KEY;
-        delete process.env.OPENROUTER_API_URL;
+        delete process.env.API_KEY;
+        delete process.env.API_URL;
         delete process.env.OPENROUTER_TIMEOUT;
         await reloadConfig();
     });
@@ -72,7 +71,6 @@ describe('makeOpenRouterRequest', () => {
 
         expect(result.duration).toBeGreaterThanOrEqual(0);
 
-        // Проверяем что запрос отправлен с правильными параметрами
         expect(mockFetch).toHaveBeenCalledWith(
             'https://openrouter.ai/api/v1/chat/completions',
             expect.objectContaining({
@@ -85,13 +83,11 @@ describe('makeOpenRouterRequest', () => {
             }),
         );
 
-        // Проверяем структуру body отдельно
         const fetchCall = mockFetch.mock.calls[0];
         if (fetchCall && fetchCall[1] && 'body' in fetchCall[1]) {
             const body = JSON.parse(fetchCall[1].body as string);
             expect(body).toEqual(
                 expect.objectContaining({
-                    // Используем динамические значения - не проверяем конкретные числа
                     max_tokens: expect.any(Number),
 
                     messages: [
@@ -109,10 +105,9 @@ describe('makeOpenRouterRequest', () => {
     });
 
     it('должен использовать модель по умолчанию когда не указана', async () => {
-        // Мокируем ответ с моделью по умолчанию из конфига
         const mockResponse = {
             choices: [{ message: { content: 'Response' } }],
-            model: APP_CONFIG.ai.defaultModel,
+            model: APP_CONFIG.model.name,
             usage: { total_tokens: 50 },
         };
 
@@ -127,25 +122,23 @@ describe('makeOpenRouterRequest', () => {
 
         const result = await makeOpenRouterRequest(params);
 
-        // Проверяем что используется модель по умолчанию из конфига
-        expect(result.model).toBe(APP_CONFIG.ai.defaultModel);
+        expect(result.model).toBe(APP_CONFIG.model.name);
 
-        // Проверяем что в запросе отправлена модель по умолчанию
         const fetchCall = mockFetch.mock.calls[0];
         if (!fetchCall || !fetchCall[1] || !fetchCall[1].body) {
             throw new Error('Expected fetch to be called with body');
         }
         const body = JSON.parse(fetchCall[1].body as string);
-        expect(body.model).toBe(APP_CONFIG.ai.defaultModel);
+        expect(body.model).toBe(APP_CONFIG.model.name);
     });
 
     it('должен использовать базовый URL из конфигурации', async () => {
-        process.env.OPENROUTER_API_URL = 'https://api.openrouter.ai/api/v2';
+        process.env.API_URL = 'https://api.openrouter.ai/api/v2';
         await reloadConfig();
 
         const mockResponse = {
             choices: [{ message: { content: 'Response' } }],
-            model: APP_CONFIG.ai.defaultModel,
+            model: APP_CONFIG.model.name,
             usage: { total_tokens: 50 },
         };
 
@@ -158,7 +151,7 @@ describe('makeOpenRouterRequest', () => {
 
         expect(mockFetch).toHaveBeenCalledWith('https://api.openrouter.ai/api/v2/chat/completions', expect.any(Object));
 
-        delete process.env.OPENROUTER_API_URL;
+        delete process.env.API_URL;
     });
 
     it('должен обрабатывать HTTP ошибки', async () => {
@@ -186,7 +179,7 @@ describe('makeOpenRouterRequest', () => {
     });
 
     it('должен обрабатывать отсутствие API ключа', async () => {
-        delete process.env.OPENROUTER_API_KEY;
+        delete process.env.API_KEY;
         await reloadConfig();
 
         const params = {
@@ -194,7 +187,7 @@ describe('makeOpenRouterRequest', () => {
         };
 
         await expect(makeOpenRouterRequest(params)).rejects.toThrow(
-            'Failed to load OpenRouter configuration: OPENROUTER_API_KEY is required',
+            'Failed to load OpenRouter configuration: API_KEY is required',
         );
     });
 
@@ -278,10 +271,8 @@ describe('makeOpenRouterRequest', () => {
         }
         const body = JSON.parse(fetchCall[1].body as string);
 
-        // Проверяем структуру body без проверки конкретных значений констант
         expect(body).toEqual(
             expect.objectContaining({
-                // Проверяем что значения есть, но не конкретные числа
                 max_tokens: expect.any(Number),
 
                 messages: [

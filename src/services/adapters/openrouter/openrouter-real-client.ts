@@ -1,45 +1,37 @@
 /** Реальная реализация OpenRouter клиента для production */
 
 import { APP_CONFIG, getAppConfigError } from '../../../model/config';
-import type { AppConfig } from '../../../model/types/main';
-import { DEFAULT_HEADERS, DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE } from './constants';
+import { DEFAULT_HEADERS } from './constants';
 import type { OpenRouterRequest, OpenRouterResponse } from './types';
-
-/** Получает конфигурацию или бросает ошибку */
-function getConfigOrThrow(): AppConfig {
-    const config = APP_CONFIG;
-
-    const configError = getAppConfigError();
-
-    if (config === null || config === undefined || configError) {
-        const message = configError?.message
-            ? `Failed to load OpenRouter configuration: ${configError.message}`
-            : 'Failed to load OpenRouter configuration';
-
-        throw new Error(message);
-    }
-
-    return config;
-}
 
 /** Выполняет запрос к OpenRouter API */
 export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<OpenRouterResponse> {
     const startTime = Date.now();
 
-    const config = getConfigOrThrow();
+    const configError = getAppConfigError();
+    if (configError) {
+        throw new Error(`Failed to load OpenRouter configuration: ${configError.message}`);
+    }
+
+    const config = APP_CONFIG;
+
     const {
-        ai: { defaultModel },
-        openRouter: { apiKey, apiUrl, timeout: defaultTimeout },
-        validation: { timeout: validationTimeout },
+        model: { name: defaultModel, maxTokens: defaultMaxTokens, temperature: defaultTemperature },
+        api: { key: apiKey, url: apiUrl },
+        timeouts: { apiRequest: defaultTimeout, validation: validationTimeout },
+    }: {
+        api: { key: string; url: string };
+        model: { maxTokens: number; name: string; temperature: number };
+        timeouts: { apiRequest: number; validation: number };
     } = config;
 
-    const model = params.model || defaultModel;
-    const timeout = params.timeout || defaultTimeout || validationTimeout;
-    const temperature = params.temperature || DEFAULT_TEMPERATURE;
-    const maxTokens = params.maxTokens || DEFAULT_MAX_TOKENS;
+    const model: string = params.model || defaultModel;
+    const timeout: number = params.timeout || defaultTimeout || validationTimeout;
+    const temperature: number = params.temperature ?? defaultTemperature;
+    const maxTokens: number = params.maxTokens || defaultMaxTokens;
 
-    const normalizedBaseUrl = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
-    const requestUrl = new URL('chat/completions', normalizedBaseUrl).toString();
+    const normalizedBaseUrl: string = apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`;
+    const requestUrl: string = new URL('chat/completions', normalizedBaseUrl).toString();
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);

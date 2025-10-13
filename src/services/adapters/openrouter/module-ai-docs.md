@@ -94,5 +94,5 @@ const validationResult = parseValidationResponse(aiResponse.text);
 
 <notes>
 **Особенности:** Результат рефакторинга - объединение client+factory, автоматическое переключение test/prod режимов, кеширование клиента
-**Ограничения:** Требует OPENROUTER_API_KEY в окружении, ограничен моделями доступными в OpenRouter
+**Ограничения:** Требует API_KEY в окружении, ограничен моделями доступными в OpenRouter
 </notes>

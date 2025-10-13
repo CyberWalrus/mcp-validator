@@ -24,10 +24,10 @@ export async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
     }
 
     const config = getConfigOrThrow();
-    const { isTestMode } = config.runtime;
+    const { isE2ETest } = config.runtime;
 
-    if (isTestMode) {
-        const { mockClientPath } = config.openRouter;
+    if (isE2ETest) {
+        const { mockClientPath } = config.api;
         const mockClient = (await import(mockClientPath)) as { makeOpenRouterRequest?: OpenRouterClientFunction };
         if (mockClient.makeOpenRouterRequest) {
             cachedClient = mockClient.makeOpenRouterRequest;
