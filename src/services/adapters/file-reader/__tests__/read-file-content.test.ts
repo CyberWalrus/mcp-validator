@@ -67,4 +67,76 @@ describe('readFileContent', () => {
         expect(result.encoding).toBe('utf8');
         expect(mockReadFile).toHaveBeenCalledWith('test.txt', 'utf8');
     });
+
+    describe('Windows-специфичные тесты', () => {
+        it('должен корректно обрабатывать Windows drive letters', async () => {
+            // Только на Windows
+            if (process.platform !== 'win32') {
+                return;
+            }
+
+            const filePath = 'C:\\Users\\test\\file.txt';
+            const fileContent = 'Windows file content';
+            mockReadFile.mockResolvedValue(fileContent);
+
+            const result = await readFileContent({
+                encoding: 'utf8',
+                path: filePath,
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.content).toBe(fileContent);
+            expect(result.path).toBe(filePath);
+        });
+
+        it('должен обрабатывать UNC paths', async () => {
+            // Только на Windows
+            if (process.platform !== 'win32') {
+                return;
+            }
+
+            const filePath = '\\\\server\\share\\file.txt';
+            const fileContent = 'UNC path content';
+            mockReadFile.mockResolvedValue(fileContent);
+
+            const result = await readFileContent({
+                encoding: 'utf8',
+                path: filePath,
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.content).toBe(fileContent);
+            expect(result.path).toBe(filePath);
+        });
+
+        it('должен обрабатывать смешанные separators', async () => {
+            const mixedPath = 'folder/subfolder\\file.txt';
+            const fileContent = 'Mixed separators content';
+            mockReadFile.mockResolvedValue(fileContent);
+
+            const result = await readFileContent({
+                encoding: 'utf8',
+                path: mixedPath,
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.content).toBe(fileContent);
+            expect(result.path).toBe(mixedPath);
+        });
+
+        it('должен корректно обрабатывать относительные пути с backslashes', async () => {
+            const relativePath = 'folder\\subfolder\\file.txt';
+            const fileContent = 'Relative path content';
+            mockReadFile.mockResolvedValue(fileContent);
+
+            const result = await readFileContent({
+                encoding: 'utf8',
+                path: relativePath,
+            });
+
+            expect(result.success).toBe(true);
+            expect(result.content).toBe(fileContent);
+            expect(result.path).toBe(relativePath);
+        });
+    });
 });

@@ -106,3 +106,26 @@ jobs:
 
       - name: Run linter
         run: yarn lint
+
+  test-windows:
+    needs: check-version
+    if: needs.check-version.outputs.should-publish == 'false'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run tests on Windows
+        run: yarn test
+
+      - name: Run linter on Windows
+        run: yarn lint
