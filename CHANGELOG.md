@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.4.0] - 2025-10-13
+
+<small>13.10.2025 10:58</small>
+
+### Changed
+
+- **Крупный рефакторинг архитектуры**
+    - Удален старый модуль валидации `src/services/workflows/validation/`
+    - Упрощена структура конфигурации и моделей данных
+    - Разделены функции на отдельные файлы согласно правилу one_file_one_function
+    - Улучшена система логирования и кэширования
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4622b1e4ef7ae898c9dea1036b533b20c21611f2" target="_blank">4622b1e</a>
+
+- **Улучшения системы тестирования**
+    - Добавлены новые модули анализа консистентности (длина, структура, время)
+    - Разделены промпты для выполнения и анализа тестов
+    - Улучшена система параллельного тестирования промптов
+    - Добавлен E2E тест для отслеживания времени выполнения валидации
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4622b1e4ef7ae898c9dea1036b533b20c21611f2" target="_blank">4622b1e</a>
+
+- **Обновления конфигурации и зависимостей**
+    - Обновлен eslint-walrus-config до версии 1.1.0
+    - Улучшены настройки CI/CD pipeline
+    - Добавлены новые переменные окружения для MCP соединения
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4622b1e4ef7ae898c9dea1036b533b20c21611f2" target="_blank">4622b1e</a>
+
+### Removed
+
+- **Очистка устаревшего кода**
+    - Удален модуль `src/services/workflows/validation/` полностью
+    - Удалены устаревшие хелперы и константы конфигурации
+    - Убраны избыточные функции и дублирующийся код
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4622b1e4ef7ae898c9dea1036b533b20c21611f2" target="_blank">4622b1e</a>
+
 ## [0.3.0] - 2025-10-13
 
 <small>13.10.2025 09:01</small>
