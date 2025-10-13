@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 import { cleanupE2EEnvironment, setupE2EEnvironment } from './helpers';
 import type { E2ETestContext, MCPResponse } from './types';
 
@@ -97,7 +99,7 @@ describe('E2E: Проблема с разрешением путей к файл
 
         it('должен воспроизвести ошибку с некорректным путем при использовании абсолютного пути', async () => {
             // Тест с абсолютным путем к файлу из workspace
-            const absolutePath = '/Users/andreypakhomov/github.com/mcp-validator/prompts/errors/validation-error.md';
+            const absolutePath = join(process.cwd(), 'prompts', 'errors', 'validation-error.md');
 
             const response = await testContext.clientSimulator.callTool('validate', {
                 context: 'Валидация шаблона ошибки с полным абсолютным путем',
@@ -188,6 +190,45 @@ describe('E2E: Проблема с разрешением путей к файл
 
             // Должен получить либо успешный результат валидации, либо другую ошибку
             // но НЕ ошибку загрузки шаблона
+            expect(response.jsonrpc).toBe('2.0');
+            expect(response.result || response.error).toBeDefined();
+        });
+    });
+
+    describe('Windows-специфичные E2E тесты', () => {
+        it('должен корректно работать с Windows-путями', async () => {
+            // Только на Windows
+            if (process.platform !== 'win32') return;
+
+            const windowsPath = join(process.cwd(), 'prompts', 'errors', 'validation-error.md').replace(/\//g, '\\');
+
+            const response = await testContext.clientSimulator.callTool('validate', {
+                context: 'Тест Windows-путей',
+                input: {
+                    data: windowsPath,
+                    type: 'file',
+                },
+                validationType: 'prompts',
+            });
+
+            // Проверяем что система корректно обработала Windows-путь
+            expect(response.jsonrpc).toBe('2.0');
+            expect(response.result || response.error).toBeDefined();
+        });
+
+        it('должен обрабатывать смешанные separators в путях', async () => {
+            const mixedPath = join(process.cwd(), 'prompts/errors', 'validation-error.md');
+
+            const response = await testContext.clientSimulator.callTool('validate', {
+                context: 'Тест смешанных separators',
+                input: {
+                    data: mixedPath,
+                    type: 'file',
+                },
+                validationType: 'prompts',
+            });
+
+            // Проверяем что система корректно обработала смешанные separators
             expect(response.jsonrpc).toBe('2.0');
             expect(response.result || response.error).toBeDefined();
         });

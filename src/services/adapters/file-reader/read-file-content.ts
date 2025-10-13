@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { isAbsolute, resolve } from 'node:path';
 
 import { tryReadFile } from './helpers/file-operations';
 import type { ReadFileContentParams, ReadFileContentResult } from './types';
@@ -32,7 +32,7 @@ export async function readFileContent({
         };
     }
 
-    const strippedPath = path.replace(/^([/\\]+|\.\/|\.\\)/, '');
+    const strippedPath = isAbsolute(path) ? path : path.replace(/^([/\\]+|\.\/|\.\\)/, '');
     const fallbackPath = resolve(process.cwd(), strippedPath);
 
     const { content: fallbackContent } = await tryReadFile(fallbackPath, encoding);

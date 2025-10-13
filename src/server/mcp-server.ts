@@ -27,11 +27,13 @@ export async function startMcpServer(): Promise<void> {
 
         await new Promise<void>((resolve, reject) => {
             process.on('SIGINT', resolve);
-            process.on('SIGTERM', resolve);
+            if (process.platform !== 'win32') {
+                process.on('SIGTERM', resolve);
+            }
             process.on('uncaughtException', reject);
             process.on('unhandledRejection', reject);
         });
-    } catch (err) {
+    } catch (err: unknown) {
         error('💥 Критическая ошибка MCP сервера:', {
             error: err,
             stack: err instanceof Error ? err.stack : 'No stack trace',

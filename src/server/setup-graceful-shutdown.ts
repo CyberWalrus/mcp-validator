@@ -9,7 +9,10 @@ export function setupGracefulShutdown(): void {
     };
 
     process.on('SIGINT', () => shutdown('SIGINT'));
-    process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+    if (process.platform !== 'win32') {
+        process.on('SIGTERM', () => shutdown('SIGTERM'));
+    }
 
     process.on('uncaughtException', (err) => {
         error('Uncaught Exception:', { error: err });
