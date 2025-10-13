@@ -1,5 +1,5 @@
 import { getPrompt } from '../../lib/cache';
-import type { ValidationInput, ValidationResult } from '../../model/types/main';
+import type { ValidationInput, ValidationInputWithoutEncoding, ValidationResult } from '../../model/config';
 import { callOpenAIForValidation } from './call-openai-for-validation';
 import { formatValidationPrompt } from './format-validation-prompt';
 import { getValidationContent } from './get-validation-content';
@@ -9,7 +9,7 @@ import type { AgentConfig } from './types';
 /** Валидация кода через CodeValidatorAgent */
 export async function validateCodeWithAgent(
     agent: AgentConfig,
-    validationInput: ValidationInput,
+    validationInput: ValidationInput | ValidationInputWithoutEncoding,
 ): Promise<ValidationResult> {
     try {
         const correctPrompt = getPrompt(`validate-${validationInput.validationType}.md`);
@@ -28,7 +28,7 @@ export async function validateCodeWithAgent(
 
         const validationPrompt = formatValidationPrompt(contentResult.content, validationInput);
 
-        const { responseContent, tokensUsed } = await callOpenAIForValidation(agent, validationPrompt);
+        const { responseContent, tokensUsed, duration } = await callOpenAIForValidation(agent, validationPrompt);
 
         if (responseContent === '') {
             return {
@@ -45,7 +45,7 @@ export async function validateCodeWithAgent(
         return {
             issues: parsed.issues.length > 0 ? parsed.issues : [],
             metadata: {
-                duration: 0,
+                duration,
                 fullResponse: responseText,
                 model: agent.model,
                 tokensUsed,
@@ -58,6 +58,11 @@ export async function validateCodeWithAgent(
     } catch (err) {
         return {
             issues: [`Ошибка валидации: ${err instanceof Error ? err.message : String(err)}`],
+            metadata: {
+                duration: undefined, // Модель не вызывалась
+                model: undefined,
+                tokensUsed: undefined,
+            },
             score: 0,
             success: false,
             type: validationInput.validationType,

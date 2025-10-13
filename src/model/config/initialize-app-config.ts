@@ -2,9 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { getPackageName, getPackageVersion } from '../../lib/helpers/version';
 import { PACKAGE_RESOURCE_PATHS } from '../constants/main';
-import { appConfigSchema } from '../schemas/main';
-import type { AppConfig } from '../types/main';
+import { appConfigSchema } from './schemas';
+import type { AppConfig } from './types';
 
 /** Получает путь к корню пакета */
 function getPackageRoot(): string {
@@ -21,16 +22,23 @@ function getPackageRoot(): string {
                     return searchDir;
                 }
             }
+        } catch {
             // eslint-disable-next-line no-empty
-        } catch {}
+        }
         searchDir = dirname(searchDir);
     }
 
     return join(dirname(currentFilePath), '../../..');
 }
 
-/** Формирует конфигурацию приложения из переменных окружения */
-export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+/** Внутреннее хранилище конфигурации */
+let appConfigInternal = {} as AppConfig;
+
+/** Глобальная конфигурация приложения - инициализируется через initializeAppConfig() */
+export const APP_CONFIG = appConfigInternal;
+
+/** Инициализирует конфигурацию приложения из переменных окружения */
+export function initializeAppConfig(env: NodeJS.ProcessEnv = process.env): void {
     const packageRoot = getPackageRoot();
 
     const rawConfig = {
@@ -42,6 +50,13 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
         },
         logging: {
             level: env.LOG_LEVEL,
+        },
+        mcp: {
+            description:
+                env.MCP_SERVER_DESCRIPTION || 'Production-ready MCP validator for Cursor IDE with 4 validation types',
+            name: getPackageName(),
+            protocolVersion: env.MCP_PROTOCOL_VERSION || '2024-11-05',
+            version: getPackageVersion(),
         },
         model: {
             maxTokens: env.AI_MAX_TOKENS,
@@ -57,14 +72,34 @@ export function createAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig
             isE2ETest: env.MCP_E2E_TEST === 'true',
             nodePath: env.NODE_PATH || '',
         },
+        testing: {
+            consistencyThresholds: {
+                anomalyLengthMultiplier: 0.5,
+                anomalyLongMultiplier: 2.0,
+                anomalySlowMultiplier: 1.5,
+                timeLow: 0.3,
+                varianceHigh: 0.7,
+                varianceLow: 0.2,
+                varianceMedium: 0.5,
+            },
+        },
         timeouts: {
             apiRequest: env.TIMEOUT_API_REQUEST,
             validation: env.TIMEOUT_VALIDATION,
         },
+        validation: {
+            limits: {
+                contextMaxLength: 5000,
+                timeoutMax: 120000,
+                timeoutMin: 1000,
+            },
+        },
     };
 
     try {
-        return appConfigSchema.parse(rawConfig);
+        const validated = appConfigSchema.parse(rawConfig);
+        appConfigInternal = validated;
+        Object.assign(APP_CONFIG, validated);
     } catch (error: unknown) {
         if (error && typeof error === 'object' && 'issues' in error && Array.isArray(error.issues)) {
             const firstIssue = error.issues[0] as { message?: string };

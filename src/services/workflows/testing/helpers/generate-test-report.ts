@@ -6,9 +6,9 @@ export function generateTestReport(
     results: TestIterationResult[],
     consistency: ConsistencyAnalysis,
 ): string {
-    const successfulTests = results.filter((r) => r.success).length;
-    const failedTests = results.filter((r) => !r.success).length;
-    const averageTime = Math.round(results.reduce((sum, r) => sum + r.responseTime, 0) / results.length);
+    const successfulTests = results.filter((r) => r.isSuccess).length;
+    const failedTests = results.filter((r) => !r.isSuccess).length;
+    const averageTime = Math.round(results.reduce((sum, r) => sum + r.duration, 0) / results.length);
 
     return `# 🧪 Отчет тестирования промпта
 
@@ -55,8 +55,8 @@ ${
 ${results
     .map(
         (r) =>
-            `| ${r.iteration} | ${r.success ? '✅' : '❌'} | ${r.responseTime} | ${
-                r.success ? `${r.response?.length || 0} символов` : r.error || 'Ошибка'
+            `| ${r.iteration} | ${r.isSuccess ? '✅' : '❌'} | ${r.duration} | ${
+                r.isSuccess ? `${r.content?.length || 0} символов` : r.error || 'Ошибка'
             } |`,
     )
     .join('\n')}

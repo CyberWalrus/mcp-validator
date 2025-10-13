@@ -199,6 +199,27 @@ Select checklist by `architecture_type`:
     - [ ] Each module has `index.ts` facade; no cross-imports inside layer
     - [ ] Tests colocated per module in `__tests__/`
 
+#### Special Case: Model Layer Container Folders
+
+For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
+
+- [ ] Container folders are NOT modular units (no facade required at container level)
+- [ ] Modular units are the files inside: `main.ts` (simple) or `main/index.ts` (complex)
+- [ ] Each `main.ts` is self-contained with all exports
+- [ ] Alternative: `main/` folder with `index.ts` facade for complex sub-groups
+- [ ] No intermediate facades between container and modular unit
+
+Example valid structures:
+
+- `src/model/constants/main.ts` - modular unit (simple)
+- `src/model/schemas/main.ts` - modular unit (simple, re-exports from other files)
+- `src/model/types/main/index.ts` - modular unit (complex, multiple files)
+
+Example invalid structures:
+
+- `src/model/constants/index.ts` - unnecessary facade for container
+- `src/model/schemas/index.ts` then `schemas/main.ts` - double facade
+
 - fsd_standard:
     - [ ] Layers: app → pages → widgets → features → entities → shared → core
     - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices

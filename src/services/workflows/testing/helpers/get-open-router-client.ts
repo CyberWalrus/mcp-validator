@@ -1,5 +1,5 @@
+import { APP_CONFIG } from '../../../../model/config';
 import type { OpenRouterRequest, OpenRouterResponse } from '../../../adapters/openrouter/types';
-import { getConfigOrThrow } from './get-config-or-throw';
 
 type OpenRouterClientFunction = (request: OpenRouterRequest) => Promise<OpenRouterResponse>;
 
@@ -11,7 +11,7 @@ export async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
         return openRouterClient;
     }
 
-    const config = getConfigOrThrow();
+    const config = APP_CONFIG;
 
     if (config.runtime.environment === 'test' && config.runtime.isE2ETest) {
         const { getOpenRouterClient: createOpenRouterClient } = await import(

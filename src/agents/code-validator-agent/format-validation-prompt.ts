@@ -1,7 +1,10 @@
-import type { ValidationInput } from '../../model/types/main';
+import type { ValidationInput, ValidationInputWithoutEncoding } from '../../model/config';
 
 /** Форматирует промпт для валидации кода */
-export function formatValidationPrompt(content: string, validationInput: ValidationInput): string {
+export function formatValidationPrompt(
+    content: string,
+    validationInput: ValidationInput | ValidationInputWithoutEncoding,
+): string {
     const contextSection = validationInput.context ? `## Контекст:\n${validationInput.context}` : '';
 
     return `

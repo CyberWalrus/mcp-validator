@@ -1,5 +1,5 @@
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
-import type { ValidationResult } from '../../model/types/main';
+import type { ValidationResult } from '../../model/config';
+import { APP_CONFIG } from '../../model/config';
 
 /** Форматирование результата как раньше - ответ ИИ + метаданные */
 export function formatSuccessfulValidation(result: ValidationResult): string {
@@ -11,7 +11,7 @@ export function formatSuccessfulValidation(result: ValidationResult): string {
     const durationValue = metadata?.duration;
     const tokensValue = metadata?.tokensUsed;
 
-    const config = getConfigOrThrow();
+    const config = APP_CONFIG;
     const modelStr = typeof modelValue === 'string' ? modelValue : config.model.name;
     const durationStr =
         typeof durationValue === 'number' || typeof durationValue === 'string' ? String(durationValue) : 'н/д';

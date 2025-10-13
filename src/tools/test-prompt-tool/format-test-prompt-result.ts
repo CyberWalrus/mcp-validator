@@ -1,4 +1,4 @@
-import type { TestPromptResult } from '../../model/types/main';
+import type { TestPromptResult } from '../../model/config';
 
 /** Форматирование результата тестирования промпта в markdown */
 export function formatTestPromptResult(result: TestPromptResult): string {

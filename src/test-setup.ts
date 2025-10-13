@@ -1,18 +1,18 @@
 import { initializePromptCache } from './lib/cache';
-import { reloadAppConfig } from './model/config';
+import { initializeAppConfig } from './model/config';
 
 /** Инициализирует тестовое окружение */
-export async function initTestEnvironment(): Promise<void> {
+export function initTestEnvironment(): void {
     if (!process.env.API_KEY) {
         process.env.API_KEY = 'test-api-key';
     }
 
     if (!process.env.LOG_LEVEL) {
-        process.env.LOG_LEVEL = 'INFO';
+        process.env.LOG_LEVEL = 'WARN';
     }
 
-    await reloadAppConfig();
+    initializeAppConfig();
     initializePromptCache();
 }
 
-await initTestEnvironment();
+initTestEnvironment();

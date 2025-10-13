@@ -1,9 +1,11 @@
-import type { ValidationInput } from '../../model/types/main';
+import type { ValidationInput, ValidationInputWithoutEncoding } from '../../model/config';
 import { readFileContent } from '../../services/adapters/file-reader';
 import type { ValidationContentResult } from './types';
 
 /** Получает контент для валидации из входных данных */
-export async function getValidationContent(validationInput: ValidationInput): Promise<ValidationContentResult> {
+export async function getValidationContent(
+    validationInput: ValidationInput | ValidationInputWithoutEncoding,
+): Promise<ValidationContentResult> {
     if (validationInput.input.type === 'file') {
         const fileResult = await readFileContent({
             encoding: validationInput.input.encoding || 'utf8',

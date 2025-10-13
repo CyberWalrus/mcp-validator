@@ -16,7 +16,7 @@ export function clearMockResponses(): void {
 
 /** Тестовая версия клиента OpenRouter, использует моки */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function makeOpenRouterRequest(_request: OpenRouterRequest): Promise<OpenRouterResponse> {
+export async function makeOpenRouterRequest(_request: OpenRouterRequest): Promise<OpenRouterResponse> {
     const startTime = Date.now();
 
     // Получаем следующий мок-ответ
@@ -39,6 +39,9 @@ export function makeOpenRouterRequest(_request: OpenRouterRequest): Promise<Open
             usage: { total_tokens: 100 },
         };
 
+        // Добавляем минимальную задержку для реалистичного duration
+        await new Promise(resolve => setTimeout(resolve, 1));
+        
         const duration = Date.now() - startTime;
         const choice = defaultResponse.choices[0];
 
@@ -54,8 +57,8 @@ export function makeOpenRouterRequest(_request: OpenRouterRequest): Promise<Open
         });
     }
 
-    // Мгновенные мок-ответы для быстрого тестирования
-    // (убрана искусственная задержка 100мс)
+    // Добавляем минимальную задержку для реалистичного duration
+    await new Promise(resolve => setTimeout(resolve, 1));
 
     const duration = Date.now() - startTime;
 

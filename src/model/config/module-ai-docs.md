@@ -21,15 +21,11 @@ size_limits:
 <public_api>
 **Функции:**
 
-- `createAppConfig(): AppConfig` - создание конфигурации приложения
-- `reloadAppConfig(): AppConfig` - перезагрузка конфигурации
-- `getAppConfigError(): string | null` - получение ошибки конфигурации
+- `initializeAppConfig(env?: NodeJS.ProcessEnv): void` - инициализация конфигурации приложения из переменных окружения
 
 **Константы:**
 
-- `APP_CONFIG` - кэшированная конфигурация приложения
-- `CACHED_CONFIG` - состояние кэша конфигурации
-- `CONFIG_STATE` - состояние конфигурации
+- `APP_CONFIG` - глобальная конфигурация приложения (инициализируется через initializeAppConfig)
 
 **Типы:**
 
@@ -40,27 +36,24 @@ size_limits:
   </public_api>
 
 <usage_examples>
-**Основное использование:**
+**Инициализация:**
 
 ```typescript
-import { APP_CONFIG } from './config';
+import { initializeAppConfig } from './model/config';
 
-// Использование конфигурации
-const openrouterKey = APP_CONFIG.openrouter.apiKey;
-const logLevel = APP_CONFIG.logging.level;
+// Инициализация конфигурации в точке входа приложения
+initializeAppConfig();
 ```
 
-**Интеграция:**
+**Использование:**
 
 ```typescript
-// Создание конфигурации в начале приложения
-import { createAppConfig } from './model/config';
+import { APP_CONFIG } from './model/config';
 
-const config = createAppConfig();
-if (config.errors.length > 0) {
-    console.error('Ошибки конфигурации:', config.errors);
-    process.exit(1);
-}
+// Использование конфигурации после инициализации
+const apiKey = APP_CONFIG.api.key;
+const logLevel = APP_CONFIG.logging.level;
+const modelName = APP_CONFIG.model.name;
 ```
 
 </usage_examples>
@@ -69,11 +62,8 @@ if (config.errors.length > 0) {
 
 ```xml
 <module name="config">
-    <facade name="index.ts" role="unit_facade" exports="APP_CONFIG, createAppConfig, reloadAppConfig, getAppConfigError"/>
-    <file name="create-app-config.ts" role="function" purpose="создание конфигурации"/>
-    <file name="get-app-config-error.ts" role="function" purpose="получение ошибок"/>
-    <file name="reload-app-config.ts" role="function" purpose="перезагрузка"/>
-    <file name="config-constants.ts" role="config" purpose="константы конфигурации"/>
+    <facade name="index.ts" role="unit_facade" exports="APP_CONFIG, initializeAppConfig"/>
+    <file name="initialize-app-config.ts" role="function" purpose="инициализация конфигурации"/>
     <file name="constants.ts" role="config" purpose="базовые константы"/>
     <file name="schemas.ts" role="schemas" purpose="Zod схемы валидации"/>
     <file name="types.ts" role="types" purpose="типы конфигурации"/>
@@ -90,6 +80,6 @@ if (config.errors.length > 0) {
 </dependencies>
 
 <notes>
-**Особенности:** Типизированная конфигурация, Zod валидация, кэширование, поддержка env переменных
-**Ограничения:** Только переменные окружения, требует корректных env значений
+**Особенности:** Типизированная конфигурация, Zod валидация с дефолтными значениями, глобальная константа APP_CONFIG, инициализация в точке входа
+**Ограничения:** Только переменные окружения, требует вызова initializeAppConfig() перед использованием APP_CONFIG
 </notes>

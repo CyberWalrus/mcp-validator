@@ -1,6 +1,5 @@
 import { initializePromptCache } from '../cache';
 import { error, info } from '../helpers/logger/index';
-import { ensureConfiguration } from './ensure-configuration';
 import { showHelp } from './show-help';
 import { showVersion } from './show-version';
 import { startMcpServer } from './start-mcp-server';
@@ -10,7 +9,6 @@ export async function main(): Promise<void> {
     const args = process.argv.slice(2);
 
     if (args.includes('--help') || args.includes('-h')) {
-        ensureConfiguration();
         initializePromptCache();
         showHelp();
         process.exit(0);
@@ -20,8 +18,6 @@ export async function main(): Promise<void> {
         showVersion();
         process.exit(0);
     }
-
-    ensureConfiguration();
 
     info('🚀 MCP Validator 2.0 запускается...');
     info('🔧 Официальный MCP SDK + упрощенная архитектура');

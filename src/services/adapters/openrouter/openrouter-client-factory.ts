@@ -1,21 +1,7 @@
-import { APP_CONFIG, getAppConfigError } from '../../../model/config';
-import type { AppConfig } from '../../../model/types/main';
+import { APP_CONFIG } from '../../../model/config';
 import type { OpenRouterClientFunction } from './types';
 
 let cachedClient: OpenRouterClientFunction | null = null;
-
-/** Возвращает конфигурацию приложения или бросает ошибку */
-function getConfigOrThrow(): AppConfig {
-    const config = APP_CONFIG;
-    const configError = getAppConfigError();
-
-    if (!config || configError) {
-        const message = configError?.message ?? 'Конфигурация приложения недоступна';
-        throw new Error(message);
-    }
-
-    return config;
-}
 
 /** Получает правильный OpenRouter клиент в зависимости от режима */
 export async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
@@ -23,7 +9,7 @@ export async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
         return cachedClient;
     }
 
-    const config = getConfigOrThrow();
+    const config = APP_CONFIG;
     const { isE2ETest } = config.runtime;
 
     if (isE2ETest) {

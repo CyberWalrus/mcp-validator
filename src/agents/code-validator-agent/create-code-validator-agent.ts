@@ -1,12 +1,12 @@
 import OpenAI from 'openai';
 
 import { getPrompt } from '../../lib/cache';
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
+import { APP_CONFIG } from '../../model/config';
 import type { CodeValidatorAgentResult } from './types';
 
 /** CodeValidatorAgent для валидации кода с загрузкой промптов из .md файлов */
 export function createCodeValidatorAgent(): CodeValidatorAgentResult {
-    const config = getConfigOrThrow();
+    const config = APP_CONFIG;
     const {
         api: { key, url },
         model: { name: modelName },

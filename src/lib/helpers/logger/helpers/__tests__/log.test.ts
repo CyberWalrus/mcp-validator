@@ -24,9 +24,9 @@ describe('log', () => {
         const { shouldLog } = await import('../should-log');
         vi.mocked(shouldLog).mockReturnValue(true);
 
-        log('INFO', 'Test message');
+        log('WARN', 'Test message');
 
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] Test message');
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] Test message');
     });
 
     it('не должен выводить сообщение когда shouldLog возвращает false', async () => {
@@ -43,9 +43,9 @@ describe('log', () => {
         vi.mocked(shouldLog).mockReturnValue(true);
         const meta = { action: 'login', userId: 123 };
 
-        log('INFO', 'User action', meta);
+        log('WARN', 'User action', meta);
 
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] User action', meta);
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] User action', meta);
     });
 
     it('должен правильно форматировать сообщения для разных уровней', async () => {
@@ -53,42 +53,42 @@ describe('log', () => {
         vi.mocked(shouldLog).mockReturnValue(true);
 
         // Тестируем только один уровень для простоты
-        log('INFO', 'Test message');
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] Test message');
+        log('WARN', 'Test message');
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] Test message');
     });
 
     it('должен использовать актуальное время для каждого вызова', async () => {
         const { shouldLog } = await import('../should-log');
         vi.mocked(shouldLog).mockReturnValue(true);
 
-        log('INFO', 'First message');
+        log('WARN', 'First message');
 
         // Передвигаем время на 1 секунду
         vi.setSystemTime(new Date('2024-01-15T12:00:01.000Z'));
 
-        log('INFO', 'Second message');
+        log('WARN', 'Second message');
 
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] First message');
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:01.000Z] [INFO] Second message');
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] First message');
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:01.000Z] [WARN] Second message');
     });
 
     it('должен обрабатывать пустые сообщения', async () => {
         const { shouldLog } = await import('../should-log');
         vi.mocked(shouldLog).mockReturnValue(true);
 
-        log('INFO', '');
+        log('WARN', '');
 
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] ');
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] ');
     });
 
     it('должен обрабатывать сообщения с специальными символами', async () => {
         const { shouldLog } = await import('../should-log');
         vi.mocked(shouldLog).mockReturnValue(true);
 
-        log('INFO', 'Message with "quotes" and \n newlines');
+        log('WARN', 'Message with "quotes" and \n newlines');
 
         expect(mockedConsoleError).toHaveBeenCalledWith(
-            '[2024-01-15T12:00:00.000Z] [INFO] Message with "quotes" and \n newlines',
+            '[2024-01-15T12:00:00.000Z] [WARN] Message with "quotes" and \n newlines',
         );
     });
 
@@ -101,9 +101,9 @@ describe('log', () => {
             user: { id: 123, name: 'John' },
         };
 
-        log('INFO', 'Complex meta', complexMeta);
+        log('WARN', 'Complex meta', complexMeta);
 
-        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [INFO] Complex meta', complexMeta);
+        expect(mockedConsoleError).toHaveBeenCalledWith('[2024-01-15T12:00:00.000Z] [WARN] Complex meta', complexMeta);
     });
 
     it('должен проверять shouldLog перед выводом', async () => {

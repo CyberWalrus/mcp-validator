@@ -2,9 +2,10 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 import { createCodeValidatorAgent, validateCodeWithAgent } from '../../agents/code-validator-agent';
 import type { AgentConfig } from '../../agents/code-validator-agent/types';
-import type { ValidationInput, ValidationResult, ValidationType } from '../../model/types/main';
+import type { ValidationInput, ValidationResult, ValidationType } from '../../model/config';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
 import { formatSuccessfulValidation } from './format-successful-validation';
+import { formatValidationMetadata } from './format-validation-metadata';
 
 /** Глобальный кэш агента для повторного использования */
 let codeValidatorAgent: AgentConfig | null = null;
@@ -206,8 +207,11 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             throw new Error(errorResult.error || 'Ошибка форматирования результата');
         }
 
+        let { content } = errorResult;
+        content += formatValidationMetadata(result);
+
         return {
-            content: errorResult.content,
+            content,
             isError: true,
         };
     } catch (error) {

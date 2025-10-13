@@ -81,12 +81,12 @@ describe('Testing Schemas', () => {
     describe('TestIterationResultSchema', () => {
         it('должен валидировать успешный результат', () => {
             const successResult = {
+                content: 'Успешный ответ',
+                duration: 1000,
                 endTime: '2024-01-01T10:00:01Z',
                 isSuccess: true,
                 iteration: 1,
                 model: 'claude-3-sonnet',
-                response: 'Успешный ответ',
-                responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
             };
 
@@ -100,10 +100,11 @@ describe('Testing Schemas', () => {
 
         it('должен валидировать результат с ошибкой', () => {
             const errorResult = {
+                content: '',
+                duration: 500,
                 error: 'Network timeout',
                 isSuccess: false,
                 iteration: 2,
-                responseTime: 500,
                 startTime: '2024-01-01T10:00:00Z',
             };
 
@@ -118,9 +119,10 @@ describe('Testing Schemas', () => {
 
         it('должен отклонять отрицательное время выполнения', () => {
             const invalidResult = {
+                content: 'Test response',
+                duration: -100,
                 isSuccess: true,
                 iteration: 1,
-                responseTime: -100,
                 startTime: '2024-01-01T10:00:00Z',
             };
 
@@ -131,9 +133,10 @@ describe('Testing Schemas', () => {
 
         it('должен отклонять недопустимый номер итерации', () => {
             const invalidResult = {
+                content: 'Test response',
+                duration: 1000,
                 isSuccess: true,
                 iteration: 0,
-                responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
             };
 
@@ -207,10 +210,10 @@ describe('Testing Schemas', () => {
                 },
                 results: [
                     {
+                        content: 'Ответ',
+                        duration: 1000,
                         isSuccess: true,
                         iteration: 1,
-                        response: 'Ответ',
-                        responseTime: 1000,
                         startTime: '2024-01-01T10:00:00Z',
                     },
                 ],

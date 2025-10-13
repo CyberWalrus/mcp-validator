@@ -1,10 +1,10 @@
-import { getConfigOrThrow } from '../../../../model/config/get-config-or-throw';
+import { APP_CONFIG } from '../../../../model/config';
 import { DEFAULT_TEST_PARAMS } from '../constants';
 import type { ParallelTestParams } from '../types';
 
 /** Валидирует параметры параллельного тестирования */
 export function validateTestParams(params: ParallelTestParams): void {
-    const config = getConfigOrThrow();
+    const config = APP_CONFIG;
     const { validation } = config;
 
     if (!validation) {

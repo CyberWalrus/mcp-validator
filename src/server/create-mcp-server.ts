@@ -1,15 +1,18 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 
+import { APP_CONFIG } from '../model/config';
 import { handleTestPromptTool, testPromptTool } from '../tools/test-prompt-tool';
 import { handleValidateTool, validateTool } from '../tools/validate-tool';
 
 /** Создание и инициализация MCP сервера с официальным SDK */
 export function createMcpServer(): Server {
+    const config = APP_CONFIG;
+
     const server = new Server(
         {
-            name: 'mcp-validator',
-            version: '2.0.0',
+            name: config.mcp.name,
+            version: config.mcp.version,
         },
         {
             capabilities: {

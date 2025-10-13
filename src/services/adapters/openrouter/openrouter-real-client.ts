@@ -1,18 +1,12 @@
 /** Реальная реализация OpenRouter клиента для production */
 
-import { APP_CONFIG, getAppConfigError } from '../../../model/config';
+import { APP_CONFIG } from '../../../model/config';
 import { DEFAULT_HEADERS } from './constants';
 import type { OpenRouterRequest, OpenRouterResponse } from './types';
 
 /** Выполняет запрос к OpenRouter API */
 export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<OpenRouterResponse> {
     const startTime = Date.now();
-
-    const configError = getAppConfigError();
-    if (configError) {
-        throw new Error(`Failed to load OpenRouter configuration: ${configError.message}`);
-    }
-
     const config = APP_CONFIG;
 
     const {

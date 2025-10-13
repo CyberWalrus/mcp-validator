@@ -1,13 +1,13 @@
 import OpenAI from 'openai';
 
 import { getPrompt } from '../../lib/cache';
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
+import { APP_CONFIG } from '../../model/config';
 import type { TestPromptAgentResult } from './types';
 
 /** TestPromptAgent для параллельного тестирования промптов */
 export function createTestPromptAgent(): TestPromptAgentResult {
     try {
-        const config = getConfigOrThrow();
+        const config = APP_CONFIG;
         const {
             api: { key, url },
             model: { name: modelName },

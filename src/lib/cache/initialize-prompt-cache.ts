@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { APP_CONFIG, getAppConfigError } from '../../model/config';
+import { APP_CONFIG } from '../../model/config';
 import { error as logError } from '../helpers/logger';
 import { PROMPT_CACHE } from './prompt-cache-constants';
 import type { CacheInitResult, PromptPaths } from './types';
@@ -9,11 +9,6 @@ import type { CacheInitResult, PromptPaths } from './types';
 /** Инициализация кэша промптов */
 export function initializePromptCache(): CacheInitResult {
     const config = APP_CONFIG;
-    const configError = getAppConfigError();
-
-    if (!config || configError) {
-        throw new Error(configError?.message ?? 'Конфигурация приложения недоступна');
-    }
 
     const paths: PromptPaths = {
         errors: join(config.paths.prompts, 'errors'),

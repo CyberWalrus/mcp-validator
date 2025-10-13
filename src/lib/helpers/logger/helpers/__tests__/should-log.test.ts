@@ -1,20 +1,7 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 describe('shouldLog', () => {
     const originalEnv = process.env;
-
-    /** Перезагружает конфигурацию приложения */
-    async function reloadConfig(): Promise<void> {
-        const configModule = await import('../../../../../model/config');
-
-        configModule.reloadAppConfig();
-    }
-
-    /** Загружает функцию shouldLog */
-    async function loadShouldLog() {
-        await reloadConfig();
-        const module = await import('../should-log');
-
-        return module.shouldLog;
-    }
 
     beforeEach(() => {
         vi.resetModules();
@@ -22,16 +9,22 @@ describe('shouldLog', () => {
         process.env.API_KEY = 'test-key';
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         process.env = originalEnv;
-        await reloadConfig();
     });
 
     /** Проверяет возврат true для DEBUG при уровне DEBUG */
     it('должен возвращать true для DEBUG при уровне DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'DEBUG' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const result = shouldLog('DEBUG');
 
         expect(result).toBe(true);
@@ -41,7 +34,14 @@ describe('shouldLog', () => {
     it('должен возвращать true для INFO при уровне DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'DEBUG' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const result = shouldLog('INFO');
 
         expect(result).toBe(true);
@@ -51,7 +51,14 @@ describe('shouldLog', () => {
     it('должен возвращать false для DEBUG при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const result = shouldLog('DEBUG');
 
         expect(result).toBe(false);
@@ -61,7 +68,14 @@ describe('shouldLog', () => {
     it('должен возвращать true для INFO при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const result = shouldLog('INFO');
 
         expect(result).toBe(true);
@@ -71,7 +85,14 @@ describe('shouldLog', () => {
     it('должен возвращать true для WARN при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const result = shouldLog('WARN');
 
         expect(result).toBe(true);
@@ -83,7 +104,15 @@ describe('shouldLog', () => {
 
         for (const level of levels) {
             process.env.LOG_LEVEL = level;
-            const shouldLog = await loadShouldLog();
+
+            // Мокируем APP_CONFIG
+            vi.doMock('../../../../../model/config', () => ({
+                APP_CONFIG: {
+                    logging: { level },
+                },
+            }));
+
+            const { shouldLog } = await import('../should-log');
             const result = shouldLog('ERROR');
 
             expect(result).toBe(true);
@@ -94,7 +123,14 @@ describe('shouldLog', () => {
     it('должен использовать INFO как уровень по умолчанию', async () => {
         delete process.env.LOG_LEVEL;
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG с уровнем по умолчанию
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const debugResult = shouldLog('DEBUG');
         const infoResult = shouldLog('INFO');
 
@@ -106,7 +142,14 @@ describe('shouldLog', () => {
     it('должен использовать INFO при некорректном уровне в переменной окружения', async () => {
         process.env.LOG_LEVEL = 'INVALID_LEVEL' as any;
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG с уровнем по умолчанию
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const debugResult = shouldLog('DEBUG');
         const infoResult = shouldLog('INFO');
 
@@ -118,7 +161,14 @@ describe('shouldLog', () => {
     it('должен правильно работать с уровнем WARN', async () => {
         process.env.LOG_LEVEL = 'WARN';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'WARN' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const debugResult = shouldLog('DEBUG');
         const infoResult = shouldLog('INFO');
         const warnResult = shouldLog('WARN');
@@ -134,7 +184,14 @@ describe('shouldLog', () => {
     it('должен правильно работать с уровнем ERROR', async () => {
         process.env.LOG_LEVEL = 'ERROR';
 
-        const shouldLog = await loadShouldLog();
+        // Мокируем APP_CONFIG
+        vi.doMock('../../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'ERROR' },
+            },
+        }));
+
+        const { shouldLog } = await import('../should-log');
         const debugResult = shouldLog('DEBUG');
         const infoResult = shouldLog('INFO');
         const warnResult = shouldLog('WARN');

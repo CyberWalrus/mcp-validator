@@ -104,7 +104,7 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 - [ ] **Array methods** - Instead of for/while loops
 - [ ] **Explicit comparisons** - `value === null`, not `!value`
 - [ ] **Curly braces** - Always use in if/else statements
-- [ ] **No inline comments** - Strictly forbid `// comments` inside function bodies (JSDoc above functions required)
+- [ ] **No inline comments** - Strictly forbid `// comments` inside function bodies (JSDoc above functions required). Exception: `@ts-ignore`, `@ts-expect-error`, `eslint-disable` are allowed but should be flagged for review.
 
 **Import/Export Rules:**
 
@@ -250,7 +250,7 @@ Use this EXACT format optimized for MCP validator processing:
 - **[CRITICAL]** Missing curly braces in if/else statements (applicable to function files)
 - **[CRITICAL]** Using `interface` instead of `type`
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
-- **[CRITICAL]** Inline comments (`//`) inside function bodies
+- **[CRITICAL]** Inline comments (`//`) inside function bodies (exception: `@ts-ignore`, `@ts-expect-error`, `eslint-disable` - flag for review but not critical)
 - **[CRITICAL]** Missing JSDoc documentation (NOT applicable to barrel files)
 - **[CRITICAL]** Barrel file importing from external directories (barrel files must only import from current directory and subdirectories)
 - **[CRITICAL]** Deep nesting instead of guard clauses (applicable to function files)
@@ -271,7 +271,7 @@ Use this EXACT format optimized for MCP validator processing:
 2. **[BLOCKS MERGE]** Replace `interface` with `type` declarations
 3. **[BLOCKS MERGE]** Add curly braces to all if/else statements (if function file)
 4. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format (NOT required for barrel files)
-5. **[BLOCKS MERGE]** Remove inline comments from function bodies
+5. **[BLOCKS MERGE]** Remove inline comments from function bodies (except `@ts-ignore`, `@ts-expect-error`, `eslint-disable` - review but don't remove)
 6. **[BLOCKS MERGE]** Add explicit return types to all functions (if function file)
 7. **[BLOCKS MERGE]** Add proper prefixes to boolean variables
 8. **[BLOCKS MERGE]** Replace `enum` with union types
@@ -287,6 +287,7 @@ Use this EXACT format optimized for MCP validator processing:
 18. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
 19. **[LOW]** Replace for loops with array methods (if function file)
 20. **[LOW]** Improve variable naming descriptiveness
+21. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
 </recommendations>
 
 </validation_result>

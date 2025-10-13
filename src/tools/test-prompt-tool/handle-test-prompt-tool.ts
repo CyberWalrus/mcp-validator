@@ -1,7 +1,7 @@
 import { createTestPromptAgent, testPromptWithAgent } from '../../agents/test-prompt-agent';
 import type { AgentConfig } from '../../agents/test-prompt-agent/types';
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
-import type { TestPromptInput, TestPromptResult } from '../../model/types/main';
+import type { TestPromptInput, TestPromptResult } from '../../model/config';
+import { APP_CONFIG } from '../../model/config';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
 import { TEST_PROMPT_TOOL } from './constants';
 import { formatTestPromptResult } from './format-test-prompt-result';
@@ -45,7 +45,7 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
             };
         }
 
-        const config = getConfigOrThrow();
+        const config = APP_CONFIG;
         const testInput: TestPromptInput = {
             iterations: typeof params.iterations === 'number' ? params.iterations : 5,
             prompt: params.prompt,

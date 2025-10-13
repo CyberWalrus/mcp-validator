@@ -7,12 +7,12 @@ export function generateDetailedResults(results: TestIterationResult[]): string 
 
     const tableRows = results
         .map((result) => {
-            const status = result.success ? '✅' : '❌';
-            const details = result.success
-                ? `${result.response?.length || 0} символов`
+            const status = result.isSuccess ? '✅' : '❌';
+            const details = result.isSuccess
+                ? `${result.content?.length || 0} символов`
                 : `${result.error?.substring(0, 50)}...` || 'Неизвестная ошибка';
 
-            return `| ${result.iteration} | ${status} | ${result.responseTime} | ${result.model || 'N/A'} | ${details} |`;
+            return `| ${result.iteration} | ${status} | ${result.duration} | ${result.model || 'N/A'} | ${details} |`;
         })
         .join('\n');
 

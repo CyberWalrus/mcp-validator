@@ -1,9 +1,10 @@
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
+import { APP_CONFIG } from '../../model/config';
 import type { AgentConfig, OpenAICallResult } from './types';
 
 /** Вызывает OpenAI API для валидации (E2E или реальный) */
 export async function callOpenAIForValidation(agent: AgentConfig, validationPrompt: string): Promise<OpenAICallResult> {
-    const config = getConfigOrThrow();
+    const startTime = Date.now();
+    const config = APP_CONFIG;
 
     if (config.runtime.isE2ETest) {
         const { getOpenRouterClient } = await import('../../services/adapters/openrouter/openrouter-client-factory');
@@ -12,7 +13,10 @@ export async function callOpenAIForValidation(agent: AgentConfig, validationProm
             prompt: validationPrompt,
         });
 
+        const duration = Date.now() - startTime;
+
         return {
+            duration,
             responseContent: mockResponse.text,
             tokensUsed: mockResponse.tokensUsed,
         };
@@ -34,7 +38,10 @@ export async function callOpenAIForValidation(agent: AgentConfig, validationProm
         temperature: config.model.temperature,
     });
 
+    const duration = Date.now() - startTime;
+
     return {
+        duration,
         responseContent: response.choices[0]?.message?.content || '',
         tokensUsed: response.usage?.total_tokens || 0,
     };

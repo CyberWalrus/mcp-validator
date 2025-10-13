@@ -1,103 +1,111 @@
 name: Publish Package
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
 
 permissions:
-    contents: write
-    packages: write
+  contents: write
+  packages: write
 
 jobs:
-    check-version:
-        runs-on: ubuntu-latest
-        outputs:
-            should-publish: ${{ steps.check.outputs.should-publish }}
-            version: ${{ steps.check.outputs.version }}
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.check.outputs.should-publish }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-            - name: Get package version
-              id: version
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Get package version
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-            - name: Check if version exists in npm
-              id: check
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  echo "Checking if version $VERSION exists in npm..."
+      - name: Check if version exists in npm
+        id: check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Checking if version $VERSION exists in npm..."
 
-                  # Check if the version exists in npm registry
-                  if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
-                    echo "Version $VERSION already exists in npm"
-                    echo "should-publish=false" >> $GITHUB_OUTPUT
-                  else
-                    echo "Version $VERSION not found in npm, will publish"
-                    echo "should-publish=true" >> $GITHUB_OUTPUT
-                  fi
+          # Check if the version exists in npm registry
+          if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
+            echo "Version $VERSION already exists in npm"
+            echo "should-publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION not found in npm, will publish"
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          fi
 
-    publish:
-        needs: check-version
-        if: needs.check-version.outputs.should-publish == 'true'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  publish:
+    needs: check-version
+    if: needs.check-version.outputs.should-publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
-                  registry-url: "https://registry.npmjs.org"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-            - name: Publish to npm
-              run: npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-            - name: Create GitHub Release
-              uses: actions/create-release@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  tag_name: v${{ needs.check-version.outputs.version }}
-                  release_name: Release v${{ needs.check-version.outputs.version }}
-                  body_path: CHANGELOG.md
-                  draft: false
-                  prerelease: false
+      - name: Extract changelog section for current version
+        run: |
+          VERSION="${{ needs.check-version.outputs.version }}"
+          awk "/^## \\[$VERSION\\]/,/^## \\[/{if(/^## \\[$VERSION\\]/)p=1; if(/^## \\[/ && !/^## \\[$VERSION\\]/)exit; if(p)print}" CHANGELOG.md > release_notes.md
+          echo "Extracted changelog for version $VERSION:"
+          cat release_notes.md
 
-    test-only:
-        needs: check-version
-        if: needs.check-version.outputs.should-publish == 'false'
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check-version.outputs.version }}
+          name: Release v${{ needs.check-version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
+  test-only:
+    needs: check-version
+    if: needs.check-version.outputs.should-publish == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-            - name: Run tests
-              run: yarn test
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-            - name: Run linter
-              run: yarn lint
+      - name: Run tests
+        run: yarn test
+
+      - name: Run linter
+        run: yarn lint

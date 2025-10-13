@@ -11,8 +11,8 @@ beforeEach(async () => {
     vi.resetModules();
     process.env.API_KEY = process.env.API_KEY || 'test-key';
 
-    const { reloadAppConfig } = await import('../../../model/config');
-    await reloadAppConfig();
+    const { initializeAppConfig } = await import('../../../model/config');
+    initializeAppConfig();
 
     const cacheModule = await import('../index');
 

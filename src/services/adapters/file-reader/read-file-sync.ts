@@ -1,8 +1,10 @@
 import { readFileSync as readFileSyncFS, statSync as statSyncFS } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { MAX_FILE_SIZE } from '../../workflows/validation/constants';
 import type { FileInput, FileResult } from './types';
+
+// Максимальный размер файла для чтения (1MB)
+const MAX_FILE_SIZE = 1024 * 1024;
 
 /** Безопасное чтение файлов с валидацией (синхронная версия) */
 export function readFileSync(input: FileInput): FileResult {

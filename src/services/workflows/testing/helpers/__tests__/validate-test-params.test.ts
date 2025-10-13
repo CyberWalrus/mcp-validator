@@ -1,24 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getConfigOrThrow } from '../../../../../model/config/get-config-or-throw';
 import type { ParallelTestParams } from '../../types';
 import { validateTestParams } from '../validate-test-params';
 
-vi.mock('../../../../../model/config/get-config-or-throw', () => ({
-    getConfigOrThrow: vi.fn(),
+vi.mock('../../../../../model/config', () => ({
+    APP_CONFIG: {
+        validation: {
+            limits: {
+                contextMaxLength: 5000,
+                timeoutMax: 120000,
+                timeoutMin: 1000,
+            },
+        },
+    },
 }));
 
 describe('validateTestParams', () => {
     beforeEach(() => {
-        vi.mocked(getConfigOrThrow).mockReturnValue({
-            validation: {
-                limits: {
-                    contextMaxLength: 5000,
-                    timeoutMax: 120000,
-                    timeoutMin: 1000,
-                },
-            },
-        } as ReturnType<typeof getConfigOrThrow>);
+        // Конфигурация уже мокирована выше
     });
 
     it('должен успешно валидировать корректные параметры', () => {
@@ -34,6 +33,7 @@ describe('validateTestParams', () => {
 
     it('должен выбрасывать ошибку для пустого промпта', () => {
         const params: ParallelTestParams = {
+            iterations: 5,
             prompt: '',
         };
 
@@ -42,6 +42,7 @@ describe('validateTestParams', () => {
 
     it('должен выбрасывать ошибку для промпта только с пробелами', () => {
         const params: ParallelTestParams = {
+            iterations: 5,
             prompt: '   ',
         };
 
@@ -68,6 +69,7 @@ describe('validateTestParams', () => {
 
     it('должен выбрасывать ошибку для слишком малого timeout', () => {
         const params: ParallelTestParams = {
+            iterations: 5,
             prompt: 'Тест',
             timeout: 500,
         };
@@ -77,6 +79,7 @@ describe('validateTestParams', () => {
 
     it('должен выбрасывать ошибку для слишком большого timeout', () => {
         const params: ParallelTestParams = {
+            iterations: 5,
             prompt: 'Тест',
             timeout: 200000,
         };
@@ -87,6 +90,7 @@ describe('validateTestParams', () => {
     it('должен выбрасывать ошибку для слишком длинного контекста', () => {
         const params: ParallelTestParams = {
             context: 'a'.repeat(5001),
+            iterations: 5,
             prompt: 'Тест',
         };
 
@@ -95,6 +99,7 @@ describe('validateTestParams', () => {
 
     it('должен работать с минимальными параметрами', () => {
         const params: ParallelTestParams = {
+            iterations: 5,
             prompt: 'Минимальный тест',
         };
 

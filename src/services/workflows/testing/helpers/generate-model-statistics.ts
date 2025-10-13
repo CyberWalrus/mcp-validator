@@ -12,9 +12,9 @@ export function generateModelStatistics(results: TestIterationResult[]): string 
 
         const stats = modelStats.get(model)!;
         stats.total++;
-        stats.times.push(result.responseTime);
+        stats.times.push(result.duration);
 
-        if (result.success) {
+        if (result.isSuccess) {
             stats.successful++;
         }
     });

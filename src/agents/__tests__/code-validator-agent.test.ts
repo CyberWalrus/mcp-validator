@@ -45,8 +45,8 @@ describe('CodeValidatorAgent', () => {
         vi.resetModules();
         process.env.API_KEY = 'test-key';
 
-        const { reloadAppConfig } = await import('../../model/config');
-        await reloadAppConfig();
+        const { initializeAppConfig } = await import('../../model/config');
+        initializeAppConfig();
 
         const cacheModule = await import('../../lib/cache');
         const agentModule = await import('../code-validator-agent');
@@ -62,7 +62,7 @@ describe('CodeValidatorAgent', () => {
     it('должен создать агент с базовым промптом validate-code.md', () => {
         expect(agent).toBeDefined();
         expect(agent.instructions).toContain('Code Quality Validator');
-        expect(agent.model).toBe('openai/gpt-oss-120b');
+        expect(agent.model).toBe('openai/gpt-oss-20b:free');
         expect(agent.openai).toBeDefined();
     });
 

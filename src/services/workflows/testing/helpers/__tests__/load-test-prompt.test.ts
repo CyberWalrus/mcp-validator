@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { loadAnalyzePrompt, loadExecutePrompt } from '../load-test-prompt';
+import { loadAnalyzePrompt } from '../load-analyze-prompt';
+import { loadExecutePrompt } from '../load-execute-prompt';
 
 describe('loadExecutePrompt', () => {
     it('должен выбросить ошибку если файл не найден', () => {

@@ -1,6 +1,6 @@
-import { APP_CONFIG, createAppConfig, getAppConfigError, reloadAppConfig } from '../index';
+import { APP_CONFIG, initializeAppConfig } from '../index';
 
-describe('createAppConfig', () => {
+describe('initializeAppConfig', () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
@@ -9,18 +9,17 @@ describe('createAppConfig', () => {
 
     afterEach(() => {
         process.env = originalEnv;
-        reloadAppConfig();
     });
 
-    it('должен возвращать корректную конфигурацию с валидными env переменными', () => {
+    it('должен инициализировать конфигурацию с валидными env переменными', () => {
         process.env.API_KEY = 'test-api-key';
         process.env.API_URL = 'https://api.openrouter.ai/api/v1';
         process.env.TIMEOUT_API_REQUEST = '30000';
         process.env.LOG_LEVEL = 'INFO';
 
-        const config = createAppConfig();
+        initializeAppConfig();
 
-        expect(config).toEqual({
+        expect(APP_CONFIG).toEqual({
             api: {
                 key: 'test-api-key',
                 mockClientPath: 'end-to-end/mocks/openrouter-test-client',
@@ -30,9 +29,15 @@ describe('createAppConfig', () => {
             logging: {
                 level: 'INFO',
             },
+            mcp: {
+                description: 'Production-ready MCP validator for Cursor IDE with 4 validation types',
+                name: 'mcp-validator',
+                protocolVersion: '2024-11-05',
+                version: '0.3.0',
+            },
             model: {
                 maxTokens: 100000,
-                name: 'openai/gpt-oss-120b',
+                name: 'openai/gpt-oss-20b:free',
                 temperature: 0.5,
             },
             paths: {
@@ -44,29 +49,47 @@ describe('createAppConfig', () => {
                 isE2ETest: false,
                 nodePath: '',
             },
+            testing: {
+                consistencyThresholds: {
+                    anomalyLengthMultiplier: 0.5,
+                    anomalyLongMultiplier: 2.0,
+                    anomalySlowMultiplier: 1.5,
+                    timeLow: 0.3,
+                    varianceHigh: 0.7,
+                    varianceLow: 0.2,
+                    varianceMedium: 0.5,
+                },
+            },
             timeouts: {
                 apiRequest: 30000,
                 validation: 30000,
+            },
+            validation: {
+                limits: {
+                    contextMaxLength: 5000,
+                    timeoutMax: 120000,
+                    timeoutMin: 1000,
+                },
             },
         });
     });
 
     it('должен использовать значения по умолчанию для необязательных переменных', () => {
-        process.env.OPENROUTER_API_KEY = 'test-key';
-        delete process.env.OPENROUTER_API_URL;
+        process.env.API_KEY = 'test-key';
+        delete process.env.API_URL;
         delete process.env.TIMEOUT_API_REQUEST;
 
-        const config = createAppConfig();
+        initializeAppConfig();
 
-        expect(config.model.name).toBe('openai/gpt-oss-120b');
-        expect(config.model.maxTokens).toBe(100000);
-        expect(config.model.temperature).toBe(0.5);
-        expect(config.api.url).toBe('https://openrouter.ai/api/v1');
-        expect(config.timeouts.apiRequest).toBe(30000);
-        expect(config.timeouts.validation).toBe(30000);
-        expect(config.api.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
-        expect(config.logging.level).toBe('INFO');
-        expect(config.runtime).toEqual({
+        expect(APP_CONFIG.model.name).toBe('openai/gpt-oss-20b:free');
+        expect(APP_CONFIG.model.maxTokens).toBe(100000);
+        expect(APP_CONFIG.model.temperature).toBe(0.5);
+        expect(APP_CONFIG.api.url).toBe('https://openrouter.ai/api/v1');
+        expect(APP_CONFIG.timeouts.apiRequest).toBe(30000);
+        expect(APP_CONFIG.timeouts.validation).toBe(30000);
+        expect(APP_CONFIG.api.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
+        expect(APP_CONFIG.logging.level).toBe('WARN');
+        expect(APP_CONFIG.runtime).toEqual({
             environment: process.env.NODE_ENV ?? 'development',
             isE2ETest: false,
             nodePath: '',
@@ -76,35 +99,38 @@ describe('createAppConfig', () => {
     it('должен выбрасывать ошибку при отсутствии обязательной переменной API_KEY', () => {
         delete process.env.API_KEY;
 
-        expect(() => createAppConfig()).toThrow('API_KEY is required');
+        expect(() => initializeAppConfig()).toThrow('API_KEY is required');
     });
 
     it('должен выбрасывать ошибку при некорректном значении LOG_LEVEL', () => {
-        process.env.OPENROUTER_API_KEY = 'test-key';
+        process.env.API_KEY = 'test-key';
         process.env.LOG_LEVEL = 'invalid-level' as unknown as 'DEBUG' | 'ERROR' | 'INFO' | 'WARN';
 
-        expect(() => createAppConfig()).toThrow();
+        expect(() => initializeAppConfig()).toThrow();
     });
 
     it('должен выбрасывать ошибку при некорректном значении TIMEOUT_API_REQUEST', () => {
-        process.env.OPENROUTER_API_KEY = 'test-key';
+        process.env.API_KEY = 'test-key';
         process.env.TIMEOUT_API_REQUEST = 'not-a-number';
 
-        expect(() => createAppConfig()).toThrow();
+        expect(() => initializeAppConfig()).toThrow();
     });
 
     it('должен использовать кастомный путь к мок клиенту из переменной окружения', () => {
         process.env.API_KEY = 'test-key';
         process.env.API_MOCK_CLIENT_PATH = 'custom/mock/path';
 
-        const config = createAppConfig();
+        initializeAppConfig();
 
-        expect(config.api.mockClientPath).toBe('custom/mock/path');
+        expect(APP_CONFIG.api.mockClientPath).toBe('custom/mock/path');
     });
 });
 
 describe('APP_CONFIG', () => {
-    it('должен быть доступен и содержать корректную структуру', () => {
+    it('должен быть доступен и содержать корректную структуру после инициализации', () => {
+        process.env.API_KEY = 'test-key';
+        initializeAppConfig();
+
         expect(APP_CONFIG).toBeDefined();
         expect(APP_CONFIG.model).toBeDefined();
         expect(APP_CONFIG.api).toBeDefined();
@@ -112,11 +138,5 @@ describe('APP_CONFIG', () => {
         expect(APP_CONFIG.logging).toBeDefined();
         expect(APP_CONFIG.paths).toBeDefined();
         expect(APP_CONFIG.runtime).toBeDefined();
-    });
-});
-
-describe('getAppConfigError', () => {
-    it('должен возвращать null при отсутствии ошибок', () => {
-        expect(getAppConfigError()).toBeNull();
     });
 });

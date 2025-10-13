@@ -27,6 +27,7 @@ export type ValidationContentResult = { content: string; success: true } | { err
 
 /** Результат вызова OpenAI */
 export type OpenAICallResult = {
+    duration: number;
     responseContent: string;
     tokensUsed: number;
 };

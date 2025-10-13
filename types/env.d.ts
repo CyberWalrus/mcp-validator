@@ -28,5 +28,11 @@ declare namespace NodeJS {
         TIMEOUT_API_REQUEST?: string;
         /** Таймаут для валидации в миллисекундах */
         TIMEOUT_VALIDATION?: string;
+        /** Максимальное количество параллельных запросов */
+        MAX_PARALLEL_REQUESTS?: string;
+        /** Интервал heartbeat в миллисекундах для поддержания MCP соединения */
+        HEARTBEAT_INTERVAL?: string;
+        /** Размер буфера для MCP запросов в байтах */
+        REQUEST_BUFFER_SIZE?: string;
     }
 }

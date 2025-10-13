@@ -2,15 +2,12 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { APP_CONFIG, getAppConfigError } from '../../../model/config';
+import { APP_CONFIG } from '../../../model/config';
 import type { ResourceResolver, ValidationType } from './types';
 
 /** Получает путь к Node.js из конфигурации */
 function getRuntimeNodePath(): string {
-    const config = APP_CONFIG;
-    const configError = getAppConfigError();
-
-    return !config || configError ? '' : config.runtime.nodePath;
+    return APP_CONFIG.runtime.nodePath;
 }
 
 /** Проверяет является ли путь корнем пакета */
@@ -53,7 +50,6 @@ function getPackageRoot(): string {
         }
     }
 
-    // Fallback для dev режима
     return join(dirname(currentFilePath), '../../../..');
 }
 

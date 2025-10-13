@@ -1,31 +1,29 @@
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-/** Кэш для версии пакета */
-let cachedVersion: string | null = null;
+import { getCachedVersion, setCachedVersion } from './reset-version-cache';
 
 /** Читает версию из package.json как единый источник правды */
 export function getPackageVersion(): string {
+    const cachedVersion = getCachedVersion();
     if (cachedVersion !== null) {
         return cachedVersion;
     }
 
     try {
-        const packageJsonPath = resolve(__dirname, '../../../package.json');
+        const currentFileUrl = import.meta.url;
+        const currentFilePath = fileURLToPath(currentFileUrl);
+        const packageJsonPath = resolve(dirname(currentFilePath), '../../../package.json');
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version: string };
-        const version = packageJson.version || '2.0.0';
-        cachedVersion = version;
+        const version = packageJson.version || '0.3.0';
+        setCachedVersion(version);
 
         return version;
     } catch {
-        const fallbackVersion = '2.0.0';
-        cachedVersion = fallbackVersion;
+        const fallbackVersion = '0.3.0';
+        setCachedVersion(fallbackVersion);
 
         return fallbackVersion;
     }
-}
-
-/** Сбрасывает кэш версии (для тестов) */
-export function resetVersionCache(): void {
-    cachedVersion = null;
 }

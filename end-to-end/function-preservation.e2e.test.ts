@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { initializePromptCache } from '../src/lib/cache';
-import { reloadAppConfig } from '../src/model/config';
+import { initializeAppConfig } from '../src/model/config';
 import { renderErrorResponse } from '../src/services/adapters/error-handler';
 // Импорты функций, которые ОБЯЗАТЕЛЬНО должны сохраниться
 import { readFileContent } from '../src/services/adapters/file-reader';
@@ -12,7 +12,7 @@ import { readFileContent } from '../src/services/adapters/file-reader';
 /** E2E тесты сохранения критических функций при миграции */
 describe('🔒 Сохранение функций при миграции на официальные SDK', () => {
     beforeAll(() => {
-        reloadAppConfig();
+        initializeAppConfig();
         initializePromptCache();
     });
 

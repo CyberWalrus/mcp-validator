@@ -2,7 +2,7 @@ import type { TestIterationResult } from '../types';
 
 /** Генерирует статистику по времени выполнения */
 export function generateTimeStatistics(results: TestIterationResult[]): string {
-    const times = results.map((r) => r.responseTime);
+    const times = results.map((r) => r.duration);
     const minTime = Math.min(...times);
     const maxTime = Math.max(...times);
     const avgTime = Math.round(times.reduce((a, b) => a + b, 0) / times.length);

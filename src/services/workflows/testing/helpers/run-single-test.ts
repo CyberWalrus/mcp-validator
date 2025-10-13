@@ -35,25 +35,26 @@ export async function runSingleTest({
         const typedResponse = response;
 
         return {
+            content: typedResponse.text,
+            duration: typedResponse.duration,
             endTime: endTime.toISOString(),
+            isSuccess: true,
             iteration,
             model: typedResponse.model,
-            response: typedResponse.text,
-            responseTime: typedResponse.duration,
             startTime: startTime.toISOString(),
-            success: true,
         };
     } catch (err) {
         const endTime = new Date();
 
         return {
+            content: '',
+            duration: endTime.getTime() - startTime.getTime(),
             endTime: endTime.toISOString(),
             error: String(err),
+            isSuccess: false,
             iteration,
             model,
-            responseTime: endTime.getTime() - startTime.getTime(),
             startTime: startTime.toISOString(),
-            success: false,
         };
     }
 }

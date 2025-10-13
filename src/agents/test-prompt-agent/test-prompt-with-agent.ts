@@ -1,5 +1,5 @@
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
-import type { TestIterationResult, TestPromptInput, TestPromptResult } from '../../model/types/main';
+import type { TestIterationResult, TestPromptInput, TestPromptResult } from '../../model/config';
+import { APP_CONFIG } from '../../model/config';
 import { calculateConsistencyScore } from './calculate-consistency-score';
 import { generateTestSummary } from './generate-test-summary';
 import type { AgentConfig } from './types';
@@ -8,7 +8,7 @@ import type { AgentConfig } from './types';
 export async function testPromptWithAgent(agent: AgentConfig, testInput: TestPromptInput): Promise<TestPromptResult> {
     try {
         const { prompt, iterations = 5 } = testInput;
-        const config = getConfigOrThrow();
+        const config = APP_CONFIG;
         const modelName = config.model.name;
 
         const promises = Array.from({ length: iterations }, async (_, index): Promise<TestIterationResult> => {

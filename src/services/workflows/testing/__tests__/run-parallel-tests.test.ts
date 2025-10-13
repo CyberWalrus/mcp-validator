@@ -1,6 +1,6 @@
 import { clearMockResponses, setMockResponse } from '../../../../../end-to-end/mocks/openrouter-test-client';
 import type { MockedOpenRouterResponse } from '../../../../../end-to-end/types';
-import { reloadAppConfig } from '../../../../model/config';
+import { initializeAppConfig } from '../../../../model/config';
 import { runParallelTests } from '../run-parallel-tests';
 
 const originalMcpE2eTest = process.env.MCP_E2E_TEST;
@@ -23,7 +23,7 @@ function createMockResponse(content: string): MockedOpenRouterResponse {
 
 beforeAll(() => {
     process.env.MCP_E2E_TEST = 'true';
-    reloadAppConfig();
+    initializeAppConfig();
 });
 
 afterAll(() => {
@@ -32,7 +32,7 @@ afterAll(() => {
     } else {
         process.env.MCP_E2E_TEST = originalMcpE2eTest;
     }
-    reloadAppConfig();
+    initializeAppConfig();
 });
 
 describe('runParallelTests', () => {
@@ -75,10 +75,10 @@ describe('runParallelTests', () => {
                 }),
                 results: expect.arrayContaining([
                     expect.objectContaining({
+                        content: expect.any(String),
+                        duration: expect.any(Number),
+                        isSuccess: expect.any(Boolean),
                         iteration: expect.any(Number),
-                        response: expect.any(String),
-                        responseTime: expect.any(Number),
-                        success: expect.any(Boolean),
                     }),
                 ]),
                 success: true,

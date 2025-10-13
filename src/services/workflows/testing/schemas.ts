@@ -21,6 +21,12 @@ export const ParallelTestParamsSchema = z.object({
 
 /** Схема результата одной итерации */
 export const TestIterationResultSchema = z.object({
+    /** Содержимое ответа */
+    content: z.string(),
+
+    /** Время выполнения в миллисекундах */
+    duration: z.number().nonnegative(),
+
     /** Время окончания выполнения */
     endTime: z.string().optional(),
 
@@ -31,28 +37,28 @@ export const TestIterationResultSchema = z.object({
     isSuccess: z.boolean(),
 
     /** Номер итерации */
-    iteration: z.number().min(1),
+    iteration: z.union([z.number().min(1), z.string()]),
 
     /** Используемая модель */
     model: z.string().optional(),
 
-    /** Ответ модели */
-    response: z.string().optional(),
-
-    /** Время выполнения в миллисекундах */
-    responseTime: z.number().nonnegative(),
-
     /** Время начала выполнения */
-    startTime: z.string(),
+    startTime: z.string().optional(),
 });
 
 /** Схема анализа консистентности */
 export const ConsistencyAnalysisSchema = z.object({
+    /** AI анализ консистентности */
+    aiAnalysis: z.string().optional(),
+
     /** Текстовый анализ консистентности */
     analysis: z.string(),
 
     /** Аномалии или выбросы */
     anomalies: z.array(z.string()).optional(),
+
+    /** Есть ли AI анализ */
+    hasAiAnalysis: z.boolean().optional(),
 
     /** Выявленные паттерны */
     patterns: z.array(z.string()).optional(),

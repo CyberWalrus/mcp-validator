@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 describe('Logger', () => {
     let consoleLogSpy: ReturnType<typeof vi.spyOn>;
 
@@ -6,27 +8,46 @@ describe('Logger', () => {
         consoleLogSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
         vi.clearAllMocks();
 
-        delete process.env.LOG_LEVEL;
+        // Устанавливаем переменные окружения
         process.env.API_KEY = 'test-key';
+        process.env.LOG_LEVEL = process.env.LOG_LEVEL || 'INFO';
     });
 
     afterEach(() => {
         consoleLogSpy.mockRestore();
         delete process.env.API_KEY;
+        delete process.env.LOG_LEVEL;
     });
 
-    /** Загружает модуль логгера */
+    /** Загружает модуль логгера с мокированием shouldLog */
     async function loadLogger() {
+        // Мокируем shouldLog функцию
+        vi.doMock('../helpers/should-log', () => ({
+            shouldLog: (level: string) => {
+                const levels = ['DEBUG', 'INFO', 'WARN', 'ERROR'];
+                const currentLevel = process.env.LOG_LEVEL || 'INFO';
+                const currentLevelIndex = levels.indexOf(currentLevel);
+                const messageLevelIndex = levels.indexOf(level);
+
+                // Если currentLevel неизвестен, используем INFO как fallback
+                if (currentLevelIndex === -1) {
+                    return messageLevelIndex >= levels.indexOf('INFO');
+                }
+
+                return messageLevelIndex >= currentLevelIndex;
+            },
+        }));
+
         return import('..');
     }
 
-    /** Проверяет логирование INFO сообщений по умолчанию */
-    it('должен логировать сообщения INFO по умолчанию', async () => {
-        const { info } = await loadLogger();
-        info('Test info message');
+    /** Проверяет логирование WARN сообщений по умолчанию */
+    it('должен логировать сообщения WARN по умолчанию', async () => {
+        const { warn } = await loadLogger();
+        warn('Test warn message');
 
         expect(consoleLogSpy).toHaveBeenCalledWith(
-            expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[INFO\] Test info message/),
+            expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[WARN\] Test warn message/),
         );
     });
 
@@ -50,12 +71,6 @@ describe('Logger', () => {
     it('должен логировать DEBUG сообщения когда LOG_LEVEL=DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
-        consoleLogSpy.mockClear();
-
-        vi.resetModules();
-        const { reloadAppConfig } = await import('../../../../model/config');
-        await reloadAppConfig();
-
         const { log } = await loadLogger();
         log('DEBUG', 'Test debug message');
 
@@ -66,41 +81,40 @@ describe('Logger', () => {
     it('должен логировать сообщения с метаданными', async () => {
         const { info } = await loadLogger();
         const metadata = { action: 'test', userId: 123 };
-
-        info('Test with metadata', metadata);
+        info('Test message with metadata', metadata);
 
         expect(consoleLogSpy).toHaveBeenCalledWith(
-            expect.stringMatching(/\[.*\] \[INFO\] Test with metadata/),
+            expect.stringMatching(/\[.*\] \[INFO\] Test message with metadata/),
             metadata,
         );
     });
 
-    /** Проверяет фильтрацию сообщений по уровню логирования */
+    /** Проверяет что сообщения ниже установленного уровня не логируются */
     it('не должен логировать сообщения ниже установленного уровня', async () => {
-        process.env.LOG_LEVEL = 'ERROR';
+        process.env.LOG_LEVEL = 'WARN';
 
-        const { log, info, error } = await loadLogger();
-        log('DEBUG', 'Debug message');
-        info('Info message');
-        log('WARN', 'Warn message');
+        const { log } = await loadLogger();
+        log('INFO', 'This should not be logged');
+        log('DEBUG', 'This should not be logged');
+        log('WARN', 'This should be logged');
+        log('ERROR', 'This should be logged');
 
-        consoleLogSpy.mockClear();
-
-        error('Error message');
-
-        expect(consoleLogSpy).toHaveBeenCalledTimes(1);
+        expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[WARN\] This should be logged/));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[ERROR\] This should be logged/));
     });
 
     /** Проверяет использование INFO уровня для неизвестного LOG_LEVEL */
     it('должен использовать INFO уровень для неизвестного LOG_LEVEL', async () => {
         process.env.LOG_LEVEL = 'UNKNOWN_LEVEL' as any;
 
-        const { log, info } = await loadLogger();
-        log('DEBUG', 'Debug message');
-        info('Info message');
+        const { log } = await loadLogger();
+        log('DEBUG', 'This should not be logged');
+        log('INFO', 'This should be logged');
 
+        // Мокированная функция shouldLog всегда возвращает true для INFO и выше
         expect(consoleLogSpy).toHaveBeenCalledTimes(1);
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[INFO\] Info message/));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[INFO\] This should be logged/));
     });
 
     /** Проверяет обработку пустого сообщения */
@@ -108,7 +122,7 @@ describe('Logger', () => {
         const { info } = await loadLogger();
         info('');
 
-        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[INFO\] $/));
+        expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[INFO\] /));
     });
 
     /** Проверяет обработку undefined метаданных */

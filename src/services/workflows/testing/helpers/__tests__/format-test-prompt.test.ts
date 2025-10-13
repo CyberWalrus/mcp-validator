@@ -1,4 +1,4 @@
-import { formatTestPrompt } from '../format-test-prompt';
+import { formatTestPrompt } from '../format-test-prompt-deprecated';
 
 describe('formatTestPrompt', () => {
     it('должен заменять плейсхолдер промпта', () => {

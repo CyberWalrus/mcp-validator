@@ -27,11 +27,22 @@ export type {
     ValidationLimitsConfig,
 } from './types';
 
-/** Константы конфигурации приложения */
-export { APP_CONFIG, CACHED_CONFIG, CONFIG_STATE } from './config-constants';
+/** Типы валидации и тестирования */
+export type {
+    ConsistencyAnalysis,
+    InputSource,
+    InputSourceWithoutEncoding,
+    ParallelTestParams,
+    ParallelTestResult,
+    TestIterationResult,
+    TestPromptInput,
+    TestPromptResult,
+    TestResult,
+    ValidationInput,
+    ValidationInputWithoutEncoding,
+    ValidationResult,
+    ValidationType,
+} from './types';
 
-/** Функции работы с конфигурацией */
-export { createAppConfig } from './create-app-config';
-export { getAppConfigError } from './get-app-config-error';
-export { getConfigOrThrow } from './get-config-or-throw';
-export { reloadAppConfig } from './reload-app-config';
+/** Конфигурация приложения и функция инициализации */
+export { APP_CONFIG, initializeAppConfig } from './initialize-app-config';

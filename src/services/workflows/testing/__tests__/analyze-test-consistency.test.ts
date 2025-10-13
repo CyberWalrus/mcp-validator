@@ -5,28 +5,28 @@ describe('analyzeTestConsistency', () => {
     it('должен анализировать высокую консистентность для стабильных результатов', () => {
         const results: TestIterationResult[] = [
             {
+                content: 'Рекурсия - это метод программирования, когда функция вызывает сама себя.',
+                duration: 1000,
                 endTime: '2024-01-01T10:00:01Z',
+                isSuccess: true,
                 iteration: 1,
-                response: 'Рекурсия - это метод программирования, когда функция вызывает сама себя.',
-                responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
+                content: 'Рекурсия - это техника, при которой функция обращается к самой себе.',
+                duration: 1100,
                 endTime: '2024-01-01T10:00:01Z',
+                isSuccess: true,
                 iteration: 2,
-                response: 'Рекурсия - это техника, при которой функция обращается к самой себе.',
-                responseTime: 1100,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
+                content: 'Рекурсия означает, что функция может вызывать саму себя в процессе выполнения.',
+                duration: 950,
                 endTime: '2024-01-01T10:00:01Z',
+                isSuccess: true,
                 iteration: 3,
-                response: 'Рекурсия означает, что функция может вызывать саму себя в процессе выполнения.',
-                responseTime: 950,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
         ];
 
@@ -41,26 +41,26 @@ describe('analyzeTestConsistency', () => {
     it('должен анализировать низкую консистентность для различающихся результатов', () => {
         const results: TestIterationResult[] = [
             {
+                content: 'Короткий ответ.',
+                duration: 500,
+                isSuccess: true,
                 iteration: 1,
-                response: 'Короткий ответ.',
-                responseTime: 500,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
-                iteration: 2,
-                response:
+                content:
                     'Очень длинный и подробный ответ, который содержит много деталей и объяснений, намного больше информации чем предыдущий ответ, что создает значительную разницу в длине и структуре.',
-                responseTime: 3000,
+                duration: 3000,
+                isSuccess: true,
+                iteration: 2,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
+                content: 'Средний по длине ответ с некоторыми деталями.',
+                duration: 1200,
+                isSuccess: true,
                 iteration: 3,
-                response: 'Средний по длине ответ с некоторыми деталями.',
-                responseTime: 1200,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
         ];
 
@@ -76,18 +76,20 @@ describe('analyzeTestConsistency', () => {
     it('должен обрабатывать случай когда все тесты провалились', () => {
         const results: TestIterationResult[] = [
             {
+                content: '',
+                duration: 0,
                 error: 'Network error',
+                isSuccess: false,
                 iteration: 1,
-                responseTime: 0,
                 startTime: '2024-01-01T10:00:00Z',
-                success: false,
             },
             {
+                content: '',
+                duration: 0,
                 error: 'Timeout error',
+                isSuccess: false,
                 iteration: 2,
-                responseTime: 0,
                 startTime: '2024-01-01T10:00:00Z',
-                success: false,
             },
         ];
 
@@ -104,11 +106,11 @@ describe('analyzeTestConsistency', () => {
     it('должен обрабатывать случай с одним успешным результатом', () => {
         const results: TestIterationResult[] = [
             {
+                content: 'Единственный успешный ответ.',
+                duration: 1000,
+                isSuccess: true,
                 iteration: 1,
-                response: 'Единственный успешный ответ.',
-                responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
         ];
 
@@ -124,34 +126,38 @@ describe('analyzeTestConsistency', () => {
     it('должен выявлять аномалии во времени выполнения', () => {
         const results: TestIterationResult[] = [
             {
+                content: 'Нормальный ответ',
+                duration: 1000,
+                isSuccess: true,
                 iteration: 1,
-                response: 'Нормальный ответ',
-                responseTime: 1000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
+                content: 'Нормальный ответ',
+                duration: 1100,
+                isSuccess: true,
                 iteration: 2,
-                response: 'Нормальный ответ',
-                responseTime: 1100,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
             {
+                content: 'Медленный ответ',
+
+                duration: 5000,
+
+                isSuccess: true,
                 iteration: 3,
-
-                response: 'Медленный ответ',
-
-                responseTime: 5000,
                 startTime: '2024-01-01T10:00:00Z',
-                success: true,
             },
         ];
 
         const analysis = analyzeTestConsistency(results);
 
         expect(analysis.anomalies).toEqual(
-            expect.arrayContaining([expect.stringMatching(/запросов выполнялись.*дольше|высокая вариация/i)]),
+            expect.arrayContaining([
+                expect.stringMatching(/время выполнения сильно варьируется/i),
+                expect.stringMatching(/очень быстрое выполнение/i),
+                expect.stringMatching(/очень медленное выполнение/i),
+            ]),
         );
     });
 });

@@ -1,4 +1,4 @@
-import type { TestIterationResult } from '../../model/types/main';
+import type { TestIterationResult } from '../../model/config';
 
 /** Генерация краткого отчета о тестировании */
 export function generateTestSummary(results: TestIterationResult[], consistencyScore: number): string {

@@ -1,8 +1,10 @@
 import { error, info } from '../../../lib/helpers/logger';
 import { getPackageVersion } from '../../../lib/helpers/version';
-import { formatAnalyzePrompt, formatExecutePrompt } from './helpers/format-test-prompt';
-import { getConfigOrThrow } from './helpers/get-config-or-throw';
-import { loadAnalyzePrompt, loadExecutePrompt } from './helpers/load-test-prompt';
+import { APP_CONFIG } from '../../../model/config';
+import { formatAnalyzePrompt } from './helpers/format-analyze-prompt';
+import { formatExecutePrompt } from './helpers/format-execute-prompt';
+import { loadAnalyzePrompt } from './helpers/load-analyze-prompt';
+import { loadExecutePrompt } from './helpers/load-execute-prompt';
 import { runSingleTest } from './helpers/run-single-test';
 import { validateTestParams } from './helpers/validate-test-params';
 import { analyzeTestConsistency } from './analyze-test-consistency';
@@ -31,7 +33,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             validatedParams.context,
         );
 
-        const config = getConfigOrThrow();
+        const config = APP_CONFIG;
 
         const testPromises = Array.from({ length: validatedParams.iterations }, (_, index) =>
             runSingleTest({
@@ -46,7 +48,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
 
         info('Этап 2: Анализирую полученные ответы на консистентность и качество');
         const analyzePromptTemplate = loadAnalyzePrompt();
-        const responses = executeResults.filter((result) => result.success).map((result) => result.response || '');
+        const responses = executeResults.filter((result) => result.isSuccess).map((result) => result.content || '');
 
         if (responses.length === 0) {
             throw new Error('Все тесты завершились неудачей - нет ответов для анализа');
@@ -68,15 +70,15 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
 
         const consistency = analyzeTestConsistency(executeResults);
 
-        const successfulTests = executeResults.filter((r) => r.success).length;
+        const successfulTests = executeResults.filter((r) => r.isSuccess).length;
         const failedTests = executeResults.length - successfulTests;
-        const averageResponseTime = executeResults.reduce((sum, r) => sum + r.responseTime, 0) / executeResults.length;
+        const averageResponseTime = executeResults.reduce((sum, r) => sum + r.duration, 0) / executeResults.length;
 
         const endTime = new Date();
         const duration = endTime.getTime() - startTime.getTime();
 
         const allResults = [...executeResults];
-        if (analysisResult.success) {
+        if (analysisResult.isSuccess) {
             allResults.push(analysisResult);
         }
 
@@ -84,9 +86,9 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             averageResponseTime: Math.round(averageResponseTime),
             consistency: {
                 ...consistency,
-                ...(analysisResult.success && analysisResult.response
+                ...(analysisResult.isSuccess && analysisResult.content
                     ? {
-                          aiAnalysis: analysisResult.response,
+                          aiAnalysis: analysisResult.content,
                           hasAiAnalysis: true,
                       }
                     : {
@@ -103,7 +105,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
                 validatorVersion: getPackageVersion(), // Версия из единого источника
             },
             results: allResults,
-            success: successfulTests > 0 && analysisResult.success,
+            success: successfulTests > 0 && analysisResult.isSuccess,
             successfulTests,
             totalTests: executeResults.length,
         };
@@ -137,7 +139,7 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
                 endTime: new Date().toISOString(),
                 originalPrompt: params.prompt,
                 startTime: startTime.toISOString(),
-                validatorVersion: '2.0.0',
+                validatorVersion: getPackageVersion(),
             },
             results: [],
             success: false,

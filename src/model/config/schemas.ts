@@ -6,7 +6,7 @@ export const logLevelSchema = z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR']);
 /** Схема валидации конфигурации AI модели */
 export const modelConfigSchema = z.object({
     maxTokens: z.coerce.number().positive('AI_MAX_TOKENS must be a positive number').default(100000),
-    name: z.string().default('openai/gpt-oss-120b'),
+    name: z.string().default('openai/gpt-oss-20b:free'),
     temperature: z.coerce.number().min(0).max(2).default(0.5),
 });
 
@@ -60,10 +60,19 @@ export const consistencyThresholdsSchema = z.object({
     varianceMedium: z.number().min(0).max(1).default(0.5),
 });
 
+/** Схема валидации конфигурации MCP сервера */
+export const mcpConfigSchema = z.object({
+    description: z.string().default('Production-ready MCP validator for Cursor IDE with 4 validation types'),
+    name: z.string().default('mcp-validator'),
+    protocolVersion: z.string().default('2024-11-05'),
+    version: z.string().default('0.3.0'),
+});
+
 /** Схема валидации полной конфигурации приложения */
 export const appConfigSchema = z.object({
     api: apiConfigSchema,
     logging: loggingConfigSchema,
+    mcp: mcpConfigSchema,
     model: modelConfigSchema,
     paths: pathsConfigSchema,
     runtime: runtimeConfigSchema,

@@ -10,25 +10,26 @@ describe('generateTestReport', () => {
 
     const mockResults: TestIterationResult[] = [
         {
+            content: 'Первый ответ',
+            duration: 1000,
+            isSuccess: true,
             iteration: 1,
-            response: 'Первый ответ',
-            responseTime: 1000,
             startTime: '2024-01-01T10:00:00Z',
-            success: true,
         },
         {
+            content: 'Второй ответ длиннее',
+            duration: 1200,
+            isSuccess: true,
             iteration: 2,
-            response: 'Второй ответ длиннее',
-            responseTime: 1200,
             startTime: '2024-01-01T10:00:01Z',
-            success: true,
         },
         {
+            content: '',
+            duration: 800,
             error: 'Тестовая ошибка',
+            isSuccess: false,
             iteration: 3,
-            responseTime: 800,
             startTime: '2024-01-01T10:00:02Z',
-            success: false,
         },
     ];
 

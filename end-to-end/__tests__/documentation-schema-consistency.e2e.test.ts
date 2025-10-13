@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { ParallelTestParamsSchema } from '../../src/services/workflows/testing/schemas';
-import { ValidationParamsSchema } from '../../src/services/workflows/validation/schemas';
+import { validationInputSchema } from '../../src/model/schemas/validation-schema';
 
 describe('Documentation Schema Consistency E2E', () => {
     it('должен валидировать примеры из документации MCP инструментов', () => {
@@ -35,7 +35,7 @@ describe('Documentation Schema Consistency E2E', () => {
         const validateExample = JSON.parse(validateExampleBlock);
         const testPromptExample = JSON.parse(testPromptExampleBlock);
 
-        expect(() => ValidationParamsSchema.parse(validateExample.arguments)).not.toThrow();
+        expect(() => validationInputSchema.parse(validateExample.arguments)).not.toThrow();
         expect(() => ParallelTestParamsSchema.parse(testPromptExample.arguments)).not.toThrow();
     });
 

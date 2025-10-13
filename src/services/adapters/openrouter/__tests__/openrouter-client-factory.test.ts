@@ -13,7 +13,7 @@ describe('getOpenRouterClient', () => {
 
     async function loadFactory() {
         const configModule = await import('../../../../model/config');
-        configModule.reloadAppConfig();
+        configModule.initializeAppConfig();
         const module = await import('../openrouter-client-factory');
 
         return module.getOpenRouterClient;
