@@ -31,11 +31,12 @@ jobs:
                   API_KEY: "test-key-for-e2e"
             
             - name: Run e2e tests
-              run: yarn test:e2e
+              run: NODE_ENV=test MCP_E2E_TEST=true yarn vitest --config vitest.e2e.ci.config.ts --run
               env:
                   MCP_E2E_TEST: "true"
                   NODE_ENV: "test"
                   API_KEY: "test-key-for-e2e"
+                  CI: "true"
 
             - name: Run linter
               run: yarn lint
@@ -62,11 +63,12 @@ jobs:
                   API_KEY: "test-key-for-e2e"
             
             - name: Run e2e tests on Windows
-              run: yarn test:e2e
+              run: NODE_ENV=test MCP_E2E_TEST=true yarn vitest --config vitest.e2e.ci.config.ts --run
               env:
                   MCP_E2E_TEST: "true"
                   NODE_ENV: "test"
                   API_KEY: "test-key-for-e2e"
+                  CI: "true"
 
             - name: Run linter on Windows
               run: yarn lint
