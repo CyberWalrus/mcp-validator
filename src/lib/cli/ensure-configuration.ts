@@ -11,7 +11,7 @@ export function ensureConfiguration(): void {
         error('❌ Ошибка конфигурации окружения:', { message });
         error('');
         error('Создайте файл .env с содержимым:');
-        error('OPENROUTER_API_KEY=your_api_key_here');
+        error('API_KEY=your_api_key_here');
         error('LOG_LEVEL=INFO');
         process.exit(1);
     }
