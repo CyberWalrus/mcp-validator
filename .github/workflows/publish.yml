@@ -94,22 +94,8 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Debug working directory
-              run: |
-                  pwd
-                  ls -la
-                  ls -la src || echo "src directory not found"
-
             - name: Run linter
-              run: |
-                  if [ ! -d "src" ]; then
-                      echo "src directory not found, checking if we're in the right location..."
-                      find . -name "src" -type d 2>/dev/null || echo "No src directory found anywhere"
-                      find . -name "package.json" -type f 2>/dev/null || echo "No package.json found"
-                  fi
-                  yarn lint
-              env:
-                  ESLINT_USE_FLAT_CONFIG: false
+              run: yarn lint
 
             - name: Run unit tests
               run: yarn test:unit
