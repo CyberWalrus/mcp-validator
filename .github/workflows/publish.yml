@@ -1,206 +1,206 @@
 name: CI/CD Pipeline
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
 
 permissions:
-    contents: write
-    packages: write
+  contents: write
+  packages: write
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-            - name: Run linter
-              run: yarn lint
+      - name: Run linter
+        run: yarn lint
 
-            - name: Run unit tests
-              run: yarn test:unit
-              env:
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
+      - name: Run unit tests
+        run: yarn test:unit
+        env:
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
 
-            - name: Build package
-              run: yarn build
+      - name: Build package
+        run: yarn build
 
-            - name: Run e2e tests
-              run: yarn vitest --config vitest.e2e.ci.config.ts --run
-              env:
-                  MCP_E2E_TEST: "true"
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
-                  CI: "true"
+      - name: Run e2e tests
+        run: yarn vitest --config vitest.e2e.ci.config.ts --run
+        env:
+          MCP_E2E_TEST: "true"
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
+          CI: "true"
 
-    test-windows:
-        runs-on: windows-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-            - name: Run linter
-              run: yarn lint
+      - name: Run linter
+        run: yarn lint
 
-            - name: Run unit tests
-              run: yarn test:unit
-              env:
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
+      - name: Run unit tests
+        run: yarn test:unit
+        env:
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
 
-            - name: Build package
-              run: yarn build
+      - name: Build package
+        run: yarn build
 
-            - name: Run e2e tests
-              run: yarn vitest --config vitest.e2e.ci.config.ts --run
-              env:
-                  MCP_E2E_TEST: "true"
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
-                  CI: "true"
+      - name: Run e2e tests
+        run: yarn vitest --config vitest.e2e.ci.config.ts --run
+        env:
+          MCP_E2E_TEST: "true"
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
+          CI: "true"
 
-    test-macos:
-        runs-on: macos-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
 
-            - name: Install dependencies
-              run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-            - name: Run linter
-              run: yarn lint
+      - name: Run linter
+        run: yarn lint
 
-            - name: Run unit tests
-              run: yarn test:unit
-              env:
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
+      - name: Run unit tests
+        run: yarn test:unit
+        env:
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
 
-            - name: Build package
-              run: yarn build
+      - name: Build package
+        run: yarn build
 
-            - name: Run e2e tests
-              run: yarn vitest --config vitest.e2e.ci.config.ts --run
-              env:
-                  MCP_E2E_TEST: "true"
-                  NODE_ENV: "test"
-                  API_KEY: "test-key-for-e2e"
-                  CI: "true"
+      - name: Run e2e tests
+        run: yarn vitest --config vitest.e2e.ci.config.ts --run
+        env:
+          MCP_E2E_TEST: "true"
+          NODE_ENV: "test"
+          API_KEY: "test-key-for-e2e"
+          CI: "true"
 
-    # Проверяем версию и публикуем только если нужно
-    check-version-and-publish:
-        needs: [test, test-windows, test-macos]
-        runs-on: ubuntu-latest
-        outputs:
-            published: ${{ steps.publish.outputs.published }}
-            version: ${{ steps.check.outputs.version }}
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  # Проверяем версию и публикуем только если нужно
+  check-version-and-publish:
+    needs: [test, test-windows, test-macos]
+    runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.publish.outputs.published }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "yarn"
-                  registry-url: "https://registry.npmjs.org"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
 
-            - name: Check if version exists in npm
-              id: check
-              run: |
-                  VERSION=$(node -p "require('./package.json').version")
-                  echo "Checking if version $VERSION exists in npm..."
+      - name: Check if version exists in npm
+        id: check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Checking if version $VERSION exists in npm..."
 
-                  if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
-                    echo "Version $VERSION already exists in npm - skipping publish"
-                    echo "should-publish=false" >> $GITHUB_OUTPUT
-                  else
-                    echo "Version $VERSION not found in npm - will publish"
-                    echo "should-publish=true" >> $GITHUB_OUTPUT
-                  fi
+          if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
+            echo "Version $VERSION already exists in npm - skipping publish"
+            echo "should-publish=false" >> $GITHUB_OUTPUT
+          else
+            echo "Version $VERSION not found in npm - will publish"
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          fi
 
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-            - name: Install dependencies
-              if: steps.check.outputs.should-publish == 'true'
-              run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        if: steps.check.outputs.should-publish == 'true'
+        run: yarn install --frozen-lockfile
 
-            - name: Build package
-              if: steps.check.outputs.should-publish == 'true'
-              run: yarn build
+      - name: Build package
+        if: steps.check.outputs.should-publish == 'true'
+        run: yarn build
 
-            - name: Publish to npm
-              if: steps.check.outputs.should-publish == 'true'
-              id: publish
-              run: |
-                  npm publish
-                  echo "published=true" >> $GITHUB_OUTPUT
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm
+        if: steps.check.outputs.should-publish == 'true'
+        id: publish
+        run: |
+          npm publish
+          echo "published=true" >> $GITHUB_OUTPUT
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-            - name: Extract changelog
-              if: steps.check.outputs.should-publish == 'true'
-              run: |
-                  VERSION="${{ steps.check.outputs.version }}"
-                  echo "Extracting changelog for version: $VERSION"
+      - name: Extract changelog
+        if: steps.check.outputs.should-publish == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          echo "Extracting changelog for version: $VERSION"
 
-                  awk -v version="$VERSION" '
-                    BEGIN { in_section = 0 }
-                    /^## \[/ { 
-                      if ($0 ~ "\\[" version "\\]") {
-                        in_section = 1
-                        print
-                        next
-                      } else if (in_section) {
-                        exit
-                      }
-                    }
-                    in_section { print }
-                  ' CHANGELOG.md > release_notes.md
+          awk -v version="$VERSION" '
+            BEGIN { in_section = 0 }
+            /^## \[/ { 
+              if ($0 ~ "\\[" version "\\]") {
+                in_section = 1
+                print
+                next
+              } else if (in_section) {
+                exit
+              }
+            }
+            in_section { print }
+          ' CHANGELOG.md > release_notes.md
 
-                  if [ ! -s release_notes.md ]; then
-                    echo "## [$VERSION] - $(date +%Y-%m-%d)" > release_notes.md
-                    echo "" >> release_notes.md
-                    echo "### Changes" >> release_notes.md
-                    echo "- See [Full Changelog](https://github.com/CyberWalrus/mcp-validator/commits/v$VERSION) for details" >> release_notes.md
-                  fi
+          if [ ! -s release_notes.md ]; then
+            echo "## [$VERSION] - $(date +%Y-%m-%d)" > release_notes.md
+            echo "" >> release_notes.md
+            echo "### Changes" >> release_notes.md
+            echo "- See [Full Changelog](https://github.com/CyberWalrus/mcp-validator/commits/v$VERSION) for details" >> release_notes.md
+          fi
 
-            - name: Create GitHub Release
-              if: steps.check.outputs.should-publish == 'true'
-              uses: softprops/action-gh-release@v2
-              with:
-                  tag_name: v${{ steps.check.outputs.version }}
-                  name: Release v${{ steps.check.outputs.version }}
-                  body_path: release_notes.md
-                  draft: false
-                  prerelease: false
-                  generate_release_notes: true
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        if: steps.check.outputs.should-publish == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.check.outputs.version }}
+          name: Release v${{ steps.check.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
