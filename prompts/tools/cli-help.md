@@ -18,7 +18,7 @@ yarn start --version          # Показать версию
 ## Требования
 
 - Node.js 20+
-- Переменная OPENROUTER_API_KEY в .env файле
+- Переменная API_KEY в .env файле
 
 ## Обновления в V2.0
 
@@ -33,12 +33,12 @@ yarn start --version          # Показать версию
 
 ```json
 {
-  "tool": "validate",
-  "arguments": {
-    "validationType": "code",
-    "input": { "type": "file", "data": "path/to/file.ts" },
-    "context": "Проверка качества TypeScript кода"
-  }
+    "tool": "validate",
+    "arguments": {
+        "validationType": "code",
+        "input": { "type": "file", "data": "path/to/file.ts" },
+        "context": "Проверка качества TypeScript кода"
+    }
 }
 ```
 
@@ -46,11 +46,11 @@ yarn start --version          # Показать версию
 
 ```json
 {
-  "tool": "test-prompt",
-  "arguments": {
-    "prompt": "Напиши функцию для сортировки массива",
-    "iterations": 5,
-    "context": "Тестирование стабильности промпта"
-  }
+    "tool": "test-prompt",
+    "arguments": {
+        "prompt": "Напиши функцию для сортировки массива",
+        "iterations": 5,
+        "context": "Тестирование стабильности промпта"
+    }
 }
 ```

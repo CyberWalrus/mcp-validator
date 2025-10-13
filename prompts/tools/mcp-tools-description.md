@@ -91,5 +91,5 @@
 ## Переменные окружения
 
 - `LOG_LEVEL`: уровень логирования (DEBUG, INFO, WARN, ERROR)
-- `OPENROUTER_API_KEY`: API ключ для OpenRouter
+- `API_KEY`: API ключ для OpenRouter
 - `REQUEST_TIMEOUT`: timeout запросов в миллисекундах

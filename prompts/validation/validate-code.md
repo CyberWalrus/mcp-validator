@@ -1,13 +1,7 @@
 ---
 id: validate-code-single-file-v4
 type: algorithm
-use_cases:
-  [
-    "single_file_code_validation",
-    "style_enforcement",
-    "mcp_validator_integration",
-    "isolated_code_quality",
-  ]
+use_cases: ['single_file_code_validation', 'style_enforcement', 'mcp_validator_integration', 'isolated_code_quality']
 prompt_language: mixed
 response_language: ru
 alwaysApply: false
@@ -92,7 +86,7 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 **File Structure:**
 
 - [ ] **One file = one function** - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, barrel files, or files exporting only constants/types/schemas). Private (non-exported) helper functions are allowed (max 2-3, under 10 lines each).
-- [ ] **File size limit** - Max 150 lines of code (excluding comments and empty lines)
+- [ ] **File size limit** - Max 150 lines of code (excluding comments and empty lines). Test files (`.test.ts`, `.spec.ts`) are exempt from this limit and can exceed 150 lines.
 - [ ] **Minimal helpers** - No more than 2-3 small private helper functions (prefer inline logic). Helper functions must NOT be exported.
 - [ ] **Entity consistency** - Files should focus on one entity type: either functions OR constants OR types OR schemas (mixing discouraged). Function files should NOT export types - move them to `types.ts`.
 - [ ] **Entity separation** - Complex types in separate `types.ts`, constants in `constants.ts`, schemas in `schemas.ts`
@@ -120,12 +114,12 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 - [ ] **Import grouping** - External libs → (blank line) → Types → (blank line) → Internal modules
 
 <completion_criteria>
-Code style checklist completed, file size verified (max 150 lines), single function principle enforced ONLY for function files (NOT for constants/types/schemas files), file type identified, all violations documented as critical issues
+Code style checklist completed, file size verified (max 150 lines, except test files), single function principle enforced ONLY for function files (NOT for constants/types/schemas files), file type identified, all violations documented as critical issues
 </completion_criteria>
 
 <exception_handling>
 If style rule unclear: mark as violation and request clarification
-If file exceeds 150 lines: document as critical blocking issue
+If file exceeds 150 lines: document as critical blocking issue (EXCEPT for test files `.test.ts`, `.spec.ts` which are exempt from this limit)
 If multiple exported functions found in FUNCTION file: document as critical violation of one-file-one-function principle
 If multiple exported constants/types/schemas found: this is ALLOWED and EXPECTED in constants/types/schemas files
 If constants file named constants.ts: DO NOT require it to export functions - multiple constant exports are correct
@@ -325,18 +319,17 @@ Use this EXACT format optimized for MCP validator processing:
 **Good Code Example (Function File):**
 
 ```typescript
-import type { ValidationResult } from "./types";
+import type { ValidationResult } from './types';
 
 /** Валидирует входные данные пользователя */
 export function validateUserInput(input: unknown): ValidationResult {
-  if (!input) return { isValid: false, error: "Нет входных данных" };
-  if (typeof input !== "object")
-    return { isValid: false, error: "Неверный тип" };
+    if (!input) return { isValid: false, error: 'Нет входных данных' };
+    if (typeof input !== 'object') return { isValid: false, error: 'Неверный тип' };
 
-  const userInput = input as Record<string, unknown>;
-  if (!userInput.email) return { isValid: false, error: "Email обязателен" };
+    const userInput = input as Record<string, unknown>;
+    if (!userInput.email) return { isValid: false, error: 'Email обязателен' };
 
-  return { isValid: true };
+    return { isValid: true };
 }
 ```
 
@@ -345,38 +338,38 @@ export function validateUserInput(input: unknown): ValidationResult {
 ```typescript
 /** Параметры валидации по умолчанию */
 export const DEFAULT_VALIDATION_PARAMS = {
-  /** Максимальная длина email */
-  MAX_EMAIL_LENGTH: 100,
+    /** Максимальная длина email */
+    MAX_EMAIL_LENGTH: 100,
 
-  /** Минимальная длина пароля */
-  MIN_PASSWORD_LENGTH: 8,
+    /** Минимальная длина пароля */
+    MIN_PASSWORD_LENGTH: 8,
 } as const;
 
 /** Сообщения об ошибках */
 export const ERROR_MESSAGES = {
-  /** Ошибка при пустом email */
-  EMPTY_EMAIL: "Email не может быть пустым",
+    /** Ошибка при пустом email */
+    EMPTY_EMAIL: 'Email не может быть пустым',
 
-  /** Ошибка при коротком пароле */
-  SHORT_PASSWORD: "Пароль слишком короткий",
+    /** Ошибка при коротком пароле */
+    SHORT_PASSWORD: 'Пароль слишком короткий',
 } as const;
 ```
 
 **Good Code Example (Barrel File):**
 
 ```typescript
-export { createCodeValidatorAgent } from "./create-code-validator-agent";
-export { validateCodeWithAgent } from "./validate-code-with-agent";
+export { createCodeValidatorAgent } from './create-code-validator-agent';
+export { validateCodeWithAgent } from './validate-code-with-agent';
 ```
 
 **Bad Code Example (Barrel File with External Imports):**
 
 ```typescript
 // WRONG: Importing from external directories
-export { createCodeValidatorAgent } from "./create-code-validator-agent";
-export { validateCodeWithAgent } from "./validate-code-with-agent";
-export { someExternalFunction } from "../external-module"; // ❌ External import
-export { anotherFunction } from "../../utils/helper"; // ❌ External import
+export { createCodeValidatorAgent } from './create-code-validator-agent';
+export { validateCodeWithAgent } from './validate-code-with-agent';
+export { someExternalFunction } from '../external-module'; // ❌ External import
+export { anotherFunction } from '../../utils/helper'; // ❌ External import
 ```
 
 **Bad Code Example (Function File with Multiple Violations):**
@@ -384,31 +377,31 @@ export { anotherFunction } from "../../utils/helper"; // ❌ External import
 ```typescript
 // Multiple violations: class, deep nesting, no JSDoc, default export
 export default class InputValidator {
-  validate(input: any) {
-    if (input) {
-      if (typeof input === "object") {
-        if (input.email) {
-          return true;
+    validate(input: any) {
+        if (input) {
+            if (typeof input === 'object') {
+                if (input.email) {
+                    return true;
+                }
+            }
         }
-      }
+        return false;
     }
-    return false;
-  }
 }
 ```
 
 **Bad Code Example (Mixed File - Function + Type Export):**
 
 ```typescript
-import type { Config } from "./types";
+import type { Config } from './types';
 
 // WRONG: Exporting type from function file
 export type ValidationFunction = (input: unknown) => boolean;
 
 /** Валидирует входные данные */
 export function validateInput(input: unknown): boolean {
-  if (!input) return false;
-  return typeof input === "object";
+    if (!input) return false;
+    return typeof input === 'object';
 }
 
 // CRITICAL: File exports both function AND type - should separate
