@@ -48,7 +48,7 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
 
         clearTimeout(timeoutId);
 
-        if (!response.ok) {
+        if (response.ok === false) {
             throw new Error(`OpenRouter API request failed: ${response.status} ${response.statusText}`);
         }
 
@@ -58,12 +58,19 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
             usage: { total_tokens: number };
         };
 
-        if (!data.choices || data.choices.length === 0) {
+        if (data.choices === null || data.choices === undefined || data.choices.length === 0) {
             throw new Error('No response from AI model');
         }
 
         const choice = data.choices[0];
-        if (!choice?.message?.content) {
+        if (
+            choice === null ||
+            choice === undefined ||
+            choice.message === null ||
+            choice.message === undefined ||
+            choice.message.content === null ||
+            choice.message.content === undefined
+        ) {
             throw new Error('No content in AI response');
         }
 

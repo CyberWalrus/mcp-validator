@@ -75,7 +75,7 @@ export const validateTool: Tool = {
 /** Обработчик MCP инструмента validate */
 export async function handleValidateTool(args: unknown): Promise<{ content: string; isError?: boolean }> {
     try {
-        if (!args || typeof args !== 'object') {
+        if (args === null || args === undefined || typeof args !== 'object') {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -92,7 +92,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
 
         const params = args as Record<string, unknown>;
 
-        if (!params.validationType) {
+        if (params.validationType === null || params.validationType === undefined) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -108,7 +108,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
         }
 
         const allowedValidationTypes = ['code', 'tests', 'architecture', 'documentation', 'prompts'];
-        if (!allowedValidationTypes.includes(params.validationType as string)) {
+        if (allowedValidationTypes.includes(params.validationType as string) === false) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -126,7 +126,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        if (!params.input) {
+        if (params.input === null || params.input === undefined) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -142,7 +142,13 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
         }
 
         const input = params.input as Record<string, unknown>;
-        if (typeof input !== 'object' || !input.type || !input.data) {
+        if (
+            typeof input !== 'object' ||
+            input.type === null ||
+            input.type === undefined ||
+            input.data === null ||
+            input.data === undefined
+        ) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -157,7 +163,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        if (params.validationType === 'custom' && !params.customPrompt) {
+        if (params.validationType === 'custom' && (params.customPrompt === null || params.customPrompt === undefined)) {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -184,7 +190,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             language: typeof params.language === 'string' ? params.language : 'typescript',
         };
 
-        if (!codeValidatorAgent) {
+        if (codeValidatorAgent === null) {
             codeValidatorAgent = createCodeValidatorAgent();
         }
 
@@ -203,7 +209,7 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             errorType: 'validation',
         });
 
-        if (!errorResult.success) {
+        if (errorResult.success === false) {
             throw new Error(errorResult.error || 'Ошибка форматирования результата');
         }
 

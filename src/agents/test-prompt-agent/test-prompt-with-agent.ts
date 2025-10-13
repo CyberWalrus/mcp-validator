@@ -53,7 +53,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
                     model: modelName,
                 };
 
-                if (!responseContent) {
+                if (responseContent === null || responseContent === undefined) {
                     result.error = 'Ошибка выполнения';
                 }
 

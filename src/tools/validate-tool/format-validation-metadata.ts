@@ -2,7 +2,7 @@ import type { ValidationResult } from '../../model/config';
 
 /** Форматирует метаданные валидации в строку */
 export function formatValidationMetadata(result: ValidationResult): string {
-    if (!result.metadata) {
+    if (result.metadata === null || result.metadata === undefined) {
         return '';
     }
 

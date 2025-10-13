@@ -15,7 +15,7 @@ let testPromptAgent: AgentConfig | null = null;
 /** Обработчик MCP инструмента test-prompt */
 export async function handleTestPromptTool(args: unknown): Promise<{ content: string; isError?: boolean }> {
     try {
-        if (!args || typeof args !== 'object') {
+        if (args === null || args === undefined || typeof args !== 'object') {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -31,7 +31,7 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
 
         const params = args as Record<string, unknown>;
 
-        if (!params.prompt || typeof params.prompt !== 'string') {
+        if (params.prompt === null || params.prompt === undefined || typeof params.prompt !== 'string') {
             const errorResult = renderErrorResponse({
                 context: 'Валидация параметров MCP инструмента',
                 errorCode: -32602,
@@ -53,7 +53,7 @@ export async function handleTestPromptTool(args: unknown): Promise<{ content: st
             ...(typeof params.context === 'string' && { context: params.context }),
         };
 
-        if (!testPromptAgent) {
+        if (testPromptAgent === null) {
             testPromptAgent = createTestPromptAgent();
         }
 

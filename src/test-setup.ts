@@ -3,11 +3,11 @@ import { initializeAppConfig } from './model/config';
 
 /** Инициализирует тестовое окружение */
 export function initTestEnvironment(): void {
-    if (!process.env.API_KEY) {
+    if (process.env.API_KEY === undefined) {
         process.env.API_KEY = 'test-api-key';
     }
 
-    if (!process.env.LOG_LEVEL) {
+    if (process.env.LOG_LEVEL === undefined) {
         process.env.LOG_LEVEL = 'WARN';
     }
 
