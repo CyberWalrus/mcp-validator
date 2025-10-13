@@ -3,13 +3,13 @@ import { resolve } from 'node:path';
 
 import type { getPrompt as getPromptFn, initializePromptCache as initPromptCache } from '../index';
 
-const originalApiKey = process.env.OPENROUTER_API_KEY;
+const originalApiKey = process.env.API_KEY;
 let getPrompt: typeof getPromptFn;
 let initializePromptCache: typeof initPromptCache;
 
 beforeEach(async () => {
     vi.resetModules();
-    process.env.OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'test-key';
+    process.env.API_KEY = process.env.API_KEY || 'test-key';
 
     const { reloadAppConfig } = await import('../../../model/config');
     await reloadAppConfig();
@@ -22,9 +22,9 @@ beforeEach(async () => {
 
 afterAll(() => {
     if (originalApiKey === undefined) {
-        delete process.env.OPENROUTER_API_KEY;
+        delete process.env.API_KEY;
     } else {
-        process.env.OPENROUTER_API_KEY = originalApiKey;
+        process.env.API_KEY = originalApiKey;
     }
 });
 

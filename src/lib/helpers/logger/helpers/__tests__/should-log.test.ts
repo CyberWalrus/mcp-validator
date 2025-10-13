@@ -1,12 +1,14 @@
 describe('shouldLog', () => {
     const originalEnv = process.env;
 
+    /** Перезагружает конфигурацию приложения */
     async function reloadConfig(): Promise<void> {
         const configModule = await import('../../../../../model/config');
 
         configModule.reloadAppConfig();
     }
 
+    /** Загружает функцию shouldLog */
     async function loadShouldLog() {
         await reloadConfig();
         const module = await import('../should-log');
@@ -17,7 +19,7 @@ describe('shouldLog', () => {
     beforeEach(() => {
         vi.resetModules();
         process.env = { ...originalEnv };
-        process.env.OPENROUTER_API_KEY = 'test-key';
+        process.env.API_KEY = 'test-key';
     });
 
     afterAll(async () => {
@@ -25,6 +27,7 @@ describe('shouldLog', () => {
         await reloadConfig();
     });
 
+    /** Проверяет возврат true для DEBUG при уровне DEBUG */
     it('должен возвращать true для DEBUG при уровне DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
@@ -34,6 +37,7 @@ describe('shouldLog', () => {
         expect(result).toBe(true);
     });
 
+    /** Проверяет возврат true для INFO при уровне DEBUG */
     it('должен возвращать true для INFO при уровне DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
@@ -43,6 +47,7 @@ describe('shouldLog', () => {
         expect(result).toBe(true);
     });
 
+    /** Проверяет возврат false для DEBUG при уровне INFO */
     it('должен возвращать false для DEBUG при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
@@ -52,6 +57,7 @@ describe('shouldLog', () => {
         expect(result).toBe(false);
     });
 
+    /** Проверяет возврат true для INFO при уровне INFO */
     it('должен возвращать true для INFO при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
@@ -61,6 +67,7 @@ describe('shouldLog', () => {
         expect(result).toBe(true);
     });
 
+    /** Проверяет возврат true для WARN при уровне INFO */
     it('должен возвращать true для WARN при уровне INFO', async () => {
         process.env.LOG_LEVEL = 'INFO';
 
@@ -70,6 +77,7 @@ describe('shouldLog', () => {
         expect(result).toBe(true);
     });
 
+    /** Проверяет возврат true для ERROR при любом уровне */
     it('должен возвращать true для ERROR при любом уровне', async () => {
         const levels = ['DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
 
@@ -82,6 +90,7 @@ describe('shouldLog', () => {
         }
     });
 
+    /** Проверяет использование INFO как уровень по умолчанию */
     it('должен использовать INFO как уровень по умолчанию', async () => {
         delete process.env.LOG_LEVEL;
 
@@ -93,9 +102,9 @@ describe('shouldLog', () => {
         expect(infoResult).toBe(true);
     });
 
+    /** Проверяет использование INFO при некорректном уровне в переменной окружения */
     it('должен использовать INFO при некорректном уровне в переменной окружения', async () => {
-        // @ts-ignore
-        process.env.LOG_LEVEL = 'INVALID_LEVEL';
+        process.env.LOG_LEVEL = 'INVALID_LEVEL' as any;
 
         const shouldLog = await loadShouldLog();
         const debugResult = shouldLog('DEBUG');
@@ -105,6 +114,7 @@ describe('shouldLog', () => {
         expect(infoResult).toBe(true);
     });
 
+    /** Проверяет правильную работу с уровнем WARN */
     it('должен правильно работать с уровнем WARN', async () => {
         process.env.LOG_LEVEL = 'WARN';
 
@@ -120,6 +130,7 @@ describe('shouldLog', () => {
         expect(errorResult).toBe(true);
     });
 
+    /** Проверяет правильную работу с уровнем ERROR */
     it('должен правильно работать с уровнем ERROR', async () => {
         process.env.LOG_LEVEL = 'ERROR';
 
