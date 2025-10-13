@@ -8,8 +8,6 @@ export const DEFAULT_TEST_PARAMS = {
     MAX_ITERATIONS: 10,
     /** Минимальное количество итераций */
     MIN_ITERATIONS: 3,
-    /** Timeout по умолчанию в миллисекундах */
-    TIMEOUT: 30000,
 } as const;
 
 /** Пороги для оценки консистентности */

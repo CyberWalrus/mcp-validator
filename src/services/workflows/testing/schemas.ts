@@ -8,9 +8,6 @@ export const ParallelTestParamsSchema = z.object({
     /** Количество параллельных итераций */
     iterations: z.number().min(3, 'Минимум 3 итерации').max(10, 'Максимум 10 итераций').optional().default(5),
 
-    /** Список моделей для тестирования */
-    models: z.array(z.string()).optional(),
-
     /** Промпт для тестирования */
     prompt: z.string().min(1, 'Промпт не может быть пустым'),
 
@@ -19,8 +16,7 @@ export const ParallelTestParamsSchema = z.object({
         .number()
         .min(1000, 'Минимальный timeout 1 секунда')
         .max(120000, 'Максимальный timeout 2 минуты')
-        .optional()
-        .default(30000),
+        .optional(),
 });
 
 /** Схема результата одной итерации */
@@ -92,9 +88,6 @@ export const ParallelTestResultSchema = z.object({
 
         /** Время окончания тестирования */
         endTime: z.string(),
-
-        /** Использованные модели */
-        models: z.array(z.string()),
 
         /** Исходный промпт */
         originalPrompt: z.string(),

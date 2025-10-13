@@ -16,7 +16,6 @@ describe('generateTestReport', () => {
             context: 'Тест для студентов',
             duration: 3000,
             endTime: '2024-01-01T10:00:03Z',
-            models: ['claude-3-sonnet', 'claude-3-haiku'],
             originalPrompt: 'Объясни что такое рекурсия',
             startTime: '2024-01-01T10:00:00Z',
             validatorVersion: '2.0.0',

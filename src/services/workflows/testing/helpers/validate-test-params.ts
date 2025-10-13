@@ -1,8 +1,18 @@
+import { getConfigOrThrow } from '../../../../model/config/get-config-or-throw';
 import { DEFAULT_TEST_PARAMS } from '../constants';
 import type { ParallelTestParams } from '../types';
 
 /** Валидирует параметры параллельного тестирования */
 export function validateTestParams(params: ParallelTestParams): void {
+    const config = getConfigOrThrow();
+    const { validation } = config;
+
+    if (!validation) {
+        throw new Error('Validation configuration is not available');
+    }
+
+    const { limits } = validation;
+
     if (!params.prompt || params.prompt.trim().length === 0) {
         throw new Error('Промпт не может быть пустым');
     }
@@ -18,26 +28,16 @@ export function validateTestParams(params: ParallelTestParams): void {
     }
 
     if (params.timeout !== undefined) {
-        if (params.timeout < 1000) {
-            throw new Error('Минимальный timeout: 1000мс');
+        if (params.timeout < limits.timeoutMin) {
+            throw new Error(`Минимальный timeout: ${limits.timeoutMin}мс`);
         }
 
-        if (params.timeout > 120000) {
-            throw new Error('Максимальный timeout: 120000мс');
-        }
-    }
-
-    if (params.models !== undefined) {
-        if (params.models.length === 0) {
-            throw new Error('Должна быть указана минимум одна модель');
-        }
-
-        if (params.models.length > 5) {
-            throw new Error('Максимальное количество моделей: 5');
+        if (params.timeout > limits.timeoutMax) {
+            throw new Error(`Максимальный timeout: ${limits.timeoutMax}мс`);
         }
     }
 
-    if (params.context !== undefined && params.context.length > 5000) {
-        throw new Error('Максимальная длина контекста: 5000 символов');
+    if (params.context !== undefined && params.context.length > limits.contextMaxLength) {
+        throw new Error(`Максимальная длина контекста: ${limits.contextMaxLength} символов`);
     }
 }

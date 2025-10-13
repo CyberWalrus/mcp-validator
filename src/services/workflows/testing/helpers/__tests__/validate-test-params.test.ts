@@ -1,12 +1,30 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { getConfigOrThrow } from '../../../../../model/config/get-config-or-throw';
 import type { ParallelTestParams } from '../../types';
 import { validateTestParams } from '../validate-test-params';
 
+vi.mock('../../../../../model/config/get-config-or-throw', () => ({
+    getConfigOrThrow: vi.fn(),
+}));
+
 describe('validateTestParams', () => {
+    beforeEach(() => {
+        vi.mocked(getConfigOrThrow).mockReturnValue({
+            validation: {
+                limits: {
+                    contextMaxLength: 5000,
+                    timeoutMax: 120000,
+                    timeoutMin: 1000,
+                },
+            },
+        } as ReturnType<typeof getConfigOrThrow>);
+    });
+
     it('должен успешно валидировать корректные параметры', () => {
         const params: ParallelTestParams = {
             context: 'Тестовый контекст',
             iterations: 5,
-            models: ['claude-3-sonnet'],
             prompt: 'Тестовый промпт',
             timeout: 30000,
         };
@@ -64,24 +82,6 @@ describe('validateTestParams', () => {
         };
 
         expect(() => validateTestParams(params)).toThrow('Максимальный timeout: 120000мс');
-    });
-
-    it('должен выбрасывать ошибку для пустого массива моделей', () => {
-        const params: ParallelTestParams = {
-            models: [],
-            prompt: 'Тест',
-        };
-
-        expect(() => validateTestParams(params)).toThrow('Должна быть указана минимум одна модель');
-    });
-
-    it('должен выбрасывать ошибку для слишком многих моделей', () => {
-        const params: ParallelTestParams = {
-            models: ['model1', 'model2', 'model3', 'model4', 'model5', 'model6'],
-            prompt: 'Тест',
-        };
-
-        expect(() => validateTestParams(params)).toThrow('Максимальное количество моделей: 5');
     });
 
     it('должен выбрасывать ошибку для слишком длинного контекста', () => {

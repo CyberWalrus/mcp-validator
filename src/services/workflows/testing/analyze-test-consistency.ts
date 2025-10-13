@@ -1,5 +1,6 @@
 import { info } from '../../../lib/helpers/logger';
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import { ANOMALY_MULTIPLIERS, TIME_VARIANCE_THRESHOLD, VARIANCE_THRESHOLDS } from './consistency-analysis-constants';
 import { CONSISTENCY_THRESHOLDS } from './constants';
 import type { ConsistencyAnalysis, TestIterationResult } from './types';
 
@@ -111,19 +112,19 @@ function analyzeLengthConsistency(results: TestIterationResult[]): {
     const patterns: string[] = [];
     const anomalies: string[] = [];
 
-    if (coefficientOfVariation < 0.2) {
+    if (coefficientOfVariation < VARIANCE_THRESHOLDS.LOW) {
         patterns.push('Стабильная длина ответов (вариация < 20%)');
-    } else if (coefficientOfVariation < 0.5) {
+    } else if (coefficientOfVariation < VARIANCE_THRESHOLDS.MEDIUM) {
         patterns.push('Умеренная вариация длины ответов (20-50%)');
     } else {
         anomalies.push('Высокая вариация длины ответов (> 50%)');
     }
 
-    if (maxLength > avgLength * 2) {
+    if (maxLength > avgLength * ANOMALY_MULTIPLIERS.LONG_LENGTH) {
         anomalies.push(`Обнаружены аномально длинные ответы (${maxLength} символов)`);
     }
 
-    if (minLength < avgLength * 0.5) {
+    if (minLength < avgLength * ANOMALY_MULTIPLIERS.SHORT_LENGTH) {
         anomalies.push(`Обнаружены аномально короткие ответы (${minLength} символов)`);
     }
 
@@ -192,17 +193,17 @@ function analyzeTimeConsistency(results: TestIterationResult[]): {
 
     if (avgTime === 0) {
         patterns.push('Мгновенное выполнение (мок-режим)');
-    } else if (coefficientOfVariation < 0.3) {
+    } else if (coefficientOfVariation < TIME_VARIANCE_THRESHOLD) {
         patterns.push(
             `Стабильное время выполнения (${Math.round(avgTime)}мс ±${Math.round(coefficientOfVariation * 100)}%)`,
         );
-    } else if (coefficientOfVariation < 0.7) {
+    } else if (coefficientOfVariation < VARIANCE_THRESHOLDS.HIGH) {
         patterns.push('Умеренная вариация времени выполнения');
     } else {
         anomalies.push('Высокая вариация времени выполнения');
     }
 
-    const slowRequests = times.filter((time) => time > avgTime * 1.5);
+    const slowRequests = times.filter((time) => time > avgTime * ANOMALY_MULTIPLIERS.SLOW_TIME);
     if (slowRequests.length > 0) {
         anomalies.push(`${slowRequests.length} запросов выполнялись значительно дольше среднего`);
     }

@@ -71,7 +71,6 @@ describe('runParallelTests', () => {
                 metadata: expect.objectContaining({
                     duration: expect.any(Number),
                     endTime: expect.any(String),
-                    models: expect.any(Array),
                     startTime: expect.any(String),
                 }),
                 results: expect.arrayContaining([

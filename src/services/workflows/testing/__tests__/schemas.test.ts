@@ -11,7 +11,6 @@ describe('Testing Schemas', () => {
             const validParams = {
                 context: 'Дополнительный контекст',
                 iterations: 5,
-                models: ['claude-3-sonnet', 'claude-3-haiku'],
                 prompt: 'Тестовый промпт',
                 timeout: 30000,
             };
@@ -34,7 +33,7 @@ describe('Testing Schemas', () => {
             expect(result.success).toBe(true);
             if (result.success) {
                 expect(result.data.iterations).toBe(5);
-                expect(result.data.timeout).toBe(30000);
+                expect(result.data.timeout).toBeUndefined();
             }
         });
 

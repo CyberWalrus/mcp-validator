@@ -1,59 +1,14 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import { error, info } from '../../../lib/helpers/logger';
 import { getPackageVersion } from '../../../lib/helpers/version';
-import { APP_CONFIG, getAppConfigError } from '../../../model/config';
-import type { AppConfig } from '../../../model/types/main';
-import type { OpenRouterRequest, OpenRouterResponse } from '../../adapters/openrouter/types';
 import { formatAnalyzePrompt, formatExecutePrompt } from './helpers/format-test-prompt';
+import { getConfigOrThrow } from './helpers/get-config-or-throw';
 import { loadAnalyzePrompt, loadExecutePrompt } from './helpers/load-test-prompt';
+import { runSingleTest } from './helpers/run-single-test';
 import { validateTestParams } from './helpers/validate-test-params';
 import { analyzeTestConsistency } from './analyze-test-consistency';
 import { DEFAULT_TEST_PARAMS } from './constants';
 import { ParallelTestParamsSchema } from './schemas';
-import type { ParallelTestParams, ParallelTestResult, TestIterationResult } from './types';
-
-// Тип функции OpenRouter клиента
-type OpenRouterClientFunction = (request: OpenRouterRequest) => Promise<OpenRouterResponse>;
-
-// Кешируем импорт клиента
-let openRouterClient: OpenRouterClientFunction | null = null;
-
-function getConfigOrThrow(): AppConfig {
-    const config = APP_CONFIG;
-
-    const configError = getAppConfigError();
-
-    if (!config || configError) {
-        const message = configError?.message ?? 'Конфигурация приложения недоступна';
-
-        throw new Error(message);
-    }
-
-    return config;
-}
-
-/** Получает правильный OpenRouter клиент в зависимости от режима */
-async function getOpenRouterClient(): Promise<OpenRouterClientFunction> {
-    if (openRouterClient) {
-        return openRouterClient;
-    }
-
-    const config = getConfigOrThrow();
-
-    if (config.runtime.environment === 'test' && config.runtime.isE2ETest) {
-        // В E2E тестах используем мок клиент через фабрику
-        const { getOpenRouterClient: createOpenRouterClient } = await import(
-            '../../adapters/openrouter/openrouter-client-factory'
-        );
-        openRouterClient = await createOpenRouterClient();
-    } else {
-        // В обычном режиме используем реальный клиент
-        const { makeOpenRouterRequest } = await import('../../adapters/openrouter/openrouter-real-client');
-        openRouterClient = makeOpenRouterRequest;
-    }
-
-    return openRouterClient;
-}
+import type { ParallelTestParams, ParallelTestResult } from './types';
 
 /** Выполняет параллельное тестирование промпта для проверки консистентности */
 export async function runParallelTests(params: ParallelTestParams): Promise<ParallelTestResult> {
@@ -68,7 +23,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
         validateTestParams(params);
         const validatedParams = ParallelTestParamsSchema.parse(params);
 
-        // ЭТАП 1: Выполнение тестируемого промпта через AI (получение 5 ответов)
         info('Этап 1: Выполняю тестируемый промпт через AI модели');
         const executePromptTemplate = loadExecutePrompt();
         const formattedExecutePrompt = formatExecutePrompt(
@@ -78,20 +32,18 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
         );
 
         const config = getConfigOrThrow();
-        const models = validatedParams.models || [config.ai.defaultModel];
 
         const testPromises = Array.from({ length: validatedParams.iterations }, (_, index) =>
             runSingleTest({
                 iteration: index + 1,
-                model: models[index % models.length] || config.ai.defaultModel,
+                model: config.model.name,
                 prompt: formattedExecutePrompt,
-                timeout: validatedParams.timeout,
+                timeout: validatedParams.timeout || config.timeouts.apiRequest,
             }),
         );
 
         const executeResults = await Promise.all(testPromises);
 
-        // ЭТАП 2: Анализ полученных ответов через специализированный промпт
         info('Этап 2: Анализирую полученные ответы на консистентность и качество');
         const analyzePromptTemplate = loadAnalyzePrompt();
         const responses = executeResults.filter((result) => result.success).map((result) => result.response || '');
@@ -107,16 +59,13 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             validatedParams.context,
         );
 
-        // Выполняем анализ через один из успешных моделей
-        const successfulModel = executeResults.find((r) => r.success)?.model || models[0];
         const analysisResult = await runSingleTest({
             iteration: 'analysis',
-            model: successfulModel,
+            model: config.model.name,
             prompt: formattedAnalyzePrompt,
-            timeout: validatedParams.timeout,
+            timeout: validatedParams.timeout || config.timeouts.apiRequest,
         });
 
-        // Для обратной совместимости также используем старый анализ консистентности
         const consistency = analyzeTestConsistency(executeResults);
 
         const successfulTests = executeResults.filter((r) => r.success).length;
@@ -126,7 +75,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
         const endTime = new Date();
         const duration = endTime.getTime() - startTime.getTime();
 
-        // Объединяем результаты выполнения и анализа
         const allResults = [...executeResults];
         if (analysisResult.success) {
             allResults.push(analysisResult);
@@ -136,7 +84,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             averageResponseTime: Math.round(averageResponseTime),
             consistency: {
                 ...consistency,
-                // Добавляем результат нового анализа в consistency, только если есть успешный результат
                 ...(analysisResult.success && analysisResult.response
                     ? {
                           aiAnalysis: analysisResult.response,
@@ -151,7 +98,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
                 context: validatedParams.context || '',
                 duration,
                 endTime: endTime.toISOString(),
-                models,
                 originalPrompt: validatedParams.prompt,
                 startTime: startTime.toISOString(),
                 validatorVersion: getPackageVersion(), // Версия из единого источника
@@ -175,8 +121,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
 
         error('Ошибка параллельного тестирования', { duration, error: err });
 
-        const config = getConfigOrThrow();
-
         return {
             averageResponseTime: 0,
             consistency: {
@@ -191,7 +135,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
                 context: params.context || '',
                 duration: new Date().getTime() - startTime.getTime(),
                 endTime: new Date().toISOString(),
-                models: params.models || [config.ai.defaultModel],
                 originalPrompt: params.prompt,
                 startTime: startTime.toISOString(),
                 validatorVersion: '2.0.0',
@@ -200,61 +143,6 @@ export async function runParallelTests(params: ParallelTestParams): Promise<Para
             success: false,
             successfulTests: 0,
             totalTests: params.iterations || DEFAULT_TEST_PARAMS.ITERATIONS,
-        };
-    }
-}
-
-/** Выполняет одну итерацию теста */
-async function runSingleTest({
-    iteration,
-    prompt,
-    model,
-    timeout,
-}: {
-    iteration: number | string;
-    model: string;
-    prompt: string;
-    timeout: number;
-}): Promise<TestIterationResult> {
-    const startTime = new Date();
-
-    try {
-        const makeOpenRouterRequest: OpenRouterClientFunction = await getOpenRouterClient();
-        const response = await makeOpenRouterRequest({
-            model,
-            prompt,
-            timeout,
-        });
-
-        const endTime = new Date();
-
-        // Проверяем что response имеет правильную структуру
-        if (typeof response !== 'object' || response === null) {
-            throw new Error('Некорректный ответ от OpenRouter API');
-        }
-
-        const typedResponse = response;
-
-        return {
-            endTime: endTime.toISOString(),
-            iteration,
-            model: typedResponse.model,
-            response: typedResponse.text,
-            responseTime: typedResponse.duration,
-            startTime: startTime.toISOString(),
-            success: true,
-        };
-    } catch (err) {
-        const endTime = new Date();
-
-        return {
-            endTime: endTime.toISOString(),
-            error: String(err),
-            iteration,
-            model,
-            responseTime: endTime.getTime() - startTime.getTime(),
-            startTime: startTime.toISOString(),
-            success: false,
         };
     }
 }
