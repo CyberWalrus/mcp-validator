@@ -102,7 +102,7 @@ jobs:
               run: |
                   VERSION=$(node -p "require('./package.json').version")
                   echo "Checking if version $VERSION exists in npm..."
-                  
+
                   if npm view mcp-validator@$VERSION version >/dev/null 2>&1; then
                     echo "Version $VERSION already exists in npm - skipping publish"
                     echo "should-publish=false" >> $GITHUB_OUTPUT
@@ -110,7 +110,7 @@ jobs:
                     echo "Version $VERSION not found in npm - will publish"
                     echo "should-publish=true" >> $GITHUB_OUTPUT
                   fi
-                  
+
                   echo "version=$VERSION" >> $GITHUB_OUTPUT
 
             - name: Install dependencies
@@ -135,7 +135,7 @@ jobs:
               run: |
                   VERSION="${{ steps.check.outputs.version }}"
                   echo "Extracting changelog for version: $VERSION"
-                  
+
                   awk -v version="$VERSION" '
                     BEGIN { in_section = 0 }
                     /^## \[/ { 
@@ -149,7 +149,7 @@ jobs:
                     }
                     in_section { print }
                   ' CHANGELOG.md > release_notes.md
-                  
+
                   if [ ! -s release_notes.md ]; then
                     echo "## [$VERSION] - $(date +%Y-%m-%d)" > release_notes.md
                     echo "" >> release_notes.md
