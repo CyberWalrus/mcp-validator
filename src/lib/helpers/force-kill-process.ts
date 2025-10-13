@@ -14,14 +14,10 @@ export function forceKillProcess(process: KillableProcess): void {
                 detached: true,
                 stdio: 'ignore',
             });
-        } catch {
-            // Игнорируем ошибки
-        }
+        } catch {} // eslint-disable-line no-empty
     } else {
         try {
             process.kill('SIGKILL');
-        } catch {
-            // Игнорируем ошибки, если процесс уже завершен
-        }
+        } catch {} // eslint-disable-line no-empty
     }
 }

@@ -17,15 +17,11 @@ export function killProcess(process: KillableProcess): void {
         } catch {
             try {
                 process.kill('SIGKILL');
-            } catch {
-                // Игнорируем ошибки, если процесс уже завершен
-            }
+            } catch {} // eslint-disable-line no-empty
         }
     } else {
         try {
             process.kill('SIGTERM');
-        } catch {
-            // Игнорируем ошибки, если процесс уже завершен
-        }
+        } catch {} // eslint-disable-line no-empty
     }
 }
