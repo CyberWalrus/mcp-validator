@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.2] - 2025-10-13
+
+<small>13.10.2025 11:12</small>
+
+### Fixed
+
+- **Исправления CI/CD и GitHub Actions**
+    - Исправлен баг с передачей версии в GitHub релизы
+    - Удален дублирующий шаг Get package version
+    - Добавлена запись version в GITHUB_OUTPUT в шаге check
+    - Теперь релизы создаются с правильным тегом (v0.4.0 вместо v)
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4f9562467e32ca55c8bacf5b03a2f16c18329016" target="_blank">4f95624</a>
+
+### Changed
+
+- **Улучшения стиля и форматирования**
+    - Удалена лишняя пустая строка в GitHub workflow
+    - Улучшена читаемость конфигурации CI/CD
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/259aa07eb196ef4155600711a47a8587b1d9c98e" target="_blank">259aa07</a>
+
 ## [0.4.0] - 2025-10-13
 
 <small>13.10.2025 10:58</small>
