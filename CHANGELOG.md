@@ -1,5 +1,65 @@
 # Changelog
 
+## [0.4.4] - 2025-10-13
+
+<small>13.10.2025 13:29</small>
+
+### Fixed
+
+- **Исправления CI/CD и GitHub Actions**
+    - Исправлена логика извлечения ченжлога в GitHub Actions workflow
+    - Убрана настройка ESLINT_USE_FLAT_CONFIG для macOS CI
+    - Исправлена Windows-совместимость e2e тестов в CI
+    - Исправлена проблема с ESLint на Windows в CI/CD
+    - Улучшена стабильность e2e тестов в CI
+    - Исправлено падение тестов в CI/CD пайплайне
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/af6dccfefab91fe701a98199bbba1b229a63e56c" target="_blank">af6dccf</a>
+
+- **Исправления кроссплатформенности**
+    - Исправлена кроссплатформенность тестов для Windows
+    - Исправлены ошибки линтера в регулярных выражениях
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/169b3259bb81f004baf1c0f9a3a379423abec603" target="_blank">169b325</a>
+
+### Added
+
+- **Кроссплатформенное тестирование**
+    - Добавлено тестирование на macOS для полной кроссплатформенности
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/85960cb489144ed2ca5163b42fda1a92ea9c04cc" target="_blank">85960cb</a>
+
+### Changed
+
+- **Улучшения CI/CD пайплайна**
+    - Упрощена структура CI/CD пайплайна
+    - Оптимизирован CI/CD пайплайн для лучшей логики и производительности
+    - Улучшен CI/CD pipeline с параллельным тестированием и улучшенной обработкой релизов
+    - Удалены избыточные пробелы в CI/CD пайплайне
+    - Добавлена сборка пакета перед e2e тестами в CI
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/fe1caea1ef767b9d3bfefa0ebfbbec2eabb4dad9" target="_blank">fe1caea</a>
+
+- **Рефакторинг кода и улучшения**
+    - Улучшена валидация параметров в agents, tools и adapters
+    - Оптимизированы проверки null/undefined в тестовых workflow helpers
+    - Улучшен template rendering и обработка ошибок в error-handler
+    - Упрощена логика проверок и catch блоков в helper функциях
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/526111f306e9f77d5fe84169855a03683d844af5" target="_blank">526111f</a>
+
+### Debug
+
+- **Отладка CI/CD**
+    - Улучшена отладка для macOS CI проблемы с ESLint
+    - Добавлена отладка рабочей директории для macOS CI
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4ee96b30161960d9ceb1d51b5f72cd487558cd8e" target="_blank">4ee96b3</a>
+
+## [0.4.3] - 2025-10-13
+
+<small>13.10.2025 11:46</small>
+
+### Changed
+
+- **Обновление версии пакета**
+    - Обновлена версия пакета до 0.4.3
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/37cc75e7cab151eb1b822d42c859e64ea4bc796a" target="_blank">37cc75e</a>
+
 ## [0.4.2] - 2025-10-13
 
 <small>13.10.2025 11:12</small>
