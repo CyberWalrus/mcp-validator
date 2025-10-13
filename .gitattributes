@@ -1,0 +1,13 @@
+# Автоматическая нормализация line endings
+* text=auto
+
+# Явно указываем LF для скриптов
+*.sh text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+# Бинарные файлы
+*.png binary
+*.jpg binary
