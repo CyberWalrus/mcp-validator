@@ -163,7 +163,6 @@ describe('E2E: Test-Prompt инструмент', () => {
 
             const response = await testContext.clientSimulator.callTool(TEST_PROMPT_TOOL, {
                 iterations: 3,
-                models: ['openai/gpt-4', 'openai/gpt-oss-120b'],
                 prompt: 'Напиши короткое приветствие',
             });
 

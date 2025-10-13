@@ -1,4 +1,4 @@
-import { getConnectionConfig } from './mcp-transport';
+import { getConnectionConfig } from './connection-config';
 import type {
     ClientInfo,
     InitializeResponse,

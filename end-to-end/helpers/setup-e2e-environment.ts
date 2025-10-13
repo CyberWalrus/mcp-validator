@@ -20,7 +20,7 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
             ...process.env,
             MCP_E2E_TEST: 'true',
             NODE_ENV: 'test',
-            OPENROUTER_API_KEY: 'test-key-for-e2e',
+            API_KEY: 'test-key-for-e2e',
         },
         stdio: ['pipe', 'pipe', 'pipe'],
     });

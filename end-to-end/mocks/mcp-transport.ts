@@ -1,23 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
 
-import { APP_CONFIG } from '../../src/model/config';
 import type { MCPRequest, MCPResponse } from '../types';
-
-/** Конфигурация подключения к MCP серверу */
-export type ConnectionConfig = {
-    timeout: number;
-    isE2ETest: boolean;
-    environment: string;
-};
-
-/** Получает конфигурацию для подключения к MCP серверу */
-export function getConnectionConfig(): ConnectionConfig {
-    return {
-        timeout: APP_CONFIG.validation.timeout,
-        isE2ETest: APP_CONFIG.runtime.isE2ETest,
-        environment: APP_CONFIG.runtime.environment,
-    };
-}
+import { getConnectionConfig } from './connection-config';
 
 /** Создает транспорт для MCP соединения */
 export function createMCPTransport() {
@@ -64,7 +48,7 @@ export function createMCPTransport() {
                                 callback(response);
                             }
                         } catch {
-                            // Игнорируем ошибки парсинга не-JSON строк
+                            /* Игнорируем ошибки парсинга не-JSON строк */
                         }
                     }
                 }
@@ -114,7 +98,9 @@ export function createMCPTransport() {
             const originalCallback = responseCallbacks.get(callbackKey);
             responseCallbacks.set(callbackKey, (response) => {
                 clearTimeout(timeoutId);
-                if (originalCallback) originalCallback(response);
+                if (originalCallback) {
+                originalCallback(response);
+            }
             });
         });
     }
