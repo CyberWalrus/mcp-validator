@@ -143,3 +143,6 @@ target/
 .cursor/*
 lib/*
 reports/*
+
+# GitHub Actions secrets (local development only)
+.github/workflows/.secrets

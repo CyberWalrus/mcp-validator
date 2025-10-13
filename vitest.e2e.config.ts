@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 
+/** Конфигурация Vitest для e2e-тестов */
 export default defineConfig({
     esbuild: {
         target: 'node20',
@@ -22,9 +23,9 @@ export default defineConfig({
             },
         },
         env: {
+            API_KEY: 'test-key-for-e2e',
             MCP_E2E_TEST: 'true',
             NODE_ENV: 'test',
-            OPENROUTER_API_KEY: 'test-key-for-e2e',
         },
         globals: true,
         include: ['end-to-end/**/*.e2e.test.ts'],
