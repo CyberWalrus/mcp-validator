@@ -87,10 +87,14 @@ export async function validateCode(params: ValidationParams): Promise<Validation
             return formatPrompt(promptTemplate, context);
         })();
 
+        const config = getConfigOrThrow();
         const makeOpenRouterRequest: OpenRouterClientFunction = await getOpenRouterClient();
         const aiResponse = await makeOpenRouterRequest({
+            maxTokens: config.model.maxTokens,
+            model: config.model.name,
             prompt: formattedPrompt,
-            timeout: 30000,
+            temperature: config.model.temperature,
+            timeout: config.timeouts.validation,
         });
 
         if (typeof aiResponse !== 'object' || aiResponse === null) {
