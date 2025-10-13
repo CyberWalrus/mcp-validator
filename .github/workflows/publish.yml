@@ -24,8 +24,18 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Run tests
-              run: yarn test
+            - name: Run unit tests
+              run: yarn test:unit
+              env:
+                  NODE_ENV: "test"
+                  API_KEY: "test-key-for-e2e"
+            
+            - name: Run e2e tests
+              run: yarn test:e2e
+              env:
+                  MCP_E2E_TEST: "true"
+                  NODE_ENV: "test"
+                  API_KEY: "test-key-for-e2e"
 
             - name: Run linter
               run: yarn lint
@@ -45,8 +55,18 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
-            - name: Run tests on Windows
-              run: yarn test
+            - name: Run unit tests on Windows
+              run: yarn test:unit
+              env:
+                  NODE_ENV: "test"
+                  API_KEY: "test-key-for-e2e"
+            
+            - name: Run e2e tests on Windows
+              run: yarn test:e2e
+              env:
+                  MCP_E2E_TEST: "true"
+                  NODE_ENV: "test"
+                  API_KEY: "test-key-for-e2e"
 
             - name: Run linter on Windows
               run: yarn lint
