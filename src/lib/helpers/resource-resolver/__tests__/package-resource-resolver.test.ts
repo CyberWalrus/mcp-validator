@@ -9,9 +9,9 @@ describe('getPackageResourceResolver', () => {
         const testsPath = resolver.resolvePromptPath('tests');
         const architecturePath = resolver.resolvePromptPath('architecture');
 
-        expect(codePath).toMatch(/prompts\/validation\/validate-code\.md$/);
-        expect(testsPath).toMatch(/prompts\/validation\/validate-tests\.md$/);
-        expect(architecturePath).toMatch(/prompts\/validation\/validate-architecture\.md$/);
+        expect(codePath).toMatch(/prompts[\\\/]validation[\\\/]validate-code\.md$/);
+        expect(testsPath).toMatch(/prompts[\\\/]validation[\\\/]validate-tests\.md$/);
+        expect(architecturePath).toMatch(/prompts[\\\/]validation[\\\/]validate-architecture\.md$/);
     });
 
     it('должен корректно разрешать пути к шаблонам ошибок', () => {
@@ -21,9 +21,9 @@ describe('getPackageResourceResolver', () => {
         const systemErrorPath = resolver.resolveErrorTemplatePath('system-error');
         const validationErrorPath = resolver.resolveErrorTemplatePath('validation-error');
 
-        expect(fileErrorPath).toContain('prompts/errors/file-error.md');
-        expect(systemErrorPath).toContain('prompts/errors/system-error.md');
-        expect(validationErrorPath).toContain('prompts/errors/validation-error.md');
+        expect(fileErrorPath.replace(/\\/g, '/')).toContain('prompts/errors/file-error.md');
+        expect(systemErrorPath.replace(/\\/g, '/')).toContain('prompts/errors/system-error.md');
+        expect(validationErrorPath.replace(/\\/g, '/')).toContain('prompts/errors/validation-error.md');
     });
 
     it('должен корректно разрешать путь к директории шаблонов ошибок', () => {
@@ -31,7 +31,7 @@ describe('getPackageResourceResolver', () => {
 
         const errorsDir = resolver.resolveErrorTemplatesDir();
 
-        expect(errorsDir).toContain('prompts/errors');
+        expect(errorsDir.replace(/\\/g, '/')).toContain('prompts/errors');
         expect(errorsDir).not.toContain('.md');
     });
 
@@ -50,8 +50,8 @@ describe('getPackageResourceResolver', () => {
         const executePromptPath = resolver.resolveExecuteTestPromptPath();
         const analyzePromptPath = resolver.resolveAnalyzeTestPromptPath();
 
-        expect(executePromptPath).toContain('prompts/testing/execute-prompt-test.md');
-        expect(analyzePromptPath).toContain('prompts/testing/test-prompt.md');
+        expect(executePromptPath.replace(/\\/g, '/')).toContain('prompts/testing/execute-prompt-test.md');
+        expect(analyzePromptPath.replace(/\\/g, '/')).toContain('prompts/testing/test-prompt.md');
     });
 
     it('должен возвращать абсолютные пути', () => {
@@ -61,9 +61,9 @@ describe('getPackageResourceResolver', () => {
         const errorPath = resolver.resolveErrorTemplatePath('file-error');
         const packagePath = resolver.resolvePackageJsonPath();
 
-        expect(codePath).toMatch(/^\/.*\.md$/);
-        expect(errorPath).toMatch(/^\/.*\.md$/);
-        expect(packagePath).toMatch(/^\/.*package\.json$/);
+        expect(codePath).toMatch(/^[A-Za-z]:.*\.md$|^\/.*\.md$/);
+        expect(errorPath).toMatch(/^[A-Za-z]:.*\.md$|^\/.*\.md$/);
+        expect(packagePath).toMatch(/^[A-Za-z]:.*package\.json$|^\/.*package\.json$/);
     });
 
     it('должен обрабатывать неизвестные типы валидации', () => {
@@ -71,7 +71,7 @@ describe('getPackageResourceResolver', () => {
 
         const unknownPath = resolver.resolvePromptPath('unknown' as ValidationType);
 
-        expect(unknownPath).toMatch(/prompts\/validation\/validate-unknown\.md$/);
+        expect(unknownPath).toMatch(/prompts[\\\/]validation[\\\/]validate-unknown\.md$/);
     });
 
     it('должен обрабатывать неизвестные типы ошибок', () => {
@@ -79,7 +79,7 @@ describe('getPackageResourceResolver', () => {
 
         const unknownErrorPath = resolver.resolveErrorTemplatePath('unknown-error');
 
-        expect(unknownErrorPath).toContain('prompts/errors/unknown-error.md');
+        expect(unknownErrorPath.replace(/\\/g, '/')).toContain('prompts/errors/unknown-error.md');
     });
 
     describe('dual-mode поддержка (development vs installed)', () => {
@@ -98,8 +98,8 @@ describe('getPackageResourceResolver', () => {
             const codePath = resolver.resolvePromptPath('code');
             const errorPath = resolver.resolveErrorTemplatePath('validation-error');
 
-            expect(codePath).toMatch(/prompts\/validation\/validate-code\.md$/);
-            expect(errorPath).toMatch(/prompts\/errors\/validation-error\.md$/);
+            expect(codePath).toMatch(/prompts[\\\/]validation[\\\/]validate-code\.md$/);
+            expect(errorPath).toMatch(/prompts[\\\/]errors[\\\/]validation-error\.md$/);
         });
 
         it('должен поддерживать поиск пакета по имени mcp-validator', () => {
@@ -108,7 +108,7 @@ describe('getPackageResourceResolver', () => {
             const packageJsonPath = resolver.resolvePackageJsonPath();
 
             expect(packageJsonPath).toBeTruthy();
-            expect(packageJsonPath).toMatch(/\/package\.json$/);
+            expect(packageJsonPath).toMatch(/[\\\/]package\.json$/);
         });
     });
 });
