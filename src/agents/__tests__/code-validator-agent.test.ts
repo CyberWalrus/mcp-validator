@@ -43,7 +43,7 @@ describe('CodeValidatorAgent', () => {
 
     beforeEach(async () => {
         vi.resetModules();
-        process.env.OPENROUTER_API_KEY = 'test-key';
+        process.env.API_KEY = 'test-key';
 
         const { reloadAppConfig } = await import('../../model/config');
         await reloadAppConfig();
@@ -78,7 +78,6 @@ describe('CodeValidatorAgent', () => {
 
         const result = await validateCodeWithAgent(agent, testInput);
 
-        // Проверяем что агент теперь использует промпт для валидации промптов
         expect(agent.instructions).toContain('AI Prompt Validator');
         expect(agent.instructions).toContain('validate-prompts');
         expect(result).toBeDefined();
@@ -97,7 +96,6 @@ describe('CodeValidatorAgent', () => {
 
         const result = await validateCodeWithAgent(agent, testInput);
 
-        // Проверяем что агент использует промпт для валидации кода
         expect(agent.instructions).toContain('Code Quality Validator');
         expect(result).toBeDefined();
         expect(result.type).toBe('code');
@@ -115,7 +113,6 @@ describe('CodeValidatorAgent', () => {
 
         const result = await validateCodeWithAgent(agent, testInput);
 
-        // Проверяем что агент использует промпт для валидации тестов
         expect(agent.instructions).toContain('validate-tests');
         expect(result).toBeDefined();
         expect(result.type).toBe('tests');

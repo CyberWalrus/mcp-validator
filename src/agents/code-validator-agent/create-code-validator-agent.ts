@@ -8,19 +8,20 @@ import type { CodeValidatorAgentResult } from './types';
 export function createCodeValidatorAgent(): CodeValidatorAgentResult {
     const config = getConfigOrThrow();
     const {
-        openRouter: { apiKey, apiUrl },
+        api: { key, url },
+        model: { name: modelName },
     } = config;
 
     const openai = new OpenAI({
-        apiKey,
-        baseURL: apiUrl,
+        apiKey: key,
+        baseURL: url,
     });
 
     const promptContent = getPrompt('validate-code.md');
 
     return {
         instructions: promptContent,
-        model: 'openai/gpt-oss-120b',
+        model: modelName,
         openai,
     };
 }

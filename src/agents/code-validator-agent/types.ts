@@ -21,3 +21,19 @@ export type CodeValidatorAgentResult = {
 export type CreateCodeValidatorAgent = typeof createCodeValidatorAgent;
 /** Тип функции валидации кода с агентом */
 export type ValidateCodeWithAgent = typeof validateCodeWithAgent;
+
+/** Результат получения контента для валидации */
+export type ValidationContentResult = { content: string; success: true } | { error: string; success: false };
+
+/** Результат вызова OpenAI */
+export type OpenAICallResult = {
+    responseContent: string;
+    tokensUsed: number;
+};
+
+/** Результат парсинга ответа валидации */
+export type ParsedValidationResponse = {
+    issues: string[];
+    recommendations: string;
+    score: number;
+};

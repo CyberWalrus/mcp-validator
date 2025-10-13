@@ -1,3 +1,4 @@
+import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
 import type { TestIterationResult, TestPromptInput, TestPromptResult } from '../../model/types/main';
 import { calculateConsistencyScore } from './calculate-consistency-score';
 import { generateTestSummary } from './generate-test-summary';
@@ -6,7 +7,9 @@ import type { AgentConfig } from './types';
 /** Параллельное тестирование промпта через TestPromptAgent */
 export async function testPromptWithAgent(agent: AgentConfig, testInput: TestPromptInput): Promise<TestPromptResult> {
     try {
-        const { prompt, iterations = 5, models = ['openai/gpt-oss-120b'] } = testInput;
+        const { prompt, iterations = 5 } = testInput;
+        const config = getConfigOrThrow();
+        const modelName = config.model.name;
 
         const promises = Array.from({ length: iterations }, async (_, index): Promise<TestIterationResult> => {
             const iterationPrompt = `
@@ -24,7 +27,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
 
             try {
                 const response = await agent.openai.chat.completions.create({
-                    max_tokens: 4000,
+                    max_tokens: config.model.maxTokens,
                     messages: [
                         {
                             content: agent.instructions,
@@ -36,7 +39,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
                         },
                     ],
                     model: agent.model,
-                    temperature: 0.1,
+                    temperature: config.model.temperature,
                 });
 
                 const duration = Date.now() - startTime;
@@ -47,7 +50,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
                     duration,
                     isSuccess: Boolean(responseContent),
                     iteration: index + 1,
-                    model: models[0] || 'openai/gpt-oss-120b',
+                    model: modelName,
                 };
 
                 if (!responseContent) {
@@ -64,7 +67,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
                     error: err instanceof Error ? err.message : String(err),
                     isSuccess: false,
                     iteration: index + 1,
-                    model: models[0] || 'openai/gpt-oss-120b',
+                    model: modelName,
                 };
             }
         });

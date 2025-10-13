@@ -1,11 +1,12 @@
 import { getPrompt } from '../../lib/cache';
-import { getConfigOrThrow } from '../../model/config/get-config-or-throw';
 import type { ValidationInput, ValidationResult } from '../../model/types/main';
-import { readFileContent } from '../../services/adapters/file-reader';
+import { callOpenAIForValidation } from './call-openai-for-validation';
+import { formatValidationPrompt } from './format-validation-prompt';
+import { getValidationContent } from './get-validation-content';
+import { parseValidationResponse } from './parse-validation-response';
 import type { AgentConfig } from './types';
 
 /** Валидация кода через CodeValidatorAgent */
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function validateCodeWithAgent(
     agent: AgentConfig,
     validationInput: ValidationInput,
@@ -14,115 +15,44 @@ export async function validateCodeWithAgent(
         const correctPrompt = getPrompt(`validate-${validationInput.validationType}.md`);
         agent.instructions = correctPrompt;
 
-        let content = '';
+        const contentResult = await getValidationContent(validationInput);
 
-        if (validationInput.input.type === 'file') {
-            const fileResult = await readFileContent({
-                encoding: validationInput.input.encoding || 'utf8',
-                path: validationInput.input.data,
-            });
-
-            if (!fileResult.success) {
-                return {
-                    issues: [`Ошибка чтения файла: ${fileResult.error}`],
-                    score: 0,
-                    success: false,
-                    type: validationInput.validationType,
-                };
-            }
-
-            content = fileResult.content!;
-        } else if (validationInput.input.type === 'content') {
-            content = validationInput.input.data;
-        } else {
+        if (contentResult.success === false) {
             return {
-                issues: ['Неподдерживаемый тип входных данных'],
+                issues: [contentResult.error],
                 score: 0,
                 success: false,
                 type: validationInput.validationType,
             };
         }
 
-        const validationPrompt = `
-# Входные данные для валидации
+        const validationPrompt = formatValidationPrompt(contentResult.content, validationInput);
 
-## Код для валидации:
-\`\`\`${validationInput.language || 'typescript'}
-${content}
-\`\`\`
+        const { responseContent, tokensUsed } = await callOpenAIForValidation(agent, validationPrompt);
 
-${validationInput.context ? `## Контекст:\n${validationInput.context}` : ''}
-
-Выполни валидацию согласно инструкциям выше.
-`;
-
-        const config = getConfigOrThrow();
-        let responseContent: string;
-        let tokensUsed = 0;
-
-        if (config.runtime.isTestMode) {
-            const { getOpenRouterClient } = await import(
-                '../../services/adapters/openrouter/openrouter-client-factory'
-            );
-            const mockClient = await getOpenRouterClient();
-            const mockResponse = await mockClient({
-                prompt: validationPrompt,
-            });
-            responseContent = mockResponse.text;
-            tokensUsed = mockResponse.tokensUsed;
-        } else {
-            const response = await agent.openai.chat.completions.create({
-                max_tokens: 4000,
-                messages: [
-                    {
-                        content: agent.instructions,
-                        role: 'system',
-                    },
-                    {
-                        content: validationPrompt,
-                        role: 'user',
-                    },
-                ],
-                model: agent.model,
-                temperature: 0.1,
-            });
-            responseContent = response.choices[0]?.message?.content || '';
-            tokensUsed = response.usage?.total_tokens || 0;
-        }
-
-        if (responseContent) {
-            const responseText = responseContent.trim();
-            const scoreMatch = responseText.match(/Оценка.*?(\d+)\/100/i);
-            const score = scoreMatch && scoreMatch[1] ? parseInt(scoreMatch[1], 10) : 75;
-
-            const issues: string[] = [];
-            const criticalSection = responseText.match(/critical_issues>(.*?)<\/critical_issues>/s);
-            if (criticalSection && criticalSection[1]) {
-                const criticalIssues = criticalSection[1].match(/- \*\*(.*?)\*\*/g);
-                if (criticalIssues) {
-                    issues.push(...criticalIssues.map((issue: string) => issue.replace(/- \*\*|\*\*/g, '')));
-                }
-            }
-
+        if (responseContent === '') {
             return {
-                issues: issues.length > 0 ? issues : [],
-                metadata: {
-                    duration: 0,
-                    fullResponse: responseText,
-                    model: agent.model,
-                    tokensUsed,
-                },
-                recommendations: responseText,
-                score,
-                success: score >= 70,
+                issues: ['Не удалось получить результат валидации от агента'],
+                score: 0,
+                success: false,
                 type: validationInput.validationType,
             };
         }
 
+        const responseText = responseContent.trim();
+        const parsed = parseValidationResponse(responseText);
+
         return {
-            issues: ['Не удалось получить результат валидации от агента'],
-            score: 0,
-            success: false,
+            issues: parsed.issues.length > 0 ? parsed.issues : [],
+            metadata: {
+                duration: 0,
+                fullResponse: responseText,
+                model: agent.model,
+                tokensUsed,
+            },
+            recommendations: parsed.recommendations,
+            score: parsed.score,
+            success: parsed.score >= 70,
             type: validationInput.validationType,
         };
     } catch (err) {

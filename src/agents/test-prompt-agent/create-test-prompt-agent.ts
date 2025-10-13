@@ -6,21 +6,28 @@ import type { TestPromptAgentResult } from './types';
 
 /** TestPromptAgent для параллельного тестирования промптов */
 export function createTestPromptAgent(): TestPromptAgentResult {
-    const config = getConfigOrThrow();
-    const {
-        openRouter: { apiKey, apiUrl },
-    } = config;
+    try {
+        const config = getConfigOrThrow();
+        const {
+            api: { key, url },
+            model: { name: modelName },
+        } = config;
 
-    const openai = new OpenAI({
-        apiKey,
-        baseURL: apiUrl,
-    });
+        const openai = new OpenAI({
+            apiKey: key,
+            baseURL: url,
+        });
 
-    const promptContent = getPrompt('test-prompt.md');
+        const promptContent = getPrompt('test-prompt.md');
 
-    return {
-        instructions: promptContent,
-        model: 'openai/gpt-oss-120b',
-        openai,
-    };
+        return {
+            instructions: promptContent,
+            model: modelName,
+            openai,
+        };
+    } catch (error) {
+        throw new Error(
+            `Failed to create test prompt agent: ${error instanceof Error ? error.message : String(error)}`,
+        );
+    }
 }
