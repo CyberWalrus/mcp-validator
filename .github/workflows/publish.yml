@@ -94,6 +94,12 @@ jobs:
             - name: Install dependencies
               run: yarn install --frozen-lockfile
 
+            - name: Debug working directory
+              run: |
+                  pwd
+                  ls -la
+                  ls -la src || echo "src directory not found"
+
             - name: Run linter
               run: yarn lint
               env:
