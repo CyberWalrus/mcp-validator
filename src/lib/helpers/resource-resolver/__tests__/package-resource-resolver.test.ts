@@ -9,9 +9,9 @@ describe('getPackageResourceResolver', () => {
         const testsPath = resolver.resolvePromptPath('tests');
         const architecturePath = resolver.resolvePromptPath('architecture');
 
-        expect(codePath).toMatch(/prompts[\\\/]validation[\\\/]validate-code\.md$/);
-        expect(testsPath).toMatch(/prompts[\\\/]validation[\\\/]validate-tests\.md$/);
-        expect(architecturePath).toMatch(/prompts[\\\/]validation[\\\/]validate-architecture\.md$/);
+        expect(codePath).toMatch(/prompts[\\/]validation[\\/]validate-code\.md$/);
+        expect(testsPath).toMatch(/prompts[\\/]validation[\\/]validate-tests\.md$/);
+        expect(architecturePath).toMatch(/prompts[\\/]validation[\\/]validate-architecture\.md$/);
     });
 
     it('должен корректно разрешать пути к шаблонам ошибок', () => {
@@ -71,7 +71,7 @@ describe('getPackageResourceResolver', () => {
 
         const unknownPath = resolver.resolvePromptPath('unknown' as ValidationType);
 
-        expect(unknownPath).toMatch(/prompts[\\\/]validation[\\\/]validate-unknown\.md$/);
+        expect(unknownPath).toMatch(/prompts[\\/]validation[\\/]validate-unknown\.md$/);
     });
 
     it('должен обрабатывать неизвестные типы ошибок', () => {
@@ -98,8 +98,8 @@ describe('getPackageResourceResolver', () => {
             const codePath = resolver.resolvePromptPath('code');
             const errorPath = resolver.resolveErrorTemplatePath('validation-error');
 
-            expect(codePath).toMatch(/prompts[\\\/]validation[\\\/]validate-code\.md$/);
-            expect(errorPath).toMatch(/prompts[\\\/]errors[\\\/]validation-error\.md$/);
+            expect(codePath).toMatch(/prompts[\\/]validation[\\/]validate-code\.md$/);
+            expect(errorPath).toMatch(/prompts[\\/]errors[\\/]validation-error\.md$/);
         });
 
         it('должен поддерживать поиск пакета по имени mcp-validator', () => {
@@ -108,7 +108,7 @@ describe('getPackageResourceResolver', () => {
             const packageJsonPath = resolver.resolvePackageJsonPath();
 
             expect(packageJsonPath).toBeTruthy();
-            expect(packageJsonPath).toMatch(/[\\\/]package\.json$/);
+            expect(packageJsonPath).toMatch(/[\\/]package\.json$/);
         });
     });
 });
