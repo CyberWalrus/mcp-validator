@@ -30,6 +30,9 @@ jobs:
                   NODE_ENV: "test"
                   API_KEY: "test-key-for-e2e"
             
+            - name: Build package
+              run: yarn build
+            
             - name: Run e2e tests
               run: NODE_ENV=test MCP_E2E_TEST=true yarn vitest --config vitest.e2e.ci.config.ts --run
               env:
@@ -61,6 +64,9 @@ jobs:
               env:
                   NODE_ENV: "test"
                   API_KEY: "test-key-for-e2e"
+            
+            - name: Build package on Windows
+              run: yarn build
             
             - name: Run e2e tests on Windows
               run: NODE_ENV=test MCP_E2E_TEST=true yarn vitest --config vitest.e2e.ci.config.ts --run
