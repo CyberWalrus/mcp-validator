@@ -5,7 +5,7 @@ import { ERROR_TYPE_TO_TEMPLATE } from './constants';
 export function loadErrorTemplate(errorType: 'file' | 'system' | 'validation'): string {
     const templateFileName = ERROR_TYPE_TO_TEMPLATE[errorType];
 
-    if (!templateFileName) {
+    if (templateFileName === null || templateFileName === undefined) {
         throw new Error(`Шаблон для типа ошибки "${errorType}" не найден`);
     }
 

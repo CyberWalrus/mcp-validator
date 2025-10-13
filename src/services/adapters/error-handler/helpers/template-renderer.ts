@@ -17,15 +17,13 @@ function renderArraySections(template: string, variables: Record<string, unknown
                 }
 
                 if (typeof item === 'object' && item !== null) {
-                    let itemContent: string = content;
-                    for (const [key, value] of Object.entries(item as Record<string, unknown>)) {
+                    return Object.entries(item as Record<string, unknown>).reduce((itemContent, [key, value]) => {
                         const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                         const pattern = new RegExp(`{{${escapedKey}}}`, 'g');
                         const replacement = String(value);
-                        itemContent = itemContent.replace(pattern, replacement);
-                    }
 
-                    return itemContent;
+                        return itemContent.replace(pattern, replacement);
+                    }, content);
                 }
 
                 return content.replace(/{{\.}}/g, String(item));
@@ -51,14 +49,17 @@ export function renderTemplate(template: string, variables: Record<string, unkno
         return '';
     });
 
-    for (const [key, value] of Object.entries(variables)) {
-        if (!Array.isArray(value)) {
+    result = Object.entries(variables).reduce((acc, [key, value]) => {
+        if (Array.isArray(value) === false) {
             const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const pattern = new RegExp(`{{${escapedKey}}}`, 'g');
             const replacement = String(value);
-            result = result.replace(pattern, replacement);
+
+            return acc.replace(pattern, replacement);
         }
-    }
+
+        return acc;
+    }, result);
 
     result = result.replace(/\{\{\w+\}\}/g, '');
 
