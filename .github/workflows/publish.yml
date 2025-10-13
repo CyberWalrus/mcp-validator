@@ -38,7 +38,7 @@ jobs:
             echo "Version $VERSION not found in npm, will publish"
             echo "should-publish=true" >> $GITHUB_OUTPUT
           fi
-          
+
           # Output version for use in other jobs
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
