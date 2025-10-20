@@ -1,2 +1,3 @@
 export { formatSuccessfulValidation } from './format-successful-validation';
-export { handleValidateTool, validateTool } from './handle-validate-tool';
+export { handleValidateTool } from './handle-validate-tool';
+export { validateTool } from './validate-tool-schema';

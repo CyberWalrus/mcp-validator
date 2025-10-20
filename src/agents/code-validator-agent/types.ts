@@ -34,7 +34,10 @@ export type OpenAICallResult = {
 
 /** Результат парсинга ответа валидации */
 export type ParsedValidationResponse = {
+    /** Массив критических проблем (deprecated, не используется) */
     issues: string[];
+    /** Полный ответ AI */
     recommendations: string;
-    score: number;
+    /** Оценка качества (опционально извлекается из ответа) */
+    score: number | undefined;
 };

@@ -11,15 +11,15 @@ describe('parseValidationResponse', () => {
         expect(result.score).toBe(85);
     });
 
-    it('должен использовать score по умолчанию 75 если не найден', () => {
+    it('должен вернуть undefined для score если не найден', () => {
         const responseText = 'Рекомендации без оценки';
 
         const result = parseValidationResponse(responseText);
 
-        expect(result.score).toBe(75);
+        expect(result.score).toBeUndefined();
     });
 
-    it('должен извлечь critical issues из ответа', () => {
+    it('должен всегда возвращать пустой массив issues', () => {
         const responseText = `
 Оценка: 70/100
 
@@ -28,14 +28,6 @@ describe('parseValidationResponse', () => {
 - **Отсутствие guard clauses**
 </critical_issues>
         `;
-
-        const result = parseValidationResponse(responseText);
-
-        expect(result.issues).toEqual(['Нарушение типизации', 'Отсутствие guard clauses']);
-    });
-
-    it('должен вернуть пустой массив issues если не найдены', () => {
-        const responseText = 'Оценка: 90/100\n\nВсе хорошо!';
 
         const result = parseValidationResponse(responseText);
 
@@ -50,21 +42,6 @@ describe('parseValidationResponse', () => {
         expect(result.recommendations).toBe(responseText);
     });
 
-    it('должен обрабатывать ответ с несколькими issues', () => {
-        const responseText = `
-<critical_issues>
-- **Issue 1**
-- **Issue 2**
-- **Issue 3**
-</critical_issues>
-        `;
-
-        const result = parseValidationResponse(responseText);
-
-        expect(result.issues).toHaveLength(3);
-        expect(result.issues).toEqual(['Issue 1', 'Issue 2', 'Issue 3']);
-    });
-
     it('должен корректно парсить score с разными форматами', () => {
         const testCases = [
             { expected: 95, input: 'Оценка качества кода: 95/100' },
@@ -76,5 +53,26 @@ describe('parseValidationResponse', () => {
             const result = parseValidationResponse(input);
             expect(result.score).toBe(expected);
         });
+    });
+
+    it('должен вернуть undefined для score при отсутствии оценки', () => {
+        const testCases = ['Просто текст', 'Рекомендации без оценки', 'Score: invalid'];
+
+        testCases.forEach((input) => {
+            const result = parseValidationResponse(input);
+            expect(result.score).toBeUndefined();
+        });
+    });
+
+    it('должен возвращать весь ответ в recommendations независимо от содержимого', () => {
+        const responseText = `<validation_result>
+<overall_score>**ОБЩАЯ ОЦЕНКА: 45/100**</overall_score>
+<critical_fixes>- **[КРИТИЧНО]** Проблема</critical_fixes>
+</validation_result>`;
+
+        const result = parseValidationResponse(responseText);
+
+        expect(result.recommendations).toBe(responseText);
+        expect(result.issues).toEqual([]);
     });
 });

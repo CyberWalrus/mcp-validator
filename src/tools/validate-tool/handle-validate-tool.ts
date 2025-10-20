@@ -1,78 +1,13 @@
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-
 import { createCodeValidatorAgent, validateCodeWithAgent } from '../../agents/code-validator-agent';
 import type { AgentConfig } from '../../agents/code-validator-agent/types';
 import type { ValidationInput, ValidationResult, ValidationType } from '../../model/config';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
 import { formatSuccessfulValidation } from './format-successful-validation';
-import { formatValidationMetadata } from './format-validation-metadata';
 
-/** Глобальный кэш агента для повторного использования */
+/** Глобальный кэш агента */
 let codeValidatorAgent: AgentConfig | null = null;
 
-/** MCP инструмент для валидации кода через @modelcontextprotocol/sdk */
-export const validateTool: Tool = {
-    description:
-        'Универсальная валидация кода, тестов, архитектуры и других типов контента через AI с детальными отчетами',
-    inputSchema: {
-        properties: {
-            context: {
-                description: 'Дополнительный контекст для валидации (опционально)',
-                type: 'string',
-            },
-            customPrompt: {
-                description: 'Кастомный промпт (только для validationType=custom)',
-                type: 'string',
-            },
-            input: {
-                properties: {
-                    data: {
-                        description: 'Данные для валидации или путь к файлу',
-                        type: 'string',
-                    },
-                    encoding: {
-                        default: 'utf8',
-                        description: 'Кодировка файла (опционально)',
-                        enum: ['utf8', 'utf16le', 'ascii'],
-                        type: 'string',
-                    },
-                    type: {
-                        description: 'Тип входных данных',
-                        enum: ['content', 'file', 'url'],
-                        type: 'string',
-                    },
-                },
-                required: ['type', 'data'],
-                type: 'object',
-            },
-            language: {
-                default: 'typescript',
-                description: 'Язык программирования (опционально)',
-                type: 'string',
-            },
-            validationType: {
-                description: 'Тип валидации для выполнения',
-                enum: [
-                    'code',
-                    'tests',
-                    'architecture',
-                    'security',
-                    'performance',
-                    'documentation',
-                    'prompts',
-                    'tasks',
-                    'custom',
-                ],
-                type: 'string',
-            },
-        },
-        required: ['validationType', 'input'],
-        type: 'object',
-    },
-    name: 'validate',
-};
-
-/** Обработчик MCP инструмента validate */
+/** Обработчик MCP инструмента validate - валидирует код через CodeValidatorAgent и возвращает форматированный результат */
 export async function handleValidateTool(args: unknown): Promise<{ content: string; isError?: boolean }> {
     try {
         if (args === null || args === undefined || typeof args !== 'object') {
@@ -204,20 +139,13 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
 
         const errorResult = renderErrorResponse({
             context: `Валидация типа: ${result.type}`,
-            errorCode: -32001,
+            errorCode: -32603,
             errorMessage: result.issues.join('; '),
-            errorType: 'validation',
+            errorType: 'system',
         });
 
-        if (errorResult.success === false) {
-            throw new Error(errorResult.error || 'Ошибка форматирования результата');
-        }
-
-        let { content } = errorResult;
-        content += formatValidationMetadata(result);
-
         return {
-            content,
+            content: errorResult.success ? errorResult.content : `# Ошибка валидации\n\n${result.issues.join('\n')}`,
             isError: true,
         };
     } catch (error) {

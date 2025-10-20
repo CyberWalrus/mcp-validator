@@ -25,7 +25,7 @@ export const validationResultSchema = z.object({
     issues: z.array(z.string()),
     metadata: z.record(z.string(), z.unknown()).optional(),
     recommendations: z.string().optional(),
-    score: z.number().min(0).max(100),
+    score: z.number().min(0).max(100).optional(),
     success: z.boolean(),
     type: validationTypeSchema,
 });
