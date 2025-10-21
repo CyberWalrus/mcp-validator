@@ -109,6 +109,7 @@ MCP Validator — инструмент для валидации кода, те�
             "env": {
                 "API_KEY": "sk-or-v1-xxxxxxxxxxxxxx",
                 "API_URL": "https://openrouter.ai/api/v1",
+                "API_PROVIDERS": "Cerebras",
                 "LOG_LEVEL": "DEBUG",
                 "AI_MODEL": "openai/gpt-oss-20b:free",
                 "AI_MAX_TOKENS": "50000",
@@ -184,14 +185,17 @@ cat ~/.cursor/mcp.json | jq '.mcpServers["mcp-validator"]'
 
 ### 🌐 Настройки API
 
-| Переменная | Описание                                    | По умолчанию                   | Диапазон            |
-| ---------- | ------------------------------------------- | ------------------------------ | ------------------- |
-| `API_KEY`  | API ключ для OpenAI-совместимого провайдера | `sk-or-v1-xxx`                 | Любой валидный ключ |
-| `API_URL`  | URL OpenAI-совместимого API                 | `https://openrouter.ai/api/v1` | Любой валидный URL  |
+| Переменная      | Описание                                    | По умолчанию                   | Пример значения               |
+| --------------- | ------------------------------------------- | ------------------------------ | ----------------------------- |
+| `API_KEY`       | API ключ для OpenAI-совместимого провайдера | `sk-or-v1-xxx`                 | Любой валидный ключ           |
+| `API_URL`       | URL OpenAI-совместимого API                 | `https://openrouter.ai/api/v1` | Любой валидный URL            |
+| `API_PROVIDERS` | Список провайдеров OpenRouter через запятую | -                              | `Cerebras`, `Cerebras,OpenAI` |
 
 **Поддерживаемые провайдеры:**
 
 - **OpenRouter** (по умолчанию): `https://openrouter.ai/api/v1`
+    - **API_PROVIDERS**: позволяет явно указать провайдера(ов) OpenRouter (Cerebras, OpenAI, Qwen, Meta)
+    - Если не указано - OpenRouter выберет провайдера автоматически
 - **OpenAI**: `https://api.openai.com/v1`
 - **Anthropic Claude**: `https://api.anthropic.com/v1`
 - **Другие OpenAI-совместимые API**

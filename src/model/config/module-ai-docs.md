@@ -33,6 +33,12 @@ size_limits:
 - `LoggingConfig` - конфигурация логирования
 - `OpenRouterConfig` - конфигурация OpenRouter API
 - `ValidationConfig` - конфигурация валидации
+
+**Переменные окружения:**
+
+- `API_KEY` - ключ OpenRouter API (обязательный)
+- `API_PROVIDERS` - список провайдеров OpenRouter через запятую (опционально, например: Cerebras,OpenAI)
+- `API_URL` - URL OpenRouter API (по умолчанию: <https://openrouter.ai/api/v1>)
   </public_api>
 
 <usage_examples>
@@ -54,6 +60,23 @@ import { APP_CONFIG } from './model/config';
 const apiKey = APP_CONFIG.api.key;
 const logLevel = APP_CONFIG.logging.level;
 const modelName = APP_CONFIG.model.name;
+const providers = APP_CONFIG.api.providers; // массив провайдеров или undefined
+```
+
+**Выбор провайдера:**
+
+```bash
+export API_PROVIDERS=Cerebras
+export API_KEY=your-key
+yarn start
+```
+
+**Несколько провайдеров (fallback):**
+
+```bash
+export API_PROVIDERS="Cerebras,OpenAI,Qwen"
+export API_KEY=your-key
+yarn start
 ```
 
 </usage_examples>

@@ -379,6 +379,8 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 - **openai:** 6.3.0 - OpenAI SDK для упрощенной агентной архитектуры
 - **zod:** 4.1.12 - runtime валидация схем с TypeScript типами
 - **OpenRouter API:** external - доступ к множественным AI моделям через единый API
+    - Поддержка выбора провайдера через `API_PROVIDERS` (Cerebras, OpenAI, Qwen, Meta)
+    - Механизм приоритизации провайдеров через `extra_body.providers`
 
 **Инструменты разработки:**
 

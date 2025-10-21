@@ -14,7 +14,7 @@ export const modelConfigSchema = z.object({
 export const apiConfigSchema = z.object({
     key: z.string({ message: 'API_KEY is required' }).min(1, 'API_KEY is required'),
     mockClientPath: z.string().default('end-to-end/mocks/openrouter-test-client'),
-    provider: z.literal('openrouter'),
+    providers: z.array(z.string()).optional(),
     url: z.string().url('API_URL must be a valid URL').default('https://openrouter.ai/api/v1'),
 });
 

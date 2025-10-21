@@ -23,7 +23,7 @@ describe('initializeAppConfig', () => {
             api: {
                 key: 'test-api-key',
                 mockClientPath: 'end-to-end/mocks/openrouter-test-client',
-                provider: 'openrouter',
+                providers: undefined,
                 url: 'https://api.openrouter.ai/api/v1',
             },
             logging: {

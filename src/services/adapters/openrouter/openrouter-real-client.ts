@@ -30,14 +30,22 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+    const requestBody: Record<string, unknown> = {
+        max_tokens: maxTokens,
+        messages: [{ content: params.prompt, role: 'user' }],
+        model,
+        temperature,
+    };
+
+    if (config.api.providers && config.api.providers.length > 0) {
+        requestBody.extra_body = {
+            providers: config.api.providers,
+        };
+    }
+
     try {
         const response = await fetch(requestUrl, {
-            body: JSON.stringify({
-                max_tokens: maxTokens,
-                messages: [{ content: params.prompt, role: 'user' }],
-                model,
-                temperature,
-            }),
+            body: JSON.stringify(requestBody),
             headers: {
                 ...DEFAULT_HEADERS,
                 Authorization: `Bearer ${apiKey}`,

@@ -34,10 +34,10 @@ function getPackageRoot(): string {
 /** Внутреннее хранилище конфигурации */
 let appConfigInternal = {} as AppConfig;
 
-/** Глобальная конфигурация приложения - инициализируется через initializeAppConfig() */
+/** Глобальная конфигурация приложения */
 export const APP_CONFIG = appConfigInternal;
 
-/** Инициализирует конфигурацию приложения из переменных окружения */
+/** Инициализирует конфигурацию приложения из переменных окружения с парсингом API_PROVIDERS */
 export function initializeAppConfig(env: NodeJS.ProcessEnv = process.env): void {
     const packageRoot = getPackageRoot();
 
@@ -45,7 +45,11 @@ export function initializeAppConfig(env: NodeJS.ProcessEnv = process.env): void 
         api: {
             key: env.API_KEY,
             mockClientPath: env.API_MOCK_CLIENT_PATH,
-            provider: 'openrouter' as const,
+            providers: env.API_PROVIDERS
+                ? env.API_PROVIDERS.split(',')
+                      .map((p) => p.trim())
+                      .filter(Boolean)
+                : undefined,
             url: env.API_URL,
         },
         logging: {
