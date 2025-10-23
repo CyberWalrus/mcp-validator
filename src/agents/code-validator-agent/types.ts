@@ -8,6 +8,7 @@ export type AgentConfig = {
     instructions: string;
     model: string;
     openai: OpenAI;
+    providers?: string[];
 };
 
 /** Результат создания агента валидации кода */
@@ -15,6 +16,7 @@ export type CodeValidatorAgentResult = {
     instructions: string;
     model: string;
     openai: OpenAI;
+    providers?: string[];
 };
 
 /** Тип функции создания агента валидации кода */

@@ -1,8 +1,10 @@
-import type { TestIterationResult, TestPromptInput, TestPromptResult } from '../../model/config';
+import type { ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat';
+
+import type { TestPromptInput, TestPromptResult } from '../../model/config';
 import { APP_CONFIG } from '../../model/config';
 import { calculateConsistencyScore } from './calculate-consistency-score';
 import { generateTestSummary } from './generate-test-summary';
-import type { AgentConfig } from './types';
+import type { AgentConfig, TestIterationResult } from './types';
 
 /** Параллельное тестирование промпта через TestPromptAgent */
 export async function testPromptWithAgent(agent: AgentConfig, testInput: TestPromptInput): Promise<TestPromptResult> {
@@ -26,21 +28,31 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
             const startTime = Date.now();
 
             try {
-                const response = await agent.openai.chat.completions.create({
+                const requestBody: ChatCompletionCreateParamsNonStreaming = {
                     max_tokens: config.model.maxTokens,
                     messages: [
                         {
                             content: agent.instructions,
-                            role: 'system',
+                            role: 'system' as const,
                         },
                         {
                             content: iterationPrompt,
-                            role: 'user',
+                            role: 'user' as const,
                         },
                     ],
                     model: agent.model,
                     temperature: config.model.temperature,
-                });
+                };
+
+                const { providers } = agent;
+
+                if (Array.isArray(providers) && providers.length > 0) {
+                    (requestBody as unknown as Record<string, unknown>).extra_body = {
+                        providers,
+                    };
+                }
+
+                const response = await agent.openai.chat.completions.create(requestBody);
 
                 const duration = Date.now() - startTime;
                 const responseContent = response.choices[0]?.message?.content;
@@ -51,6 +63,7 @@ ${testInput.context ? `## Контекст:\n${testInput.context}` : ''}
                     isSuccess: Boolean(responseContent),
                     iteration: index + 1,
                     model: modelName,
+                    tokensUsed: response.usage?.total_tokens || 0,
                 };
 
                 if (responseContent === null || responseContent === undefined) {

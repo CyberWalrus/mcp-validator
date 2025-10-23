@@ -5,6 +5,7 @@ export type AgentConfig = {
     instructions: string;
     model: string;
     openai: OpenAI;
+    providers?: string[];
 };
 
 /** Результат создания агента тестирования промптов */
@@ -12,6 +13,7 @@ export type TestPromptAgentResult = {
     instructions: string;
     model: string;
     openai: OpenAI;
+    providers?: string[];
 };
 
 /** Результат одной итерации тестирования */

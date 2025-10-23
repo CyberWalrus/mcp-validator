@@ -8,7 +8,7 @@ import type { CodeValidatorAgentResult } from './types';
 export function createCodeValidatorAgent(): CodeValidatorAgentResult {
     const config = APP_CONFIG;
     const {
-        api: { key, url },
+        api: { key, url, providers },
         model: { name: modelName },
     } = config;
 
@@ -23,5 +23,6 @@ export function createCodeValidatorAgent(): CodeValidatorAgentResult {
         instructions: promptContent,
         model: modelName,
         openai,
+        providers,
     };
 }

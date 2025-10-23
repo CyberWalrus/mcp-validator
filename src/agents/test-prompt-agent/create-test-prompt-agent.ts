@@ -9,7 +9,7 @@ export function createTestPromptAgent(): TestPromptAgentResult {
     try {
         const config = APP_CONFIG;
         const {
-            api: { key, url },
+            api: { key, url, providers },
             model: { name: modelName },
         } = config;
 
@@ -24,6 +24,7 @@ export function createTestPromptAgent(): TestPromptAgentResult {
             instructions: promptContent,
             model: modelName,
             openai,
+            providers,
         };
     } catch (error) {
         throw new Error(

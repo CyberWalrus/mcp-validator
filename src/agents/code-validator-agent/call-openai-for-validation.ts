@@ -22,21 +22,29 @@ export async function callOpenAIForValidation(agent: AgentConfig, validationProm
         };
     }
 
-    const response = await agent.openai.chat.completions.create({
+    const requestBody = {
         max_tokens: config.model.maxTokens,
         messages: [
             {
                 content: agent.instructions,
-                role: 'system',
+                role: 'system' as const,
             },
             {
                 content: validationPrompt,
-                role: 'user',
+                role: 'user' as const,
             },
         ],
         model: agent.model,
         temperature: config.model.temperature,
-    });
+        ...(agent.providers &&
+            agent.providers.length > 0 && {
+                extra_body: {
+                    providers: agent.providers,
+                },
+            }),
+    };
+
+    const response = await agent.openai.chat.completions.create(requestBody);
 
     const duration = Date.now() - startTime;
 

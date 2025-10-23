@@ -40,4 +40,3 @@ describe('API Providers Configuration', () => {
         expect(APP_CONFIG.api.providers).toEqual(['Cerebras', 'OpenAI']);
     });
 });
-
