@@ -188,16 +188,16 @@ Let's analyze deeper. Check compliance with architecture-guide.md standards usin
 Select checklist by `architecture_type`:
 
 - single_module:
-    - [ ] Facade: `src/index.ts` is present
-    - [ ] One file = one function; types in `src/types.ts`
-    - [ ] No FSD layers; tests in `src/__tests__/`
-    - [ ] Named exports only; no default exports
+  - [ ] Facade: `src/index.ts` is present
+  - [ ] One file = one function; types in `src/types.ts`
+  - [ ] No FSD layers; tests in `src/__tests__/`
+  - [ ] Named exports only; no default exports
 
 - layered_library:
-    - [ ] `src/index.ts` as package facade
-    - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional)
-    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-    - [ ] Tests colocated per module in `__tests__/`
+  - [ ] `src/index.ts` as package facade
+  - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional)
+  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+  - [ ] Tests colocated per module in `__tests__/`
 
 #### Special Case: Model Layer Container Folders
 
@@ -221,27 +221,37 @@ Example invalid structures:
 - `src/model/schemas/index.ts` then `schemas/main.ts` - double facade
 
 - fsd_standard:
-    - [ ] Layers: app → pages → widgets → features → entities → shared → core
-    - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
-    - [ ] No cross-imports within same layer; only downward dependencies
-    - [ ] Tests placed near slices in `__tests__/`
+  - [ ] Layers: app → pages → [widgets]? → [features]? → [entities]? → shared → [core]? (опциональные слои: widgets, features, entities, core)
+  - [ ] Обязательные слои: app, pages, shared. Минимальная конфигурация достаточна для простых проектов
+  - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
+  - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
+  - [ ] Segments (ui/, model/, service/, lib/) опциональны, добавляются по необходимости
+  - [ ] No cross-imports within same layer; only downward dependencies
+  - [ ] Tests placed near slices in `__tests__/`
+  - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
+  - [ ] app может импортировать из любых нижележащих слоев (pages, widgets, features, entities, shared, core если присутствует)
 
 - fsd_domain:
-    - [ ] Domain grouping in `widgets/features/entities` (e.g., `<directory name="user">`)
-    - [ ] Public API via facades only; no cross-imports inside domain layer
-    - [ ] Inter-domain imports follow vertical hierarchy
-    - [ ] Tests near slices; named exports only
+  - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
+  - [ ] Обязательные слои: app, pages, shared. Опциональные: widgets, features, entities, core
+  - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
+  - [ ] Domain grouping применяется только если существуют соответствующие слои (widgets, features, entities)
+  - [ ] Отсутствие опциональных слоев не является нарушением
+  - [ ] Public API via facades only; no cross-imports inside domain layer
+  - [ ] Inter-domain imports follow vertical hierarchy
+  - [ ] Tests near slices; named exports only
+  - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
 
 - server_fsd:
-    - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
-    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-    - [ ] Encapsulation respected; tests in `__tests__/`
+  - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
+  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+  - [ ] Encapsulation respected; tests in `__tests__/`
 
 - multi_app_monolith:
-    - [ ] Multiple `<application>` containers; each has its own `entrypoint`
-    - [ ] No direct imports between applications; only via `applications/common`
-    - [ ] Common app uses layered_library rules; each app may use internal architecture
-    - [ ] Tests per application
+  - [ ] Multiple `<application>` containers; each has its own `entrypoint`
+  - [ ] No direct imports between applications; only via `applications/common`
+  - [ ] Common app uses layered_library rules; each app may use internal architecture
+  - [ ] Tests per application
 
 #### Additional Validations (all types)
 
@@ -249,10 +259,16 @@ Example invalid structures:
 - [ ] No internal file import from outside its module (imports limited to facades)
 - [ ] Tests present for testable units (skip for configs/types/constants/assets)
 - [ ] Role consistency: `file.role` matches placement (e.g., `component` only in `ui` segments/layers)
-- [ ] Layer direction: higher layers do not import lower-forbidden directions (type-specific graph)
+- [ ] Layer direction: higher layers can depend on any lower layers; опциональные слои (widgets, features, entities, core) могут отсутствовать — это нормально для проектов любого размера (app → может зависеть от pages и shared напрямую в минимальной конфигурации)
 - [ ] Modular units: single file main.ts (simple, role='single_module') or dir with index.ts (complex); model subdirs — single main.ts preferred
 - [ ] Facades: re-exports OR single main function (no multiple definitions); helpers separate if exported >10 lines
 - [ ] One main function per file; helpers private/inline if small, separate if exported >10 lines
+- [ ] Naming in exports: module unit name должно присутствовать в экспорте (не обязательно как префикс). Examples: `User`, `UserWidget`, `selectUserByLogin` - все допустимо если содержат название модуля
+- [ ] Constants naming: префиксы обязательны ТОЛЬКО для экспортов в фасадах (`index.ts`). Internal constants without prefixes are allowed: `NAMES`, `GRADE_LEVELS` (inside module). Facade exports require prefixes: `USER_NAMES` (in index.ts)
+- [ ] Segments optional: ui/, model/, service/, lib/ добавляются по необходимости, не все сегменты обязательны
+- [ ] shared/api optional: допустимо временное размещение fetch-запросов в service-файлах слайсов
+- [ ] app initialization: инициализация данных в app/ui/main допустима
+- [ ] entities/service: может содержать бизнес-логику если нет features layer
 - [ ] Metadata conformance: when present, attributes are consistent (e.g., `<module layer="lib">` agrees with actual layer placement; `path` points to existing location). For canonical files, `<architecture_metadata>` MUST include: `architecture_type`, `package_name`, `workspace_path`, `source_root`, `entrypoints`, `ruleset`, `source_revision`, `generated_at`.
 
 #### Import Graph Heuristics (optional if input lacks imports)
