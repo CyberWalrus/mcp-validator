@@ -43,7 +43,7 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 **For algorithm/reference/combo types (all required):**
 
 - [ ] Field `id` - unique identifier with version suffix
-- [ ] Field `type` - algorithm/reference/combo/compact
+- [ ] Field `type` - algorithm/reference/combo/compact/command
 - [ ] Field `use_cases` - specific scenarios list (concrete, relevant)
 - [ ] Field `prompt_language` - en/ru/mixed (language of prompt content)
 - [ ] Field `response_language` - en/ru/mixed (expected model response language)
@@ -55,6 +55,11 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] Field `type` - compact
 - [ ] Field `alwaysApply` - boolean value
 - [ ] ❌ Fields `use_cases`, `prompt_language`, `response_language` are OPTIONAL (not required for compact)
+
+**For command type (NO YAML required):**
+
+- [ ] ❌ NO YAML frontmatter (commands are standalone instructions)
+- [ ] ❌ Type detection by file location (`.cursor/commands/` directory) or content structure
 
 **YAML Frontmatter (optional - игнорировать при валидации):**
 
@@ -80,6 +85,13 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 
 - [ ] ❌ NO TIER structure required (flat structure with bold headers)
 - [ ] ✅ Single semantic XML wrapper tag (e.g., `<chat_mode_router>...</chat_mode_router>`)
+
+**For command type:**
+
+- [ ] ❌ NO TIER structure (flat Markdown with ## headers)
+- [ ] ✅ Imperative role definition in first paragraph ("Ты — [роль]. Твоя задача — [задача].")
+- [ ] ✅ Structured with ## section headers
+- [ ] ✅ Numbered lists for step-by-step instructions
 
 **XML Data Structuring (type-dependent):**
 
@@ -107,11 +119,19 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] ✅ Imperative triggers (e.g., "INSTANT DETECTION", "Execute both")
 - [ ] ✅ Built-in exception handling (e.g., "Otherwise → DEFAULT")
 
+**For command type:**
+
+- [ ] ❌ NO XML tags (pure Markdown formatting)
+- [ ] ✅ Clear ## section headers for organization
+- [ ] ✅ Concrete examples (bash commands, git workflows, output formats)
+- [ ] ✅ Operational context where needed
+
 **System Anchors (type-dependent):**
 
 - [ ] `[ALGORITHM-BEGIN]` → `[ALGORITHM-END]` (for algorithm/combo types - mandatory)
 - [ ] `[REFERENCE-BEGIN]` → `[REFERENCE-END]` (for reference/combo types - mandatory)
 - [ ] ❌ NO anchors for compact type (uses semantic XML wrapper instead)
+- [ ] ❌ NO anchors for command type (standalone instructions)
 
 **Size Control:**
 
@@ -119,6 +139,7 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] Reference: ~100-1000 lines (essential info only)
 - [ ] Combo: ~200-1600 lines total
 - [ ] Compact: ~5-50 lines optimal, max ~150 lines for simple tasks
+- [ ] Command: ~50-200 lines (task instructions only)
 
 **Language Policy Compliance:**
 
@@ -177,6 +198,53 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 - **RESULT: Production ready compact prompt**
 </compact_scoring_rules>
 
+<command_scoring_rules>
+**SPECIAL SCORING RULES FOR COMMAND TYPE:**
+
+Command prompts are task execution instructions stored in `.cursor/commands/`. Apply PRACTICAL scoring:
+
+**HIGH PRIORITY for command (critical for score 80+):**
+
+- ✅ Imperative role definition in first paragraph ("Ты — [роль]. Твоя задача — [задача].")
+- ✅ Clear ## section headers for organization
+- ✅ Numbered lists for step-by-step instructions
+- ✅ Concrete examples (bash commands, git workflows, output formats)
+- ✅ Operational context specified ("Работа ведётся в корне репозитория")
+- ✅ Expected behavior and edge cases documented
+- ✅ Russian language for all content (user-facing instructions)
+- ✅ Size: 50-200 lines optimal
+
+**LOW PRIORITY for command (DO NOT penalize):**
+
+- ❌ Missing YAML frontmatter (expected for command)
+- ❌ Missing TIER structure (expected - flat Markdown)
+- ❌ Missing XML tags (expected - pure Markdown)
+- ❌ Missing `[ALGORITHM-BEGIN/END]` anchors (not needed)
+- ❌ No `<completion_criteria>` (embedded in instructions)
+- ❌ No `<exception_handling>` section (described inline)
+
+**Scoring formula for command:**
+
+- Base: 70 points (if type=command detected by structure/location)
+- +10: Clear imperative role definition
+- +10: Well-structured with ## headers and numbered lists
+- +5: Concrete examples present (bash/git commands)
+- +5: Operational context and edge cases documented
+- Final: 70-100 range (80+ = production ready for command)
+
+**Example command score 85/100:**
+
+- ✅ 120 lines (optimal for task complexity)
+- ✅ "Ты — инженер автоматизации git-процессов"
+- ✅ Clear ## section structure
+- ✅ Numbered step-by-step instructions
+- ✅ Bash command examples with explanations
+- ✅ Edge cases handled ("Если любая упадет — остановись")
+- ❌ No YAML (expected)
+- ❌ No TIER/XML (expected)
+- **RESULT: Production ready command prompt**
+</command_scoring_rules>
+
 <reference_scoring_rules>
 **SPECIAL SCORING RULES FOR REFERENCE TYPE:**
 
@@ -194,9 +262,9 @@ Reference prompts are documentation, not execution algorithms. Apply FLEXIBLE sc
 **FLEXIBLE for reference (allow variations):**
 
 - ✅ TIER 2 can be named descriptively (not strict "Algorithm/Process")
-    - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
+  - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
 - ✅ Custom XML tags for documentation sections
-    - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
+  - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
 - ✅ Multiple `<completion_criteria>` blocks for key sections (not every step)
 - ✅ Size 100-1000 lines (documentation needs space)
 
@@ -221,6 +289,7 @@ If checklist item unclear: mark as failed and specify the ambiguity
 If standard conflicts: prioritize latest prompt-engineering.mdc version
 If validating compact type: apply compact scoring rules (70-100 range)
 If validating reference type: apply reference scoring rules (flexible structure)
+If validating command type: apply command scoring rules (70-100 range, focus on clarity and actionability)
 </exception_handling>
 
 ### Step 2: Critical Content Analysis
@@ -414,6 +483,35 @@ If compatibility unclear: test with multiple model assumptions
 </reference_strengths>
 
 </validation_result>
+
+**ФОРМАТ ДЛЯ COMMAND TYPE (task execution instructions):**
+
+<validation_result>
+
+<overall_score>
+**ОБЩАЯ ОЦЕНКА: 85/100**
+*(Command scoring: 70-100 range, 80+ = production ready)*
+</overall_score>
+
+<checks_passed>
+**Пройдено:** ✅ Imperative Role Definition ✅ Clear ## Headers ✅ Numbered Instructions ✅ Concrete Examples (bash/git) ✅ Operational Context ✅ Edge Cases Documented ✅ Russian Language ✅ Size 50-200 lines
+**НЕ ТРЕБУЕТСЯ (command):** ❌ YAML Frontmatter ❌ TIER Structure ❌ XML Tags ❌ System Anchors
+</checks_passed>
+
+**СТАТУС: PRODUCTION READY для COMMAND** 🛠️
+
+Промпт соответствует command best practices: императивный стиль с четкой ролью, структурированные инструкции, конкретные примеры команд. Absence of YAML/TIER/XML/anchors is EXPECTED and CORRECT for command type.
+
+<command_strengths>
+
+- ✅ Четкое определение роли: "Ты — [роль]. Твоя задача — [задача]."
+- ✅ Структурированные ## секции с numbered lists
+- ✅ Конкретные bash/git примеры с пояснениями
+- ✅ Операционный контекст и edge cases
+- ✅ Оптимальный размер для задачи (120 строк)
+</command_strengths>
+
+</validation_result>
 </output_format>
 
 ## TIER 5: Critical Requirements
@@ -445,6 +543,14 @@ If compatibility unclear: test with multiple model assumptions
 - ✅ Encourage custom XML tags for documentation
 - ✅ Multiple completion_criteria blocks = OK
 
+**For COMMAND type:**
+
+- ✅ Apply command scoring rules (base 70, max 100)
+- ✅ DO NOT penalize for missing YAML/TIER/XML/anchors (expected)
+- ✅ Focus on: imperative role, clear structure, concrete examples, operational context
+- ✅ Absence of meta-structure = CORRECT for command
+- ✅ Russian language for all content (user-facing instructions)
+
 **For ALGORITHM/COMBO types:**
 
 - ✅ Apply strict algorithm validation rules
@@ -455,7 +561,9 @@ If compatibility unclear: test with multiple model assumptions
 
 - ❌ Skipping type detection before validation
 - ❌ Applying algorithm rules to compact prompts (wrong scoring)
+- ❌ Applying algorithm rules to command prompts (wrong scoring)
 - ❌ Penalizing reference for flexible structure
+- ❌ Penalizing command for missing YAML/TIER/XML
 - ❌ Blind agreement with prompt logic
 - ❌ Ignoring potential issues
 - ❌ Superficial recommendations
@@ -497,6 +605,16 @@ If compatibility unclear: test with multiple model assumptions
 - Size limits: 5-50 lines optimal, max ~150 lines
 - Language policy: Include if user-facing output expected
 
+**COMMAND type:**
+
+- YAML frontmatter: ❌ NO YAML (standalone instructions)
+- TIER structure: ❌ NO TIER structure (flat Markdown with ## headers)
+- XML tags: ❌ NO XML tags (pure Markdown)
+- System anchors: ❌ NO anchors (standalone)
+- Size limits: 50-200 lines (task instructions)
+- Language policy: Russian for all content (user-facing instructions)
+- Structure: Imperative role + ## headers + numbered lists + examples
+
 **OPTIONAL (НЕ ВАЛИДИРОВАТЬ для всех типов):**
 
 - globs - file patterns for application scope (e.g., `**/*.mdc`, `.cursor/**/*.md`) - присутствие или отсутствие не влияет на оценку
@@ -527,6 +645,16 @@ If compatibility unclear: test with multiple model assumptions
 - **❌ Неправильно:** Запрещать `<use_cases>`, `<anti_patterns>` как custom tags
 - **✅ Правильно:** Поощрять custom XML tags для структурирования документации
 - **Score:** 80-90/100 для хорошо структурированной reference документации
+
+**Command type:**
+
+- **❌ Неправильно:** Требовать YAML frontmatter и TIER структуру
+- **✅ Правильно:** Flat Markdown с ## headers (NO YAML/TIER/XML)
+- **❌ Неправильно:** "You are a git automation engineer..."
+- **✅ Правильно:** "Ты — инженер автоматизации git-процессов. Твоя задача — создать атомарные коммиты."
+- **❌ Неправильно:** Абстрактные инструкции без примеров
+- **✅ Правильно:** Конкретные bash/git команды с пояснениями
+- **Score:** 80-90/100 для четких command инструкций с примерами
   </validation_examples>
 
 [REFERENCE-END]
