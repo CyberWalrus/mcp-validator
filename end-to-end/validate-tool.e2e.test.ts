@@ -48,21 +48,15 @@ describe('E2E: Validate инструмент', () => {
         it('должен обрабатывать некорректный код', async () => {
             testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_WARNING);
 
-            const invalidCodeCase = VALIDATION_TEST_CASES.find(
-                (testCase) => testCase.name === 'Код с проблемами безопасности',
-            );
-
-            if (!invalidCodeCase) {
-                throw new Error('Тестовый случай не найден');
-            }
-
             const response = await testContext.clientSimulator.callTool('validate', {
                 input: {
-                    data: invalidCodeCase.code,
+                    data: `export function invalidCode(): void {
+    console.log("bad code");
+}`,
                     type: 'content',
                 },
-                language: invalidCodeCase.language,
-                validationType: invalidCodeCase.validationType,
+                language: 'typescript',
+                validationType: 'code',
             });
 
             expectValidMCPResponse(response);
@@ -100,50 +94,6 @@ describe('Test Suite', () => {
                 'validate',
                 TEST_SCENARIOS.VALIDATE_ARCHITECTURE.arguments,
             );
-
-            expectValidMCPResponse(response);
-        });
-    });
-
-    describe('Валидация безопасности (security)', () => {
-        it('должен выявлять проблемы безопасности', async () => {
-            testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_WARNING);
-
-            const securityCase = VALIDATION_TEST_CASES.find(
-                (testCase) => testCase.name === 'Код с проблемами безопасности',
-            );
-
-            if (!securityCase) {
-                throw new Error('Тестовый случай не найден');
-            }
-
-            const response = await testContext.clientSimulator.callTool('validate', {
-                input: {
-                    data: securityCase.code,
-                    type: 'content',
-                },
-                language: securityCase.language,
-                validationType: securityCase.validationType,
-            });
-
-            expectValidMCPResponse(response);
-        });
-    });
-
-    describe('Валидация производительности (performance)', () => {
-        it('должен анализировать производительность кода', async () => {
-            testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_SUCCESS);
-
-            const response = await testContext.clientSimulator.callTool('validate', {
-                input: {
-                    data: `function inefficientSort(arr) {
-    return arr.sort((a, b) => Math.random() - 0.5);
-}`,
-                    type: 'content',
-                },
-                language: 'javascript',
-                validationType: 'performance',
-            });
 
             expectValidMCPResponse(response);
         });
@@ -188,45 +138,6 @@ Returns list of users`,
         });
     });
 
-    describe('Валидация задач (tasks)', () => {
-        it('должен анализировать техзадания', async () => {
-            testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_SUCCESS);
-
-            const response = await testContext.clientSimulator.callTool('validate', {
-                input: {
-                    data: `## Задача
-Создать REST API для управления пользователями
-## Требования  
-- CRUD операции
-- Аутентификация JWT
-- Валидация входных данных`,
-                    type: 'content',
-                },
-                language: 'markdown',
-                validationType: 'tasks',
-            });
-
-            expectValidMCPResponse(response);
-        });
-    });
-
-    describe('Кастомная валидация (custom)', () => {
-        it('должен выполнять валидацию с кастомным промптом', async () => {
-            testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_SUCCESS);
-
-            const response = await testContext.clientSimulator.callTool('validate', {
-                customPrompt: 'Проверь, соответствует ли этот код стандартам ES6+',
-                input: {
-                    data: 'console.log("Hello, World!");',
-                    type: 'content',
-                },
-                language: 'javascript',
-                validationType: 'custom',
-            });
-
-            expectValidMCPResponse(response);
-        });
-    });
 
     describe('Обработка ошибок валидации', () => {
         it('должен обрабатывать отсутствующие обязательные параметры', async () => {

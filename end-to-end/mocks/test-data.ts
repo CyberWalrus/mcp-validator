@@ -38,10 +38,10 @@ export const VALIDATION_TEST_CASES = [
         validationType: 'code',
     },
     {
-        code: 'function test() { var x = 1; eval("console.log(x)"); }',
-        language: 'javascript',
-        name: 'Код с проблемами безопасности',
-        validationType: 'security',
+        code: 'export function formatDate(date: Date): string { return date.toISOString(); }',
+        language: 'typescript',
+        name: 'Проверка архитектуры модуля',
+        validationType: 'architecture',
     },
     {
         code: 'describe("test", () => { it("should work", () => { expect(true).toBe(true); }); });',

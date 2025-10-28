@@ -98,21 +98,6 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             };
         }
 
-        if (params.validationType === 'custom' && (params.customPrompt === null || params.customPrompt === undefined)) {
-            const errorResult = renderErrorResponse({
-                context: 'Валидация параметров MCP инструмента',
-                errorCode: -32602,
-                errorDetails: JSON.stringify({ provided: params }),
-                errorMessage: 'Для custom валидации требуется параметр customPrompt',
-                errorType: 'validation',
-            });
-
-            return {
-                content: errorResult.content,
-                isError: true,
-            };
-        }
-
         const validationInput: ValidationInput = {
             input: {
                 data: input.data as string,
@@ -121,7 +106,6 @@ export async function handleValidateTool(args: unknown): Promise<{ content: stri
             } as ValidationInput['input'],
             validationType: params.validationType as ValidationType,
             ...(typeof params.context === 'string' && { context: params.context }),
-            ...(typeof params.customPrompt === 'string' && { customPrompt: params.customPrompt }),
             language: typeof params.language === 'string' ? params.language : 'typescript',
         };
 

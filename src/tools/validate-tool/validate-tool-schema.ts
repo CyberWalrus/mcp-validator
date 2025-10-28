@@ -10,10 +10,6 @@ export const validateTool: Tool = {
                 description: 'Дополнительный контекст для валидации (опционально)',
                 type: 'string',
             },
-            customPrompt: {
-                description: 'Кастомный промпт (только для validationType=custom)',
-                type: 'string',
-            },
             input: {
                 properties: {
                     data: {
@@ -41,18 +37,9 @@ export const validateTool: Tool = {
                 type: 'string',
             },
             validationType: {
-                description: 'Тип валидации для выполнения',
-                enum: [
-                    'code',
-                    'tests',
-                    'architecture',
-                    'security',
-                    'performance',
-                    'documentation',
-                    'prompts',
-                    'tasks',
-                    'custom',
-                ],
+                description:
+                    'Тип валидации: code (качество кода), tests (качество тестов), architecture (архитектура), prompts (AI промпты), documentation (документация)',
+                enum: ['code', 'tests', 'architecture', 'prompts', 'documentation'],
                 type: 'string',
             },
         },

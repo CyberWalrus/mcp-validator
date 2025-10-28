@@ -1,95 +1,65 @@
-# Описание MCP команд
+# MCP Tools
 
-## Доступные команды
+## validate
 
-### validate
-
-Выполняет валидацию кода с указанным типом проверки.
+Универсальная валидация через AI. Типы: `code`, `tests`, `architecture`, `prompts`, `documentation`.
 
 **Параметры:**
 
-- `validationType` (обязательный): тип валидации - code, tests, security, architecture, performance, documentation, prompts, tasks, custom
-- `input` (обязательный): входные данные для валидации
-    - `type`: тип источника - content, file, url
-    - `data`: данные или путь к файлу
-    - `encoding`: кодировка для файлов (utf8, utf16le, ascii)
-- `additionalFiles` (опциональный): массив дополнительных файлов для контекста
-- `context` (опциональный): дополнительный контекст для валидации
-- `customPrompt` (опциональный): кастомный промпт (только для validationType=custom)
+- `validationType`: code|tests|architecture|prompts|documentation
+- `input`: { `type`: file|content|url, `data`: абсолютный путь (ОБЯЗАТЕЛЬНО!), `encoding`?: utf8|utf16le|ascii }
+- `context`: дополнительный контекст (опционально)
+- `language`: язык (по умолчанию typescript)
 
-**Пример:**
+**⚠️ ВСЕГДА используйте абсолютный путь в `data`:**
 
 ```json
 {
-    "tool": "validate",
-    "arguments": {
-        "validationType": "code",
-        "input": {
-            "type": "file",
-            "data": "/path/to/file.ts"
-        },
-        "context": "React компонент для формы"
-    }
-}
-```
-
-### test-prompt
-
-Выполняет параллельное тестирование промпта на консистентность.
-
-**Параметры:**
-
-- `prompt` (обязательный): промпт для тестирования
-- `iterations` (опциональный): количество параллельных итераций (по умолчанию 5, максимум 10)
-- `models` (опциональный): список моделей для тестирования
-- `timeout` (опциональный): timeout для каждого запроса в миллисекундах
-- `context` (опциональный): дополнительный контекст промпта
-
-**Пример:**
-
-```json
-{
-    "tool": "test-prompt",
-    "arguments": {
-        "prompt": "Объясни что такое рекурсия простыми словами",
-        "iterations": 3,
-        "context": "Промпт для объяснения студентам"
-    }
-}
-```
-
-## Возвращаемые данные
-
-Все команды возвращают результат в markdown формате с подробным анализом и рекомендациями.
-
-## Частые ошибки
-
-### Ошибка -32602 "Invalid tool parameters"
-
-**Причина:** Неправильное имя поля в параметре `input`
-
-```json
-// ❌ НЕПРАВИЛЬНО - вызовет ошибку -32602
-{
+  "tool": "validate",
+  "arguments": {
+    "validationType": "code",
     "input": {
-        "type": "file",
-        "path": "/path/to/file.ts"  // Поле "path" не существует!
+      "type": "file",
+      "data": "/Users/name/project/src/file.ts"
     }
-}
-
-// ✅ ПРАВИЛЬНО - корректный формат
-{
-    "input": {
-        "type": "file",
-        "data": "/path/to/file.ts"  // Используйте поле "data"
-    }
+  }
 }
 ```
 
-**Решение:** Всегда используйте поле `data` для передачи пути к файлу, содержимого или URL.
+## Выбор типа
+
+| Тип | Когда | Что проверяет |
+|-----|-------|---------------|
+| **code** | Новый/измененный код | Качество, стиль, naming, типы |
+| **tests** | Новые/измененные тесты | Покрытие, моки, производительность |
+| **architecture** | Проектирование/рефакторинг | FSD, layered, фасады |
+| **prompts** | Новые/измененные промпты | YAML frontmatter, TIER, XML |
+| **documentation** | Новые/измененные docs | Шаблоны, YAML, XML |
+
+**⚠️ Всегда используйте `data`, НЕ `path` (иначе ошибка -32602):**
+
+```json
+// ❌ НЕПРАВИЛЬНО
+"path": "/path/file.ts"
+
+// ✅ ПРАВИЛЬНО
+"data": "/absolute/path/file.ts"
+```
+
+## test-prompt
+
+Параллельное тестирование промпта (3-10 итераций).
+
+```json
+{
+  "tool": "test-prompt",
+  "arguments": {
+    "prompt": "Твой промпт здесь",
+    "iterations": 3
+  }
+}
+```
 
 ## Переменные окружения
 
-- `LOG_LEVEL`: уровень логирования (DEBUG, INFO, WARN, ERROR)
-- `API_KEY`: API ключ для OpenRouter
-- `REQUEST_TIMEOUT`: timeout запросов в миллисекундах
+- `API_KEY` - API ключ OpenRouter (обязательно)

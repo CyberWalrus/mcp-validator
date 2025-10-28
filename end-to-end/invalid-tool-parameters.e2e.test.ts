@@ -142,22 +142,6 @@ describe('E2E: Воспроизведение ошибки "-32602: Invalid tool
             expectValidationParametersError(response);
         });
 
-        it('должен выдать ошибку -32602 для custom типа без customPrompt', async () => {
-            const response = await testContext.clientSimulator.callTool('validate', {
-                // customPrompt отсутствует
-                context: 'Валидация кода после рефакторинга - убрал try/catch fallback логику для выбрасывания ошибок',
-
-                // Для custom обязателен customPrompt
-                input: {
-                    data: 'src/services/workflows/testing/helpers/load-test-prompt.ts',
-                    type: 'file',
-                },
-
-                validationType: 'custom',
-            });
-
-            expectValidationParametersError(response);
-        });
     });
 
     describe('Некорректные типы данных в параметрах', () => {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /** Схема валидации типов валидации */
-export const validationTypeSchema = z.enum(['architecture', 'code', 'custom', 'documentation', 'prompts', 'tests']);
+export const validationTypeSchema = z.enum(['architecture', 'code', 'documentation', 'prompts', 'tests']);
 
 /** Схема валидации источника входных данных */
 export const inputSourceSchema = z.object({
