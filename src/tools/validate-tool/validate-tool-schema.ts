@@ -11,9 +11,10 @@ export const validateTool: Tool = {
                 type: 'string',
             },
             input: {
+                description: 'Источник данных для валидации: файл, содержимое или URL',
                 properties: {
                     data: {
-                        description: 'Данные для валидации или путь к файлу',
+                        description: 'Данные для валидации или абсолютный путь к файлу',
                         type: 'string',
                     },
                     encoding: {
@@ -23,7 +24,7 @@ export const validateTool: Tool = {
                         type: 'string',
                     },
                     type: {
-                        description: 'Тип входных данных',
+                        description: 'Тип входных данных: content (текст), file (файл), url (ссылка)',
                         enum: ['content', 'file', 'url'],
                         type: 'string',
                     },
@@ -38,7 +39,7 @@ export const validateTool: Tool = {
             },
             validationType: {
                 description:
-                    'Тип валидации: code (качество кода), tests (качество тестов), architecture (архитектура), prompts (AI промпты), documentation (документация)',
+                    'Тип валидации: code (качество кода/стиль), tests (покрытие/моки), architecture (структура/паттерны), prompts (YAML/XML), documentation (шаблоны/формат)',
                 enum: ['code', 'tests', 'architecture', 'prompts', 'documentation'],
                 type: 'string',
             },
