@@ -118,7 +118,7 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] Algorithm: ~100-600 lines (core instructions only)
 - [ ] Reference: ~100-1000 lines (essential info only)
 - [ ] Combo: ~200-1600 lines total
-- [ ] Compact: ~5-25 lines optimal for routers/detectors, max ~100 lines for simple tasks
+- [ ] Compact: ~5-50 lines optimal, max ~150 lines for simple tasks
 
 **Language Policy Compliance:**
 
@@ -138,7 +138,7 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 
 **HIGH PRIORITY for compact (critical for score 80+):**
 
-- ✅ Size: 5-25 lines for routers (10-15 optimal)
+- ✅ Size: 5-50 lines optimal, max ~150 lines (10-30 preferred)
 - ✅ Single semantic XML wrapper with prompt name
 - ✅ Imperative triggers in first line ("INSTANT", "EXECUTE", "CHECK immediately")
 - ✅ Numbered list for logic (not prose)
@@ -162,12 +162,12 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 - +10: Imperative trigger present
 - +10: Numbered list structure
 - +5: Single semantic wrapper
-- +5: Size ≤25 lines
+- +5: Size ≤50 lines
 - Final: 70-100 range (80+ = production ready for compact)
 
 **Example compact score 85/100:**
 
-- ✅ 15 lines (optimal)
+- ✅ 25 lines (optimal)
 - ✅ "INSTANT DETECTION" trigger
 - ✅ `<chat_mode_router>` wrapper
 - ✅ Numbered routing rules
@@ -194,9 +194,9 @@ Reference prompts are documentation, not execution algorithms. Apply FLEXIBLE sc
 **FLEXIBLE for reference (allow variations):**
 
 - ✅ TIER 2 can be named descriptively (not strict "Algorithm/Process")
-  - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
+    - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
 - ✅ Custom XML tags for documentation sections
-  - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
+    - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
 - ✅ Multiple `<completion_criteria>` blocks for key sections (not every step)
 - ✅ Size 100-1000 lines (documentation needs space)
 
@@ -368,7 +368,7 @@ If compatibility unclear: test with multiple model assumptions
 </overall_score>
 
 <checks_passed>
-**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Imperative Triggers ✅ Numbered Logic ✅ Size ≤25 lines ✅ No Emoji ✅ Explicit Actions
+**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Imperative Triggers ✅ Numbered Logic ✅ Size ≤50 lines ✅ No Emoji ✅ Explicit Actions
 **НЕ ТРЕБУЕТСЯ (compact):** ❌ TIER Structure ❌ Multiple XML tags ❌ System Anchors ❌ Extended YAML
 </checks_passed>
 
@@ -378,7 +378,7 @@ If compatibility unclear: test with multiple model assumptions
 
 <compact_strengths>
 
-- ✅ Ultra-compact: 15 строк (оптимально)
+- ✅ Ultra-compact: 30 строк (оптимально)
 - ✅ Императивный триггер: "INSTANT DETECTION"
 - ✅ Одна семантическая обертка
 - ✅ Numbered routing logic
@@ -494,7 +494,7 @@ If compatibility unclear: test with multiple model assumptions
 - TIER structure: ❌ NO TIER structure (flat with bold headers)
 - XML tags: ONE semantic wrapper tag with prompt name
 - System anchors: ❌ NO anchors (uses XML wrapper)
-- Size limits: 5-25 lines optimal for routers, max ~100
+- Size limits: 5-50 lines optimal, max ~150 lines
 - Language policy: Include if user-facing output expected
 
 **OPTIONAL (НЕ ВАЛИДИРОВАТЬ для всех типов):**
@@ -514,8 +514,8 @@ If compatibility unclear: test with multiple model assumptions
 
 **Compact type:**
 
-- **❌ Неправильно:** 46 строк с TIER структурой и 8 XML тегами
-- **✅ Правильно:** 15 строк с одним `<chat_mode_router>` wrapper и императивами
+- **❌ Неправильно:** 200 строк с TIER структурой и 8 XML тегами
+- **✅ Правильно:** 30 строк с одним `<chat_mode_router>` wrapper и императивами (оптимально 5-50)
 - **❌ Неправильно:** "Please check if system_reminder contains..."
 - **✅ Правильно:** "INSTANT DETECTION - Check in order:"
 - **Score:** 85/100 (production ready для compact)

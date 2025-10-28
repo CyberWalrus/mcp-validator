@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
