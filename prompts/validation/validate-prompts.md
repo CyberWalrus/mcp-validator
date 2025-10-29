@@ -262,9 +262,9 @@ Reference prompts are documentation, not execution algorithms. Apply FLEXIBLE sc
 **FLEXIBLE for reference (allow variations):**
 
 - ✅ TIER 2 can be named descriptively (not strict "Algorithm/Process")
-  - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
+    - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
 - ✅ Custom XML tags for documentation sections
-  - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
+    - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
 - ✅ Multiple `<completion_criteria>` blocks for key sections (not every step)
 - ✅ Size 100-1000 lines (documentation needs space)
 
