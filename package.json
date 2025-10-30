@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
@@ -44,7 +44,7 @@
     "@modelcontextprotocol/sdk": "1.20.0",
     "dotenv": "17.2.3",
     "openai": "6.3.0",
-    "undici": "7.16.0",
+    "undici": "5.28.4",
     "zod": "4.1.12"
   },
   "devDependencies": {
