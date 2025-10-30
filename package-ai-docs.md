@@ -374,7 +374,9 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 **Используемые технологии:**
 
 - **TypeScript:** 5.9.3 - строгая типизация, вся кодовая база на TS
-- **Node.js:** 20+ - встроенная поддержка env файлов через --env-file флаг
+- **Node.js:** 16.0+ - поддержка через undici (HTTP) и dotenv (env vars)
+- **undici:** Official Node.js HTTP client (совместимость с Node.js 16+)
+- **dotenv:** Standard .env loader (совместимость с Node.js 16+)
 - **@modelcontextprotocol/sdk:** 1.20.0 - официальный MCP SDK для интеграции с Cursor
 - **openai:** 6.3.0 - OpenAI SDK для упрощенной агентной архитектуры
 - **zod:** 4.1.12 - runtime валидация схем с TypeScript типами
