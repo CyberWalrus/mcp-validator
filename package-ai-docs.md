@@ -7,9 +7,9 @@ package_context:
     architecture_type: 'layered_library'
     main_exports: ['validate', 'test-prompt']
     workspace_path: '.'
-context7_refs: ['@modelcontextprotocol/sdk', 'openai', 'zod', 'typescript', 'node.js']
+context7_refs: ['@modelcontextprotocol/sdk', 'openai', 'zod', 'typescript', 'node.js', 'undici', 'dotenv']
 module_docs:
-    type: 'by_layer'
+    type: 'custom'
     rule: 'per_library'
     targets:
         [
@@ -32,6 +32,9 @@ architecture_docs:
 **Назначение пакета:**
 Универсальный инструмент для AI-валидации кода, тестов, архитектуры и других типов контента через MCP протокол и OpenRouter API. Предоставляет интеграцию с Cursor IDE для автоматической проверки качества в процессе разработки.
 
+**Основные экспорты:**
+Пакет не экспортирует функции напрямую. Основные возможности доступны через MCP tools (`validate`, `test-prompt`), которые интегрируются с Cursor IDE через MCP протокол. Также доступен CLI режим для локального запуска через `yarn start` или `npx mcp-validator`.
+
 **Решаемые задачи:**
 
 - Автоматическая валидация кода на 9 типов контента (код, тесты, архитектура, безопасность, производительность, документация, промпты, задачи, кастом)
@@ -39,6 +42,7 @@ architecture_docs:
 - Интеграция с Cursor IDE через MCP SDK для seamless workflow разработки
 - Детальные отчеты об ошибках в markdown формате с практическими рекомендациями
 - Полная AI документация всех модулей для интеграции с AI ассистентами
+- CLI режим для локальной разработки и отладки
   </package_purpose>
 
 <package_structure>
@@ -375,8 +379,8 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 
 - **TypeScript:** 5.9.3 - строгая типизация, вся кодовая база на TS
 - **Node.js:** 16.0+ - поддержка через undici (HTTP) и dotenv (env vars)
-- **undici:** Official Node.js HTTP client (совместимость с Node.js 16+)
-- **dotenv:** Standard .env loader (совместимость с Node.js 16+)
+- **undici:** 5.28.4 - HTTP клиент для совместимости с Node.js 16+ (заменяет встроенный `fetch`)
+- **dotenv:** 17.2.3 - загрузка переменных окружения из `.env` файла (совместимость с Node.js 16+)
 - **@modelcontextprotocol/sdk:** 1.20.0 - официальный MCP SDK для интеграции с Cursor
 - **openai:** 6.3.0 - OpenAI SDK для упрощенной агентной архитектуры
 - **zod:** 4.1.12 - runtime валидация схем с TypeScript типами
@@ -388,7 +392,7 @@ Cursor IDE → MCP SDK → server/mcp-server → tools/ → services/workflows �
 
 - **vitest:** 3.2.4 - unit и E2E тестирование с coverage
 - **tsx:** 4.20.6 - TypeScript execution для development
-- **eslint-walrus-config:** 1.0.1 - линтинг правила с автофиксом
+- **eslint-walrus-config:** 1.1.0 - линтинг правила с автофиксом
   </technologies_used>
 
 <implementation_details>
@@ -449,6 +453,20 @@ MCP сервер работает в постоянном режиме ожид�
 - Обновлена фабрика клиента для использования конфигурации
 
 **Причина:** Гибкость настройки, возможность использования разных мок клиентов в разных окружениях
+
+### 8. Поддержка Node.js 16+ через undici и dotenv
+
+В версии 0.5.9 добавлена поддержка Node.js 16+ через замену встроенного `fetch` на `undici` и использование `dotenv` для загрузки переменных окружения.
+
+**Особенности:**
+
+- Заменен встроенный `fetch` на `undici@5.28.4` для HTTP запросов (совместимость с Node.js 16+)
+- Добавлена загрузка переменных окружения через `dotenv@17.2.3` вместо флага `--env-file`
+- Обновлен `engines.node` в package.json: `>=16.0.0` (было `>=20`)
+- Исправлены unit тесты для работы с новым HTTP клиентом
+- Профилирование показало аналогичную производительность с встроенным `fetch`
+
+**Причина:** Расширение совместимости с более старыми версиями Node.js, стандартизация загрузки переменных окружения
 
 **Важные детали архитектуры:**
 
