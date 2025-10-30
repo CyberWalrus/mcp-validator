@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
@@ -23,7 +23,7 @@
   ],
   "packageManager": "yarn@1.22.22",
   "engines": {
-    "node": ">=20"
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
@@ -32,17 +32,19 @@
   "author": "Andrey Pakhomov",
   "license": "MIT",
   "scripts": {
-    "start": "node --env-file=.env --import tsx src/index.ts",
+    "start": "node --import tsx src/index.ts",
     "build": "tsup",
     "test": "yarn test:unit && yarn test:e2e",
-    "test:unit": "vitest --run",
+    "test:unit": "NODE_ENV=test vitest --run",
     "test:e2e": "NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
     "lint": "yarn eslint --fix --report-unused-disable-directives-severity off src && yarn typecheck",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.20.0",
+    "dotenv": "17.2.3",
     "openai": "6.3.0",
+    "undici": "7.16.0",
     "zod": "4.1.12"
   },
   "devDependencies": {
