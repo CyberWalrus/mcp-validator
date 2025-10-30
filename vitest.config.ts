@@ -15,6 +15,9 @@ export default defineConfig({
                 },
             },
         },
+        env: {
+            NODE_ENV: 'test',
+        },
         environment: 'node',
         exclude: ['node_modules', 'dist', '**/*.e2e.test.ts'],
         globals: true,
