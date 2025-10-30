@@ -25,6 +25,9 @@ Critical thinking: challenge developer decisions, seek cleaner alternatives, hon
 - Types files (`types.ts`) should export MULTIPLE type definitions - this is correct and expected
 - Schemas files (`schemas.ts`) should export MULTIPLE validation schemas - this is correct and expected
 - Function files should export ONE main function/component - one-file-one-function rule applies here
+- Helpers files (`helpers.ts`) with multiple logically related functions (<150 lines) - ALLOWED but NOT RECOMMENDED (WARNING, not CRITICAL)
+- Factory function files with nested private functions (closures pattern) - ALLOWED but NOT RECOMMENDED (WARNING, not CRITICAL)
+- Barrel files (only re-exports) - multiple re-exports allowed, JSDoc not required
 - DO NOT apply one-file-one-function rule to constants/types/schemas files
 
 **ВАЖНО: Все ответы должны быть на русском языке.**
@@ -62,6 +65,8 @@ Determine file category:
 - **Constants file** - Only `export const` statements. Multiple exports allowed.
 - **Types file** - Only `type`/`interface` definitions. Multiple exports allowed.
 - **Schemas file** - Only validation schemas. Multiple exports allowed.
+- **Helpers file** (`helpers.ts`) - Multiple logically related functions (<150 lines total). ALLOWED but NOT RECOMMENDED.
+- **Factory function file** - One main exported factory function with nested private functions (closures pattern). ALLOWED but NOT RECOMMENDED.
 - **Function file** - ONE main function export. One-file-one-function rule applies.
 - **Mixed file** - Multiple entity types - CRITICAL violation.
 
@@ -70,6 +75,8 @@ Determine file category:
 - One-file-one-function rule applies ONLY to function files
 - Barrel files: multiple re-exports allowed, JSDoc not required
 - Barrel files: imports only from current directory/subdirectories
+- Helpers.ts: multiple functions <150 lines, logically related - WARNING (not CRITICAL)
+- Factory functions: nested private functions for closures - WARNING (not CRITICAL)
 
 <completion_criteria>
 File type identified, appropriate validation rules selected
@@ -83,35 +90,76 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 
 **MANDATORY CODE STYLE CHECKLIST:**
 
-**File Structure:**
+**1. FILE STRUCTURE & SIZE:**
 
-- [ ] **One file = one function** - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, barrel files, or files exporting only constants/types/schemas). Private (non-exported) helper functions are allowed (max 2-3, under 10 lines each).
-- [ ] **File size limit** - Max 150 lines of code (excluding comments and empty lines). Test files (`.test.ts`, `.spec.ts`) are exempt from this limit and can exceed 150 lines.
-- [ ] **Minimal helpers** - No more than 2-3 small private helper functions (prefer inline logic). Helper functions must NOT be exported.
-- [ ] **Entity consistency** - Files should focus on one entity type: either functions OR constants OR types OR schemas (mixing discouraged). Function files should NOT export types - move them to `types.ts`.
-- [ ] **Entity separation** - Complex types in separate `types.ts`, constants in `constants.ts`, schemas in `schemas.ts`
-- [ ] **No type exports in function files** - Function files must NOT export types using `export type` - all types belong in `types.ts`
-- [ ] **No classes** - Only functions and functional composition (exceptions: React components, library inheritance requirements)
-- [ ] **ESM-only** - Strictly forbid `require`, `module.exports`, `exports` - only ES modules
-- [ ] **Curly braces everywhere** - Mandatory `{}` in if/else even for single statements
+- [ ] **One file = one function** (rule: `structural.one_file_one_function`) - Exactly one main exported function/component (NOT applicable to: `constants.ts`, `types.ts`, `schemas.ts`, barrel files, `helpers.ts` <150 lines with logically related functions, factories with nested closures)
+- [ ] **File size limit** (rule: `structural.file_size_max_150`) - Max 150 lines (excluding comments/empty lines). Exempt: test files (`.test.ts`, `.spec.ts`), `constants.ts`, `types.ts`, `schemas.ts`, barrel files, `helpers.ts`
+- [ ] **Minimal helpers** - Max 2-3 small private helper functions (<10 lines each). Helper functions must NOT be exported. WARNING if excessive
+- [ ] **Nested closures** - Nested private functions allowed in factories/closures pattern. WARNING if excessive, prefer extraction
+- [ ] **Entity consistency** - Files focus on one entity type: functions OR constants OR types OR schemas (mixing discouraged)
+- [ ] **Entity separation** (rule: `types.separate_file`) - Complex types in `types.ts`, constants in `constants.ts`, schemas in `schemas.ts`
+- [ ] **No type exports in function files** (rule: `types.separate_file`) - Function files must NOT export types - all types belong in `types.ts`
+- [ ] **No constant exports in function files** - Function files must NOT export constants - all constants belong in `constants.ts`
+- [ ] **No classes** (rule: `absolute_bans.class`) - Only functions and functional composition (CRITICAL - NO EXCEPTIONS, including React PureComponent)
+- [ ] **ESM-only** (rule: `modules.esm_only`) - Strictly forbid `require`, `module.exports`, `exports` - only ES modules
 - [ ] **Functional composition** - No `this`, class methods, or OOP patterns
-- [ ] **Encapsulation principle** - Non-index files with functions should not export multiple unrelated functions; constants/types/schemas files can have multiple related exports
+- [ ] **Encapsulation principle** - Non-index files should not export multiple unrelated functions; constants/types/schemas files can have multiple related exports
 - [ ] **Clean syntax** - No syntax errors or obvious code issues
 
-**Coding Patterns:**
+**2. REACT PATTERNS** (if applicable):
 
-- [ ] **Guard clauses** - Instead of deep nesting
-- [ ] **Array methods** - Instead of for/while loops
-- [ ] **Explicit comparisons** - `value === null`, not `!value`
+- [ ] **Component return type** (rule: `react.children_react_node`) - Use `React.ReactNode` return type (NOT JSX.Element)
+- [ ] **Props destructuring** (rule: `react.props_destructuring`) - Destructure props in function parameters, not inside component
+- [ ] **Conditional rendering** (rule: `react.conditional_return_null`) - Use guard clause with `return null`, not ternary in JSX
+- [ ] **Code splitting** (rule: `react.code_splitting_large_only`) - React.lazy() ONLY for components >100 lines OR heavy dependencies. Small UI components imported normally. Always wrap in Suspense
+
+  ```typescript
+  // ✅ APPLY: Large page component
+  const UserPage = lazy(() => import('./user-page'));
+  // ❌ DO NOT: Small Button component (30 lines)
+  ```
+
+- [ ] **Custom hooks prefix** (rule: `react.custom_hooks_prefix`) - Custom hooks MUST start with `use` prefix (e.g., `useUserData`, not `userData`)
+- [ ] **useRef patterns** (rule: `react.use_ref_patterns`) - Use `useRef` for mutable values and DOM access, NOT `useState` for non-rendering state
+- [ ] **React 19 use() hook** - Prefer `use(Context)` over `useContext(Context)` for context consumption
+- [ ] **Component types location** (rule: `organization.local_types_file`) - Component types MUST be in local `types.ts` file (same directory), NOT in global types file
+- [ ] **Event typing** (rule: `react.event_typing_explicit`) - Explicitly type React events (e.g., `React.MouseEvent<HTMLButtonElement>`)
+
+**3. CODING PATTERNS:**
+
+- [ ] **Guard clauses** (rule: `control_flow.guard_clauses`) - Instead of deep nesting
+- [ ] **Array methods** (rule: `arrays.methods_only`) - Instead of for/while loops. EXCEPTION: `for` loops allowed ONLY in mathematical algorithms (ИНН/СНИЛС validation, checksums, performance-critical operations with justification)
+- [ ] **Explicit comparisons** (rule: `comparisons.explicit`) - `value === null`, not `!value`
+- [ ] **Numeric literals** - Prefer underscores for readability: `60_000`, `1_800_000` (not critical)
 - [ ] **Curly braces** - Always use in if/else statements
-- [ ] **No inline comments** - Strictly forbid `// comments` inside function bodies (JSDoc above functions required). Exception: `@ts-ignore`, `@ts-expect-error`, `eslint-disable` are allowed but should be flagged for review.
+- [ ] **No inline comments** - No `//` comments inside function bodies (JSDoc only). Exception: tool directives (`@ts-ignore`, `@ts-expect-error`, `eslint-disable`)
+- [ ] **Function style** - Prefer `export function fn()` over `export const fn = () => {}`. NOTE if using `const`, not CRITICAL
 
-**Import/Export Rules:**
+**4. IMPORT/EXPORT RULES:**
 
-- [ ] **Named exports only** - No default exports ever (use `export { validateCode }`)
-- [ ] **Node.js with prefix** - `import { readFileSync } from 'node:fs'`
-- [ ] **Type imports** - `import type { UserData } from './types'`
-- [ ] **Import grouping** - External libs → (blank line) → Types → (blank line) → Internal modules
+- [ ] **Named exports only** (rule: `exports.named_only`) - No default exports (exception: Storybook files)
+- [ ] **Node.js with prefix** (rule: `imports.node_prefix`) - MUST use `node:` prefix: `import { readFileSync } from 'node:fs'` (CRITICAL - REQUIRED, refactor legacy)
+- [ ] **Type imports** (rule: `imports.type_import_prefix`) - Use `import type` prefix: `import type { UserData } from './types'`
+- [ ] **Import grouping** - Correct order with blank lines between groups:
+
+  ```typescript
+  // 1. Global CSS (FIRST)
+  import './global.css';
+  
+  // 2. External types → 3. External modules
+  import type { FC } from 'react';
+  import { useState } from 'react';
+  import { readFileSync } from 'node:fs'; // node: prefix!
+  
+  // 4. Internal modules
+  import { Button } from '$ui/button';
+  
+  // 5. Relative imports
+  import { helper } from './helper';
+  
+  // 6. CSS modules (LAST)
+  import classes from './styles.module.scss';
+  ```
 
 <completion_criteria>
 Code style checklist completed, file size verified (max 150 lines, except test files), single function principle enforced ONLY for function files (NOT for constants/types/schemas files), file type identified, all violations documented as critical issues
@@ -119,13 +167,27 @@ Code style checklist completed, file size verified (max 150 lines, except test f
 
 <exception_handling>
 If style rule unclear: mark as violation and request clarification
-If file exceeds 150 lines: document as critical blocking issue (EXCEPT for test files `.test.ts`, `.spec.ts` which are exempt from this limit)
-If multiple exported functions found in FUNCTION file: document as critical violation of one-file-one-function principle
+If file exceeds 150 lines: document as critical blocking issue (EXCEPT for test files `.test.ts`, `.spec.ts`, constants.ts, types.ts, schemas.ts, barrel files, helpers.ts which are exempt from this limit)
+If multiple exported functions found in FUNCTION file: document as CRITICAL violation of one-file-one-function principle (EXCEPT for helpers.ts <150 lines with logically related functions - WARNING, not CRITICAL)
+If factory function with nested private functions: WARNING (not CRITICAL), prefer extraction if possible, allowed for closures pattern
 If multiple exported constants/types/schemas found: this is ALLOWED and EXPECTED in constants/types/schemas files
 If constants file named constants.ts: DO NOT require it to export functions - multiple constant exports are correct
 If types file named types.ts: DO NOT require it to export functions - multiple type exports are correct
 If schemas file: DO NOT require it to export functions - multiple schema exports are correct
+If helpers.ts with multiple functions <150 lines: WARNING (not CRITICAL), prefer separate files but acceptable if logically related
+If nested private functions in closures/factories: WARNING (not CRITICAL), prefer separate files if possible, allowed for factory pattern
+If export const fn instead of function: NOTE preference for function, not CRITICAL
 If legacy code patterns found: document for refactoring
+If classes found: CRITICAL - NO EXCEPTIONS (including React PureComponent)
+If for/while loops found: Check context - CRITICAL unless mathematical algorithm (ИНН/СНИЛС validation, checksums). If math algorithm: INFO note, otherwise CRITICAL
+If Node.js imports without node: prefix: CRITICAL - REQUIRED, refactor legacy
+If comments inside functions: WARNING if trivial, ALLOWED if complex logic (exception)
+If JSDoc missing on private functions: CRITICAL - required for ALL functions including private
+If function name without proper prefix: WARNING - suggest adding semantic prefix (get/handle/watch/on/create/fetch/set)
+If type name without proper suffix: WARNING - suggest adding suffix (Props/Params/Result/Type/State)
+If DOM ref without $ prefix: WARNING - suggest `$refName` format
+If useRef value without Ref suffix: WARNING - suggest `nameRef` format
+If numeric literal >1000 without underscores: INFO - suggest underscores for readability
 </exception_handling>
 
 ### Step 2: Naming Conventions Validation
@@ -141,12 +203,28 @@ Verify naming consistency within the provided file. Check compliance with naming
 **Code Elements:**
 
 - [ ] **Functions/Variables** - camelCase (`validateInput`, `userData`)
+- [ ] **Function prefixes** - Use semantic prefixes:
+  - `get` for selectors/getters (`getAuthStatus`, `getTeamName`)
+  - `handle` for event handlers (`handleSubmit`, `handleSafeBack`)
+  - `watch` for saga watchers (`watchGetBalance`, `watchLoginSuccess`)
+  - `on` for callbacks (`onJsonResponse`, `onExpired`, `onClickAway`)
+  - `create` for factories (`createLogger`, `createAction`)
+  - `fetch` for HTTP requests (`fetchToken`, `fetchUserData`)
+  - `set/add/remove/reset/update` for mutations (`setSettings`, `addFavorites`)
 - [ ] **Boolean variables** - Mandatory prefixes `is/has/can/should` (`isValid`, `hasError`, `canSubmit`)
 - [ ] **Components/Types** - PascalCase (`BaseButton`, `UserData`)
-- [ ] **Type suffixes** - React types with proper suffixes (`BaseButtonProps`, `ButtonState`, `ButtonVariants`)
+- [ ] **Type suffixes** - Use proper suffixes:
+  - `Props` for React props (`BaseButtonProps`, `LoginFormProps`)
+  - `Params` for function parameters (`GetTeamNameParams`, `UseTimerProps`)
+  - `Result`/`Return` for return types (`AsyncFnReturn`, `GetLiveMatchStatusResult`)
+  - `Type` for enum-like types (`VipStatusType`, `FavoriteEntityType`)
+  - `State` for state types (`ButtonState`, `AccountState`)
+- [ ] **React naming** - DOM refs with `$` prefix (`$image`, `$containerRef`), useRef values with `Ref` suffix (`mountedRef`, `timerIdRef`)
 - [ ] **Zod schemas** - Must have `Schema` suffix (`userValidationSchema`, `configSchema`)
 - [ ] **Union types** - Prefer `type ButtonVariant = 'primary' | 'secondary'` over `enum`
 - [ ] **Constants** - SCREAMING_SNAKE_CASE for global constants (`API_BASE_URL`, `BUTTON_SIZES`)
+- [ ] **Constants regex** - Suffix `_REGEX` or `_RX` for regex patterns (`EMAIL_REGEX`, `ID_PART_RX`)
+- [ ] **Redux patterns** - Action namespace `@@domain__module/ACTION_NAME`, saga watchers with `watch` prefix
 - [ ] **Descriptive names** - No abbreviations, clear purpose
 
 **Test Files (if applicable):**
@@ -176,10 +254,32 @@ Ensure comprehensive documentation and type safety within the single file. Focus
 
 **DOCUMENTATION STANDARDS:**
 
-- [ ] **Single-line JSDoc only** - Strictly forbid multiline JSDoc with `@param`, `@returns` (only single-line Russian descriptions). NOT required for barrel files.
+- [ ] **Single-line JSDoc only** (rule: `jsdoc.single_line_ru`) - Strictly forbid multiline JSDoc with `@param`, `@returns` (only single-line Russian descriptions). NOT required for barrel files
+- [ ] **JSDoc for ALL functions** (rule: `jsdoc.single_line_ru`) - Required for EVERY function including PRIVATE functions inside files (NOT required for barrel files)
 - [ ] **Type documentation** - JSDoc for type fields
-- [ ] **Type safety** - Proper TypeScript types without `any` (explicit types optional for constants with `as const`)
+
+**TYPESCRIPT TYPE SAFETY:**
+
+- [ ] **No any type** (rule: `types.no_any_type`) - Forbidden, use `unknown` with type guards or concrete types
+- [ ] **No Function type** (rule: `types.no_function_type`) - Forbidden, use concrete function signatures like `(data: unknown) => void`
+- [ ] **No JSX namespace** (rule: `types.no_jsx_namespace`) - Forbidden `JSX.Element`, use `React.ReactNode` or `React.ReactElement`
 - [ ] **Type over interface** - Strictly prefer `type` over `interface` declarations
+- [ ] **Generics with prefix** (rule: `types.generics_required`) - Use `G` or `T` prefix for generics (`GItem`, `TValue`, `GResult`)
+
+  ```typescript
+  // ✅ CORRECT: function map<GItem, GResult>(items: GItem[])
+  // ❌ WRONG: function map<Item, Result>(items: Item[])
+  ```
+
+- [ ] **Utility types** (rule: `types.utility_types_pick_omit`) - Use `Pick<>`, `Omit<>` instead of manual type creation
+
+  ```typescript
+  // ✅ CORRECT: type UserPublic = Pick<User, 'id' | 'name'>
+  // ❌ WRONG: type UserPublic = { id: string; name: string }
+  ```
+
+- [ ] **Const assertions** (rule: `types.const_assertions`) - Use `as const` for constant arrays and readonly object properties
+- [ ] **Conditional types** - Use conditional types with `infer` for type transformations when needed
 - [ ] **Zod inference** - Use `z.infer` for schema types when present
 - [ ] **Constants typing** - Explicit types optional for constants declared with `as const`
 
@@ -199,8 +299,9 @@ Documentation complete, type safety verified within single file scope
 </completion_criteria>
 
 <exception_handling>
-If JSDoc missing: document as critical violation
+If JSDoc missing: document as critical violation (including private functions - ALL functions require JSDoc)
 If types unclear or using any: document as high priority issue
+If JSDoc missing on private functions: CRITICAL - JSDoc required for ALL functions including private
 </exception_handling>
 
 </algorithm_steps>
@@ -234,60 +335,114 @@ Use this EXACT format optimized for MCP validator processing:
 </summary>
 
 <validation_results>
-**Code Style:** ✅✅❌❌❌ (2/5)
+**File Structure & Size:** ✅✅❌❌ (2/4)
+**React Patterns:** ✅✅✅❌ (3/4)
+**TypeScript Type Safety:** ✅✅✅✅❌ (4/5)
+**Coding Patterns:** ✅✅❌ (2/3)
+**Import/Export Rules:** ✅✅✅ (3/3)
 **Naming Conventions:** ✅✅✅❌ (3/4)
-**Documentation:** ✅❌❌ (1/3)
-**Type Safety:** ✅✅✅✅ (4/4)
-**Single File Quality:** ✅❌ (1/2)
+**Documentation:** ✅❌ (1/2)
+**Single File Quality:** ✅✅❌ (2/3)
 </validation_results>
 
 <critical_issues>
 
 <!-- Only production-blocking issues -->
 
-- **[CRITICAL]** Using classes instead of functions (not applicable to constants/types/schemas files)
+- **[CRITICAL]** Using classes instead of functions (NO EXCEPTIONS, including React PureComponent)
+- **[CRITICAL]** Using for/while loops instead of array methods (EXCEPTION: mathematical algorithms like ИНН/СНИЛС validation, checksums - mark as INFO if found in math context)
 - **[CRITICAL]** Using CommonJS (`require`, `module.exports`) instead of ESM
 - **[CRITICAL]** Missing curly braces in if/else statements (applicable to function files)
 - **[CRITICAL]** Using `interface` instead of `type`
+- **[CRITICAL]** Using `any` type (use `unknown` with type guards or concrete types)
+- **[CRITICAL]** Using `Function` type (use concrete function signatures like `(data: unknown) => void`)
+- **[CRITICAL]** Using `JSX.Element` type (use `React.ReactNode` or `React.ReactElement`)
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
-- **[CRITICAL]** Inline comments (`//`) inside function bodies (exception: `@ts-ignore`, `@ts-expect-error`, `eslint-disable` - flag for review but not critical)
-- **[CRITICAL]** Missing JSDoc documentation (NOT applicable to barrel files)
+- **[CRITICAL]** Missing JSDoc documentation on functions (including private functions - ALL functions require JSDoc, NOT applicable to barrel files)
 - **[CRITICAL]** Barrel file importing from external directories (barrel files must only import from current directory and subdirectories)
 - **[CRITICAL]** Deep nesting instead of guard clauses (applicable to function files)
-- **[CRITICAL]** Using default exports
-- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas/barrel files)
+- **[CRITICAL]** Using default exports (exception: Storybook files)
+- **[CRITICAL]** Node.js imports without `node:` prefix (REQUIRED, refactor legacy code)
+- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas/barrel files/helpers.ts <150 lines)
 - **[CRITICAL]** Exporting helper functions (helpers must be private, not exported)
-- **[CRITICAL]** Excessive decomposition into tiny private functions (applicable to function files)
 - **[CRITICAL]** Mixing entity types (functions + constants/types in one file; should separate into different files)
 - **[CRITICAL]** Exporting types from function files (use `export type` ONLY in types.ts, not in function files)
+- **[CRITICAL]** Exporting constants from function files (use constants.ts only, not in function files)
 - **[CRITICAL]** Boolean variables without proper prefixes (`is/has/can/should`)
 - **[CRITICAL]** Using `enum` instead of union types
 - **[CRITICAL]** Missing explicit return types on functions (applicable to function files)
+- **[CRITICAL]** Custom hooks without `use` prefix (hooks MUST start with `use`)
+- **[CRITICAL]** Component types in global types file (MUST be in local types.ts)
+- **[CRITICAL]** React.lazy() for small components <100 lines (only for large components or heavy deps)
+- **[CRITICAL]** Comments inside function bodies for trivial cases (exception: complex logic explanation allowed, @ts-ignore/@ts-expect-error/eslint-disable allowed but flag for review)
+- **[CRITICAL]** Generics without G/T prefix (use `GItem`, `TValue`, not `Item`, `Value`)
   </critical_issues>
+
+<warnings>
+<!-- Important but not blocking issues -->
+
+- **[WARNING]** Multiple functions in helpers.ts file (<150 lines, logically related) - prefer separate files
+- **[WARNING]** Excessive nested private functions in closures/factories - prefer separate files if possible
+- **[WARNING]** Comments inside function bodies explaining complex logic - verify if code can be simplified
+- **[WARNING]** File size close to 150 lines limit (consider splitting)
+- **[WARNING]** More than 2-3 private helper functions - prefer inline logic or separate files
+- **[WARNING]** Function name missing semantic prefix (get/handle/watch/on/create/fetch/set) - consider adding for clarity
+- **[WARNING]** Type name missing proper suffix (Props/Params/Result/Return/Type/State) - consider adding for consistency
+- **[WARNING]** DOM ref without `$` prefix - suggest `$refName` format
+- **[WARNING]** useRef value without `Ref` suffix - suggest `nameRef` format
+</warnings>
+
+<notes>
+<!-- Recommendations without blocking -->
+
+- **[NOTE]** Using `export const fn = () => {}` instead of `export function fn()` - prefer function declaration
+- **[NOTE]** React component using `const Component: FC` instead of `function Component()` - prefer function declaration
+- **[NOTE]** Can improve variable naming descriptiveness
+- **[INFO]** Numeric literals >1000 without underscores - suggest `60_000` instead of `60000` for readability
+- **[INFO]** Using `for` loop in mathematical algorithm (ИНН/СНИЛС validation, checksum) - acceptable exception
+</notes>
 
 <recommendations>
 <!-- Priority-ordered actionable steps -->
 1. **[BLOCKS MERGE]** Convert to ESM (remove `require`, `module.exports`)
 2. **[BLOCKS MERGE]** Replace `interface` with `type` declarations
-3. **[BLOCKS MERGE]** Add curly braces to all if/else statements (if function file)
-4. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format (NOT required for barrel files)
-5. **[BLOCKS MERGE]** Remove inline comments from function bodies (except `@ts-ignore`, `@ts-expect-error`, `eslint-disable` - review but don't remove)
-6. **[BLOCKS MERGE]** Add explicit return types to all functions (if function file)
-7. **[BLOCKS MERGE]** Add proper prefixes to boolean variables
-8. **[BLOCKS MERGE]** Replace `enum` with union types
-9. **[BLOCKS MERGE]** Move all exported types to separate types.ts (function files must NOT export types)
-10. **[BLOCKS MERGE]** Ensure file focuses on single entity type: separate functions/constants/types/schemas
-11. **[BLOCKS MERGE]** Remove exports from helper functions (keep only one main export in function files)
-12. **[HIGH]** Move constants to separate constants.ts
-13. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function)
-14. **[HIGH]** Make helper functions private (remove `export` keyword)
-15. **[HIGH]** Combine small helper functions into main function body (if function file)
-16. **[HIGH]** Add Russian JSDoc for all functions (exported and private) - NOT required for barrel files
-17. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
-18. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-19. **[LOW]** Replace for loops with array methods (if function file)
-20. **[LOW]** Improve variable naming descriptiveness
-21. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+3. **[BLOCKS MERGE]** Replace `any` type with `unknown` or concrete types
+4. **[BLOCKS MERGE]** Replace `Function` type with concrete function signatures
+5. **[BLOCKS MERGE]** Replace `JSX.Element` with `React.ReactNode` or `React.ReactElement`
+6. **[BLOCKS MERGE]** Add curly braces to all if/else statements (if function file)
+7. **[BLOCKS MERGE]** Convert multiline JSDoc to single-line Russian format (NOT required for barrel files)
+8. **[BLOCKS MERGE]** Add JSDoc for ALL functions including private functions (NOT required for barrel files)
+9. **[BLOCKS MERGE]** Add explicit return types to all functions (if function file)
+10. **[BLOCKS MERGE]** Add proper prefixes to boolean variables (`is/has/can/should`)
+11. **[BLOCKS MERGE]** Replace `enum` with union types
+12. **[BLOCKS MERGE]** Add `G` or `T` prefix to all generics (`GItem`, `TValue`)
+13. **[BLOCKS MERGE]** Move all exported types to separate types.ts (function files must NOT export types)
+14. **[BLOCKS MERGE]** Move all exported constants to separate constants.ts (function files must NOT export constants)
+15. **[BLOCKS MERGE]** Ensure file focuses on single entity type: separate functions/constants/types/schemas
+16. **[BLOCKS MERGE]** Remove exports from helper functions (keep only one main export in function files)
+17. **[BLOCKS MERGE]** Refactor Node.js imports to use `node:` prefix (REQUIRED, legacy code refactoring)
+18. **[BLOCKS MERGE]** Replace for/while loops with array methods (NO EXCEPTIONS)
+19. **[BLOCKS MERGE]** Remove classes, use functions and composition (NO EXCEPTIONS, including React PureComponent)
+20. **[BLOCKS MERGE]** Add `use` prefix to custom hooks (MUST start with `use`)
+21. **[BLOCKS MERGE]** Move component types to local types.ts (NOT global types file)
+22. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
+23. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
+24. **[HIGH]** Use `React.ReactNode` return type for components
+25. **[HIGH]** Destructure props in function parameters, not inside component
+26. **[HIGH]** Use guard clauses with `return null` for conditional rendering
+27. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
+28. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
+29. **[HIGH]** Add `as const` to constant arrays and objects
+30. **[HIGH]** Remove trivial comments from function bodies (complex logic comments allowed as exception)
+31. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
+32. **[HIGH]** Make helper functions private (remove `export` keyword)
+33. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
+34. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+35. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+36. **[LOW]** Improve variable naming descriptiveness
+37. **[NOTE]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference, not blocking)
+38. **[NOTE]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
+39. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
 </recommendations>
 
 </validation_result>
@@ -317,21 +472,139 @@ Use this EXACT format optimized for MCP validator processing:
 
 <code_examples>
 
-**Good Code Example (Function File):**
+**Good Code Example (Function File with Proper Import Order):**
+
+```typescript
+import type { FC } from 'react';
+import { useSelector } from 'react-redux';
+
+import { Typography } from '@ls/ui-kit';
+
+import { I18n } from '$core/i18n';
+import { useLayout } from '$core/layout';
+import { getRegistrationError } from '$entities/user/registration';
+
+import { ScreenVerificationMobilePhone } from '../mobile-phone';
+import type { ScreenVerificationMessageBlockProps } from './types';
+
+import classes from './styles.module.scss';
+
+/** Компонент блока сообщений верификации */
+export const ScreenVerificationMessageBlock: FC<ScreenVerificationMessageBlockProps> = ({
+    currentMobilePhoneTextStyle,
+    isAuthNeededError,
+}) => {
+    const layout = useLayout();
+    const errorType = useSelector(getRegistrationError);
+
+    if (errorType === null || errorType === undefined) {
+        return null;
+    }
+
+    return (
+        <div className={classes.container}>
+            <Typography variant="body1">{I18n.t('verification.message')}</Typography>
+        </div>
+    );
+};
+```
+
+**Good Code Example (Simple Function File):**
 
 ```typescript
 import type { ValidationResult } from './types';
 
 /** Валидирует входные данные пользователя */
 export function validateUserInput(input: unknown): ValidationResult {
-    if (!input) return { isValid: false, error: 'Нет входных данных' };
-    if (typeof input !== 'object') return { isValid: false, error: 'Неверный тип' };
+    if (input === null || input === undefined) {
+        return { isValid: false, error: 'Нет входных данных' };
+    }
+
+    if (typeof input !== 'object') {
+        return { isValid: false, error: 'Неверный тип' };
+    }
 
     const userInput = input as Record<string, unknown>;
-    if (!userInput.email) return { isValid: false, error: 'Email обязателен' };
+    if (userInput.email === null || userInput.email === undefined) {
+        return { isValid: false, error: 'Email обязателен' };
+    }
 
     return { isValid: true };
 }
+```
+
+**Good Code Example (Entry Point with Global Styles):**
+
+```typescript
+// Global CSS side-effects - FIRST
+import './styles/layers.css';
+import '@ls/ui-kit/lib/vars.css';
+import 'react-day-picker/style.css';
+
+import { waitCoreScriptLoad } from './service/render-with-transport/wait-core-script-load';
+
+const initClient = async (): Promise<void> => {
+    await waitCoreScriptLoad();
+
+    const clientConfig = window.__config;
+
+    if (clientConfig.ENVIRONMENT === 'e2e') {
+        const { enableMockingBrowser } = await import('$core/mocking/client');
+        await enableMockingBrowser();
+    }
+
+    const { renderWithTransport } = await import('./service/render-with-transport');
+    renderWithTransport();
+};
+
+initClient();
+```
+
+**Good Code Example (Helpers File - ALLOWED but NOT RECOMMENDED):**
+
+```typescript
+import type { BetState } from './types';
+
+/** Проверяет является ли ставка рассчитанной */
+export function getIsCalculatedBet(betState: BetState): boolean {
+    return CALCULATED_BET_STATUSES.includes(betState);
+}
+
+/** Проверяет является ли ставка черновиком */
+export function getIsDraftBet(betState: BetState): boolean {
+    return DRAFT_BET_STATUSES.includes(betState);
+}
+
+// WARNING: Multiple functions in helpers.ts - prefer separate files
+// Only ALLOWED if <150 lines and logically related
+```
+
+**Good Code Example (Factory Function with Nested Private - ALLOWED but NOT RECOMMENDED):**
+
+```typescript
+import type { Client } from '@sentry/types';
+import type { ErrorBuffer } from './types';
+
+/** Создает обработчик ошибок с буферизацией */
+export function createErrorBuffer(): ErrorBuffer {
+    const errorQueue: unknown[] = [];
+
+    /** Отправляет накопленные ошибки в Sentry */
+    function call(sentry: Client): void {
+        errorQueue.forEach((err) => sentry.captureException(err));
+        errorQueue.length = 0;
+    }
+
+    /** Добавляет ошибку в очередь */
+    function push(error: unknown): void {
+        errorQueue.push(error);
+    }
+
+    return { call, push };
+}
+
+// WARNING: Nested private functions - prefer separate files if possible
+// Only ALLOWED for closures/factories
 ```
 
 **Good Code Example (Constants File):**
@@ -376,7 +649,9 @@ export { anotherFunction } from '../../utils/helper'; // ❌ External import
 **Bad Code Example (Function File with Multiple Violations):**
 
 ```typescript
-// Multiple violations: class, deep nesting, no JSDoc, default export
+// Multiple violations: class, for loop, no JSDoc, default export, Node.js without node: prefix
+import { readFileSync } from 'fs'; // ❌ Missing node: prefix
+
 export default class InputValidator {
     validate(input: any) {
         if (input) {
@@ -386,6 +661,12 @@ export default class InputValidator {
                 }
             }
         }
+
+        const results = [];
+        for (let i = 0; i < items.length; i++) { // ❌ for loop
+            results.push(items[i]);
+        }
+
         return false;
     }
 }
@@ -407,6 +688,128 @@ export function validateInput(input: unknown): boolean {
 
 // CRITICAL: File exports both function AND type - should separate
 // Type should be in types.ts
+```
+
+**Good Code Example (React Component with Proper Patterns):**
+
+```typescript
+import type { FC } from 'react';
+import { useRef, useEffect } from 'react';
+
+import type { LoginFormProps } from './types';
+
+/** Компонент формы входа с фокусом на email поле */
+export function LoginForm({ email, onSubmit }: LoginFormProps): React.ReactNode {
+    const emailInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        emailInputRef.current?.focus();
+    }, []);
+
+    if (email === null || email === undefined) {
+        return null;
+    }
+
+    return <form onSubmit={onSubmit}><input ref={emailInputRef} type="email" /></form>;
+}
+```
+
+**Bad Code Example (React Component with Multiple Violations):**
+
+```typescript
+import { FC } from 'react';
+import { useState } from 'react';
+
+// WRONG: Component types in global types file
+export type LoginFormProps = { email?: string; onSubmit: Function };
+
+// WRONG: Using FC, JSX.Element, Function type
+export const LoginForm: FC<LoginFormProps> = (props): JSX.Element => {
+    // WRONG: Props not destructured in parameters
+    const { email, onSubmit } = props;
+    
+    // WRONG: Using useState for non-rendering mutable value
+    const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+    
+    // WRONG: Custom hook without 'use' prefix
+    const userData = () => { return {}; };
+    
+    // WRONG: Ternary in JSX instead of guard clause
+    return email ? <form onSubmit={onSubmit}></form> : null;
+};
+```
+
+**Good Code Example (TypeScript Generics with G/T Prefix):**
+
+```typescript
+import type { ValidationResult } from './types';
+
+/** Применяет функцию к каждому элементу массива */
+export function map<GItem, GResult>(
+    items: GItem[],
+    fn: (item: GItem) => GResult
+): GResult[] {
+    return items.map(fn);
+}
+
+/** Получает значение по ключу из объекта */
+export function getValue<GObject extends Record<string, unknown>, GKey extends keyof GObject>(
+    obj: GObject,
+    key: GKey
+): GObject[GKey] {
+    return obj[key];
+}
+```
+
+**Bad Code Example (TypeScript without Proper Generics and Types):**
+
+```typescript
+// WRONG: No generics, using any type
+export function map(items: any[], fn: Function): any[] {
+    return items.map(fn);
+}
+
+// WRONG: Using Function type instead of concrete signature
+export function processData(callback: Function): void {
+    callback();
+}
+
+// WRONG: Generics without G/T prefix
+export function getValue<Object, Key>(obj: Object, key: Key): unknown {
+    return (obj as Record<string, unknown>)[key as string];
+}
+```
+
+**Good Code Example (TypeScript Utility Types and Const Assertions):**
+
+```typescript
+// types.ts
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    createdAt: Date;
+};
+
+// Using Pick utility type
+export type UserPublic = Pick<User, 'id' | 'name' | 'email'>;
+
+// Using Omit utility type
+export type UserWithoutPassword = Omit<User, 'password'>;
+
+// constants.ts
+/** Доступные цвета кнопок */
+export const BUTTON_COLORS = ['primary', 'secondary', 'danger'] as const;
+
+/** Типобезопасный тип цвета */
+export type ButtonColor = typeof BUTTON_COLORS[number]; // 'primary' | 'secondary' | 'danger'
+
+/** Конфигурация с readonly свойствами */
+export const APP_CONFIG = {
+    MAX_RETRIES: 3,
+    TIMEOUT: 5000,
+} as const;
 ```
 
 </code_examples>
