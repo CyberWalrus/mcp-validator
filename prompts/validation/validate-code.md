@@ -140,26 +140,7 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 - [ ] **Named exports only** (rule: `exports.named_only`) - No default exports (exception: Storybook files)
 - [ ] **Node.js with prefix** (rule: `imports.node_prefix`) - MUST use `node:` prefix: `import { readFileSync } from 'node:fs'` (CRITICAL - REQUIRED, refactor legacy)
 - [ ] **Type imports** (rule: `imports.type_import_prefix`) - Use `import type` prefix: `import type { UserData } from './types'`
-- [ ] **Import grouping** - Correct order with blank lines between groups:
-
-  ```typescript
-  // 1. Global CSS (FIRST)
-  import './global.css';
-  
-  // 2. External types → 3. External modules
-  import type { FC } from 'react';
-  import { useState } from 'react';
-  import { readFileSync } from 'node:fs'; // node: prefix!
-  
-  // 4. Internal modules
-  import { Button } from '$ui/button';
-  
-  // 5. Relative imports
-  import { helper } from './helper';
-  
-  // 6. CSS modules (LAST)
-  import classes from './styles.module.scss';
-  ```
+- [ ] **Import grouping** - Правила группировки контролируются линтером. Проверять только РЕАЛЬНО СЛОМАННЫЕ импорты (полностью перемешаны external/internal/relative). Мелкие отклонения (пустые строки между внешними модулями, небольшие вариации порядка) НЕ критиковать.
 
 <completion_criteria>
 Code style checklist completed, file size verified (max 150 lines, except test files), single function principle enforced ONLY for function files (NOT for constants/types/schemas files), file type identified, all violations documented as critical issues
@@ -181,6 +162,7 @@ If legacy code patterns found: document for refactoring
 If classes found: CRITICAL - NO EXCEPTIONS (including React PureComponent)
 If for/while loops found: Check context - CRITICAL unless mathematical algorithm (ИНН/СНИЛС validation, checksums). If math algorithm: INFO note, otherwise CRITICAL
 If Node.js imports without node: prefix: CRITICAL - REQUIRED, refactor legacy
+If minor import grouping deviations: DO NOT CRITICIZE - let linter handle this, only flag if imports are completely mixed/disordered
 If comments inside functions: WARNING if trivial, ALLOWED if complex logic (exception)
 If JSDoc missing on private functions: CRITICAL - required for ALL functions including private
 If function name without proper prefix: WARNING - suggest adding semantic prefix (get/handle/watch/on/create/fetch/set)
@@ -204,21 +186,21 @@ Verify naming consistency within the provided file. Check compliance with naming
 
 - [ ] **Functions/Variables** - camelCase (`validateInput`, `userData`)
 - [ ] **Function prefixes** - Use semantic prefixes:
-  - `get` for selectors/getters (`getAuthStatus`, `getTeamName`)
-  - `handle` for event handlers (`handleSubmit`, `handleSafeBack`)
-  - `watch` for saga watchers (`watchGetBalance`, `watchLoginSuccess`)
-  - `on` for callbacks (`onJsonResponse`, `onExpired`, `onClickAway`)
-  - `create` for factories (`createLogger`, `createAction`)
-  - `fetch` for HTTP requests (`fetchToken`, `fetchUserData`)
-  - `set/add/remove/reset/update` for mutations (`setSettings`, `addFavorites`)
+    - `get` for selectors/getters (`getAuthStatus`, `getTeamName`)
+    - `handle` for event handlers (`handleSubmit`, `handleSafeBack`)
+    - `watch` for saga watchers (`watchGetBalance`, `watchLoginSuccess`)
+    - `on` for callbacks (`onJsonResponse`, `onExpired`, `onClickAway`)
+    - `create` for factories (`createLogger`, `createAction`)
+    - `fetch` for HTTP requests (`fetchToken`, `fetchUserData`)
+    - `set/add/remove/reset/update` for mutations (`setSettings`, `addFavorites`)
 - [ ] **Boolean variables** - Mandatory prefixes `is/has/can/should` (`isValid`, `hasError`, `canSubmit`)
 - [ ] **Components/Types** - PascalCase (`BaseButton`, `UserData`)
 - [ ] **Type suffixes** - Use proper suffixes:
-  - `Props` for React props (`BaseButtonProps`, `LoginFormProps`)
-  - `Params` for function parameters (`GetTeamNameParams`, `UseTimerProps`)
-  - `Result`/`Return` for return types (`AsyncFnReturn`, `GetLiveMatchStatusResult`)
-  - `Type` for enum-like types (`VipStatusType`, `FavoriteEntityType`)
-  - `State` for state types (`ButtonState`, `AccountState`)
+    - `Props` for React props (`BaseButtonProps`, `LoginFormProps`)
+    - `Params` for function parameters (`GetTeamNameParams`, `UseTimerProps`)
+    - `Result`/`Return` for return types (`AsyncFnReturn`, `GetLiveMatchStatusResult`)
+    - `Type` for enum-like types (`VipStatusType`, `FavoriteEntityType`)
+    - `State` for state types (`ButtonState`, `AccountState`)
 - [ ] **React naming** - DOM refs with `$` prefix (`$image`, `$containerRef`), useRef values with `Ref` suffix (`mountedRef`, `timerIdRef`)
 - [ ] **Zod schemas** - Must have `Schema` suffix (`userValidationSchema`, `configSchema`)
 - [ ] **Union types** - Prefer `type ButtonVariant = 'primary' | 'secondary'` over `enum`
