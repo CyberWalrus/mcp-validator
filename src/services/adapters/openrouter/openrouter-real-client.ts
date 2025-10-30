@@ -1,5 +1,7 @@
 /** Реальная реализация OpenRouter клиента для production */
 
+import { request } from 'undici';
+
 import { APP_CONFIG } from '../../../model/config';
 import { DEFAULT_HEADERS } from './constants';
 import type { OpenRouterRequest, OpenRouterResponse } from './types';
@@ -44,7 +46,7 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
     }
 
     try {
-        const response = await fetch(requestUrl, {
+        const { statusCode, body } = await request(requestUrl, {
             body: JSON.stringify(requestBody),
             headers: {
                 ...DEFAULT_HEADERS,
@@ -56,11 +58,12 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
 
         clearTimeout(timeoutId);
 
-        if (response.ok === false) {
-            throw new Error(`OpenRouter API request failed: ${response.status} ${response.statusText}`);
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new Error(`OpenRouter API request failed: ${statusCode}`);
         }
 
-        const data = (await response.json()) as {
+        const responseText = await body.text();
+        const data = JSON.parse(responseText) as {
             choices: Array<{ message?: { content?: string } }>;
             model: string;
             usage: { total_tokens: number };

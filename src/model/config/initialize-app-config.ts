@@ -7,6 +7,10 @@ import { PACKAGE_RESOURCE_PATHS } from '../constants/main';
 import { appConfigSchema } from './schemas';
 import type { AppConfig } from './types';
 
+if (process.env.NODE_ENV !== 'test') {
+    await import('dotenv/config');
+}
+
 /** Получает путь к корню пакета */
 function getPackageRoot(): string {
     const currentFileUrl = import.meta.url;
