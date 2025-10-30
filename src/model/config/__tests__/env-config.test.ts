@@ -78,6 +78,7 @@ describe('initializeAppConfig', () => {
         process.env.API_KEY = 'test-key';
         delete process.env.API_URL;
         delete process.env.TIMEOUT_API_REQUEST;
+        delete process.env.LOG_LEVEL;
 
         initializeAppConfig();
 
@@ -88,7 +89,7 @@ describe('initializeAppConfig', () => {
         expect(APP_CONFIG.timeouts.apiRequest).toBe(30000);
         expect(APP_CONFIG.timeouts.validation).toBe(30000);
         expect(APP_CONFIG.api.mockClientPath).toBe('end-to-end/mocks/openrouter-test-client');
-        expect(APP_CONFIG.logging.level).toBe('WARN');
+        expect(APP_CONFIG.logging.level).toBe('INFO');
         expect(APP_CONFIG.runtime).toEqual({
             environment: process.env.NODE_ENV ?? 'development',
             isE2ETest: false,

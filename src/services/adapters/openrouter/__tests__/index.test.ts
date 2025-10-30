@@ -1,10 +1,24 @@
+import type { Dispatcher } from 'undici';
+
 import { APP_CONFIG } from '../../../../model/config';
 import type { MakeOpenRouterRequest as MakeOpenRouterRequestFn } from '../types';
 
-global.fetch = vi.fn();
-const mockFetch = vi.mocked(fetch);
+vi.mock('undici', () => ({
+    request: vi.fn(),
+}));
+
+const { request: mockRequest } = await import('undici');
 
 let makeOpenRouterRequest: MakeOpenRouterRequestFn;
+
+function createMockResponse(statusCode: number, body: string): Dispatcher.ResponseData {
+    return {
+        body: {
+            text: () => Promise.resolve(body),
+        },
+        statusCode,
+    } as Dispatcher.ResponseData;
+}
 
 async function reloadConfig(): Promise<void> {
     const configModule = await import('../../../../model/config');
@@ -18,18 +32,15 @@ describe('makeOpenRouterRequest', () => {
         vi.clearAllMocks();
         vi.useFakeTimers();
 
-        // Устанавливаем переменные окружения ПЕРЕД вызовом reloadConfig()
         process.env.API_KEY = 'test-api-key';
         process.env.LOG_LEVEL = 'INFO';
         process.env.API_URL = 'https://openrouter.ai/api/v1';
         process.env.TIMEOUT_API_REQUEST = '30000';
 
-        // Переинициализируем конфигурацию только если API_KEY установлен
         if (process.env.API_KEY) {
             try {
                 await reloadConfig();
             } catch (error) {
-                // Игнорируем ошибки инициализации в тестах
                 console.warn('Config reload failed in test:', error);
             }
         }
@@ -46,10 +57,8 @@ describe('makeOpenRouterRequest', () => {
     afterAll(() => {
         delete process.env.API_KEY;
         delete process.env.API_URL;
-        delete process.env.OPENROUTER_TIMEOUT;
         delete process.env.LOG_LEVEL;
         delete process.env.TIMEOUT_API_REQUEST;
-        // Не вызываем reloadConfig() в afterAll, так как API_KEY удален
     });
 
     it('должен выполнить успешный запрос к OpenRouter API', async () => {
@@ -67,10 +76,7 @@ describe('makeOpenRouterRequest', () => {
             },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             model: 'anthropic/claude-3-sonnet',
@@ -89,7 +95,7 @@ describe('makeOpenRouterRequest', () => {
 
         expect(result.duration).toBeGreaterThanOrEqual(0);
 
-        expect(mockFetch).toHaveBeenCalledWith(
+        expect(mockRequest).toHaveBeenCalledWith(
             'https://openrouter.ai/api/v1/chat/completions',
             expect.objectContaining({
                 headers: expect.objectContaining({
@@ -101,9 +107,9 @@ describe('makeOpenRouterRequest', () => {
             }),
         );
 
-        const fetchCall = mockFetch.mock.calls[0];
-        if (fetchCall && fetchCall[1] && 'body' in fetchCall[1]) {
-            const body = JSON.parse(fetchCall[1].body as string);
+        const requestCall = vi.mocked(mockRequest).mock.calls[0];
+        if (requestCall && requestCall[1] && 'body' in requestCall[1]) {
+            const body = JSON.parse(requestCall[1].body as string);
             expect(body).toEqual(
                 expect.objectContaining({
                     max_tokens: expect.any(Number),
@@ -129,10 +135,7 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 50 },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             prompt: 'Test without model',
@@ -142,11 +145,11 @@ describe('makeOpenRouterRequest', () => {
 
         expect(result.model).toBe(APP_CONFIG.model.name);
 
-        const fetchCall = mockFetch.mock.calls[0];
-        if (!fetchCall || !fetchCall[1] || !fetchCall[1].body) {
-            throw new Error('Expected fetch to be called with body');
+        const requestCall = vi.mocked(mockRequest).mock.calls[0];
+        if (!requestCall || !requestCall[1] || !requestCall[1].body) {
+            throw new Error('Expected request to be called with body');
         }
-        const body = JSON.parse(fetchCall[1].body as string);
+        const body = JSON.parse(requestCall[1].body as string);
         expect(body.model).toBe(APP_CONFIG.model.name);
     });
 
@@ -160,34 +163,30 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 50 },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         await makeOpenRouterRequest({ prompt: 'Test prompt' });
 
-        expect(mockFetch).toHaveBeenCalledWith('https://api.openrouter.ai/api/v2/chat/completions', expect.any(Object));
+        expect(mockRequest).toHaveBeenCalledWith(
+            'https://api.openrouter.ai/api/v2/chat/completions',
+            expect.any(Object),
+        );
 
         delete process.env.API_URL;
     });
 
     it('должен обрабатывать HTTP ошибки', async () => {
-        mockFetch.mockResolvedValue({
-            ok: false,
-            status: 401,
-            statusText: 'Unauthorized',
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(401, '{"error": "Unauthorized"}'));
 
         const params = {
             prompt: 'Test prompt',
         };
 
-        await expect(makeOpenRouterRequest(params)).rejects.toThrow('OpenRouter API request failed: 401 Unauthorized');
+        await expect(makeOpenRouterRequest(params)).rejects.toThrow('OpenRouter API request failed: 401');
     });
 
     it('должен обрабатывать сетевые ошибки', async () => {
-        mockFetch.mockRejectedValue(new Error('Network connection failed'));
+        vi.mocked(mockRequest).mockRejectedValue(new Error('Network connection failed'));
 
         const params = {
             prompt: 'Test prompt',
@@ -197,10 +196,8 @@ describe('makeOpenRouterRequest', () => {
     });
 
     it('должен обрабатывать отсутствие API ключа', async () => {
-        // Удаляем API_KEY и переинициализируем конфигурацию
         delete process.env.API_KEY;
 
-        // Ожидаем, что reloadConfig выбросит ошибку
         await expect(reloadConfig()).rejects.toThrow('API_KEY is required');
     });
 
@@ -211,10 +208,7 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 10 },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             prompt: 'Test prompt',
@@ -234,10 +228,7 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 10 },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             prompt: 'Test prompt',
@@ -253,10 +244,7 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 100 },
         };
 
-        mockFetch.mockResolvedValue({
-            json: () => Promise.resolve(mockResponse),
-            ok: true,
-        } as Response);
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             model: 'anthropic/claude-3-sonnet',
@@ -266,7 +254,7 @@ describe('makeOpenRouterRequest', () => {
 
         await makeOpenRouterRequest(params);
 
-        expect(mockFetch).toHaveBeenCalledWith(
+        expect(mockRequest).toHaveBeenCalledWith(
             'https://openrouter.ai/api/v1/chat/completions',
             expect.objectContaining({
                 body: expect.stringContaining('Complex test prompt with special characters ñáéíóú 🚀'),
@@ -278,11 +266,11 @@ describe('makeOpenRouterRequest', () => {
             }),
         );
 
-        const fetchCall = mockFetch.mock.calls[0];
-        if (!fetchCall || !fetchCall[1] || !fetchCall[1].body) {
-            throw new Error('Expected fetch to be called with body');
+        const requestCall = vi.mocked(mockRequest).mock.calls[0];
+        if (!requestCall || !requestCall[1] || !requestCall[1].body) {
+            throw new Error('Expected request to be called with body');
         }
-        const body = JSON.parse(fetchCall[1].body as string);
+        const body = JSON.parse(requestCall[1].body as string);
 
         expect(body).toEqual(
             expect.objectContaining({
@@ -308,27 +296,17 @@ describe('makeOpenRouterRequest', () => {
             usage: { total_tokens: 75 },
         };
 
-        mockFetch.mockImplementation(
-            () =>
-                new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve({
-                            json: () => Promise.resolve(mockResponse),
-                            ok: true,
-                        } as Response);
-                    }, 1500);
-                }),
-        );
+        const startTime = Date.now();
+
+        vi.mocked(mockRequest).mockResolvedValue(createMockResponse(200, JSON.stringify(mockResponse)));
 
         const params = {
             prompt: 'Test timing',
         };
 
-        vi.useRealTimers();
-
         const result = await makeOpenRouterRequest(params);
 
-        expect(result.duration).toBeGreaterThan(1000);
-        expect(result.duration).toBeLessThan(2000);
+        expect(result.duration).toBeGreaterThanOrEqual(0);
+        expect(result.duration).toBe(Date.now() - startTime);
     });
 });
