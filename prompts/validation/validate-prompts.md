@@ -116,7 +116,6 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] ❌ NO multiple XML tags required
 - [ ] ✅ ONE semantic wrapper tag with prompt name (e.g., `<chat_mode_router>`)
 - [ ] ✅ Flat structure with **bold** section headers inside wrapper
-- [ ] ✅ Imperative triggers (e.g., "INSTANT DETECTION", "Execute both")
 - [ ] ✅ Built-in exception handling (e.g., "Otherwise → DEFAULT")
 
 **For command type:**
@@ -141,11 +140,23 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] Compact: ~5-50 lines optimal, max ~150 lines for simple tasks
 - [ ] Command: ~50-200 lines (task instructions only)
 
-**Language Policy Compliance:**
+**Language Policy Compliance (type-dependent):**
+
+**For algorithm/reference/combo types:**
 
 - [ ] If user-facing output: includes "**ВАЖНО: Все ответы должны быть на русском языке.**" in expert_role
 - [ ] prompt_language matches actual prompt content language
 - [ ] response_language correctly specified for expected model output
+
+**For compact type:**
+
+- [ ] ❌ Language policy in expert_role NOT required (optional for compact)
+- [ ] prompt_language matches actual prompt content language (if present in YAML)
+- [ ] response_language correctly specified (if present in YAML)
+
+**For command type:**
+
+- [ ] Russian language for all content (user-facing instructions)
       </validation_checklist>
 
 <completion_criteria>
@@ -161,7 +172,6 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 
 - ✅ Size: 5-50 lines optimal, max ~150 lines (10-30 preferred)
 - ✅ Single semantic XML wrapper with prompt name
-- ✅ Imperative triggers in first line ("INSTANT", "EXECUTE", "CHECK immediately")
 - ✅ Numbered list for logic (not prose)
 - ✅ Explicit action items with examples
 - ✅ Built-in fallback (e.g., "Otherwise → DEFAULT")
@@ -174,25 +184,26 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 - ❌ Missing multiple XML tags (expected - uses one wrapper)
 - ❌ Missing `[ALGORITHM-BEGIN/END]` anchors (not needed)
 - ❌ Missing `use_cases`, `prompt_language`, `response_language` in YAML (optional)
+- ❌ Missing language policy instruction "**ВАЖНО: Все ответы должны быть на русском языке.**" (optional for compact)
 - ❌ No `<completion_criteria>` for each step (embedded in logic)
 - ❌ No `<exception_handling>` section (built into flow)
 
 **Scoring formula for compact:**
 
 - Base: 70 points (if type=compact and minimal YAML present)
-- +10: Imperative trigger present
 - +10: Numbered list structure
-- +5: Single semantic wrapper
+- +10: Single semantic wrapper
 - +5: Size ≤50 lines
+- +5: Explicit action items with examples
 - Final: 70-100 range (80+ = production ready for compact)
 
 **Example compact score 85/100:**
 
 - ✅ 25 lines (optimal)
-- ✅ "INSTANT DETECTION" trigger
 - ✅ `<chat_mode_router>` wrapper
 - ✅ Numbered routing rules
 - ✅ Explicit actions
+- ✅ Built-in fallback handling
 - ❌ No TIER (expected)
 - ❌ No multiple XML tags (expected)
 - **RESULT: Production ready compact prompt**
@@ -437,21 +448,21 @@ If compatibility unclear: test with multiple model assumptions
 </overall_score>
 
 <checks_passed>
-**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Imperative Triggers ✅ Numbered Logic ✅ Size ≤50 lines ✅ No Emoji ✅ Explicit Actions
-**НЕ ТРЕБУЕТСЯ (compact):** ❌ TIER Structure ❌ Multiple XML tags ❌ System Anchors ❌ Extended YAML
+**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Numbered Logic ✅ Size ≤50 lines ✅ No Emoji ✅ Explicit Actions ✅ Built-in Fallback
+**НЕ ТРЕБУЕТСЯ (compact):** ❌ TIER Structure ❌ Multiple XML tags ❌ System Anchors ❌ Extended YAML ❌ Imperative Triggers ❌ Language Policy instruction
 </checks_passed>
 
 **СТАТУС: PRODUCTION READY для COMPACT** ⚡
 
-Промпт соответствует compact best practices: минималистичная структура, императивные команды, оптимальный размер для мгновенного выполнения. Absence of TIER/XML/anchors is EXPECTED and CORRECT for compact type.
+Промпт соответствует compact best practices: минималистичная структура, numbered logic, оптимальный размер для быстрого выполнения. Absence of TIER/XML/anchors is EXPECTED and CORRECT for compact type.
 
 <compact_strengths>
 
 - ✅ Ultra-compact: 30 строк (оптимально)
-- ✅ Императивный триггер: "INSTANT DETECTION"
 - ✅ Одна семантическая обертка
 - ✅ Numbered routing logic
 - ✅ Явные action items
+- ✅ Built-in fallback handling
 </compact_strengths>
 
 </validation_result>
@@ -533,7 +544,9 @@ If compatibility unclear: test with multiple model assumptions
 
 - ✅ Apply compact scoring rules (base 70, max 100)
 - ✅ DO NOT penalize for missing TIER/XML/anchors (expected)
-- ✅ Focus on: size, imperative triggers, numbered logic, explicit actions
+- ✅ DO NOT require imperative triggers (optional, not mandatory)
+- ✅ DO NOT require language policy instruction (optional for compact)
+- ✅ Focus on: size, numbered logic, explicit actions, built-in fallback
 - ✅ Absence of structure = CORRECT for compact
 
 **For REFERENCE type:**
@@ -603,7 +616,7 @@ If compatibility unclear: test with multiple model assumptions
 - XML tags: ONE semantic wrapper tag with prompt name
 - System anchors: ❌ NO anchors (uses XML wrapper)
 - Size limits: 5-50 lines optimal, max ~150 lines
-- Language policy: Include if user-facing output expected
+- Language policy: ❌ NOT required (optional, no penalty if missing)
 
 **COMMAND type:**
 
@@ -633,9 +646,9 @@ If compatibility unclear: test with multiple model assumptions
 **Compact type:**
 
 - **❌ Неправильно:** 200 строк с TIER структурой и 8 XML тегами
-- **✅ Правильно:** 30 строк с одним `<chat_mode_router>` wrapper и императивами (оптимально 5-50)
-- **❌ Неправильно:** "Please check if system_reminder contains..."
-- **✅ Правильно:** "INSTANT DETECTION - Check in order:"
+- **✅ Правильно:** 30 строк с одним `<chat_mode_router>` wrapper и numbered logic (оптимально 5-50)
+- **❌ Неправильно:** Простые инструкции без структуры
+- **✅ Правильно:** Numbered list с явными action items и built-in fallback
 - **Score:** 85/100 (production ready для compact)
 
 **Reference type:**
