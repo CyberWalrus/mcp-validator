@@ -108,7 +108,8 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 
 **2. REACT PATTERNS** (if applicable):
 
-- [ ] **Component return type** (rule: `react.children_react_node`) - Use `React.ReactNode` return type (NOT JSX.Element)
+- [ ] **React types import** (rule: `react.direct_type_imports`) - Import React types directly without `React.` prefix: `import type { FC, ReactNode, ReactElement } from 'react'` (use `ReactNode`, NOT `React.ReactNode`)
+- [ ] **Component return type** (rule: `react.children_react_node`) - Use `ReactNode` return type (NOT `JSX.Element` or `React.ReactNode`)
 - [ ] **Props destructuring** (rule: `react.props_destructuring`) - Destructure props in function parameters, not inside component
 - [ ] **Conditional rendering** (rule: `react.conditional_return_null`) - Use guard clause with `return null`, not ternary in JSX
 - [ ] **Code splitting** (rule: `react.code_splitting_large_only`) - React.lazy() ONLY for components >100 lines OR heavy dependencies. Small UI components imported normally. Always wrap in Suspense
@@ -133,7 +134,7 @@ Let's analyze the code step by step. Check compliance with appropriate standards
 - [ ] **Numeric literals** - Prefer underscores for readability: `60_000`, `1_800_000` (not critical)
 - [ ] **Curly braces** - Always use in if/else statements
 - [ ] **No inline comments** - No `//` comments inside function bodies (JSDoc only). Exception: tool directives (`@ts-ignore`, `@ts-expect-error`, `eslint-disable`)
-- [ ] **Function style** - Prefer `export function fn()` over `export const fn = () => {}`. NOTE if using `const`, not CRITICAL
+- [ ] **Function style** - `export function fn()` preferred over `export const fn = () => {}` for consistency, but `const` is acceptable if project uses it consistently. INFO note, not CRITICAL
 
 **4. IMPORT/EXPORT RULES:**
 
@@ -157,7 +158,7 @@ If types file named types.ts: DO NOT require it to export functions - multiple t
 If schemas file: DO NOT require it to export functions - multiple schema exports are correct
 If helpers.ts with multiple functions <150 lines: WARNING (not CRITICAL), prefer separate files but acceptable if logically related
 If nested private functions in closures/factories: WARNING (not CRITICAL), prefer separate files if possible, allowed for factory pattern
-If export const fn instead of function: NOTE preference for function, not CRITICAL
+If export const fn instead of function: INFO note about preference, but acceptable if project uses const consistently - not CRITICAL
 If legacy code patterns found: document for refactoring
 If classes found: CRITICAL - NO EXCEPTIONS (including React PureComponent)
 If for/while loops found: Check context - CRITICAL unless mathematical algorithm (ИНН/СНИЛС validation, checksums). If math algorithm: INFO note, otherwise CRITICAL
@@ -338,7 +339,8 @@ Use this EXACT format optimized for MCP validator processing:
 - **[CRITICAL]** Using `interface` instead of `type`
 - **[CRITICAL]** Using `any` type (use `unknown` with type guards or concrete types)
 - **[CRITICAL]** Using `Function` type (use concrete function signatures like `(data: unknown) => void`)
-- **[CRITICAL]** Using `JSX.Element` type (use `React.ReactNode` or `React.ReactElement`)
+- **[CRITICAL]** Using `JSX.Element` type (use `ReactNode` or `ReactElement` with direct import)
+- **[CRITICAL]** Using `React.ReactNode`, `React.ReactElement`, `React.FC` instead of direct imports (import `type { ReactNode, ReactElement, FC } from 'react'`)
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
 - **[CRITICAL]** Missing JSDoc documentation on functions (including private functions - ALL functions require JSDoc, NOT applicable to barrel files)
 - **[CRITICAL]** Barrel file importing from external directories (barrel files must only import from current directory and subdirectories)
@@ -409,7 +411,8 @@ Use this EXACT format optimized for MCP validator processing:
 21. **[BLOCKS MERGE]** Move component types to local types.ts (NOT global types file)
 22. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
 23. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
-24. **[HIGH]** Use `React.ReactNode` return type for components
+24. **[BLOCKS MERGE]** Import React types directly: `import type { FC, ReactNode, ReactElement } from 'react'` (NOT `React.ReactNode`)
+25. **[HIGH]** Use `ReactNode` return type for components (with direct import)
 25. **[HIGH]** Destructure props in function parameters, not inside component
 26. **[HIGH]** Use guard clauses with `return null` for conditional rendering
 27. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
@@ -422,8 +425,8 @@ Use this EXACT format optimized for MCP validator processing:
 34. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
 35. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
 36. **[LOW]** Improve variable naming descriptiveness
-37. **[NOTE]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference, not blocking)
-38. **[NOTE]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
+37. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
+38. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
 39. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
 </recommendations>
 
@@ -675,13 +678,13 @@ export function validateInput(input: unknown): boolean {
 **Good Code Example (React Component with Proper Patterns):**
 
 ```typescript
-import type { FC } from 'react';
+import type { ReactNode } from 'react';
 import { useRef, useEffect } from 'react';
 
 import type { LoginFormProps } from './types';
 
 /** Компонент формы входа с фокусом на email поле */
-export function LoginForm({ email, onSubmit }: LoginFormProps): React.ReactNode {
+export function LoginForm({ email, onSubmit }: LoginFormProps): ReactNode {
     const emailInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -705,7 +708,7 @@ import { useState } from 'react';
 // WRONG: Component types in global types file
 export type LoginFormProps = { email?: string; onSubmit: Function };
 
-// WRONG: Using FC, JSX.Element, Function type
+// WRONG: Using React.FC prefix, JSX.Element, Function type
 export const LoginForm: FC<LoginFormProps> = (props): JSX.Element => {
     // WRONG: Props not destructured in parameters
     const { email, onSubmit } = props;
