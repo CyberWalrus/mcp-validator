@@ -188,16 +188,16 @@ Let's analyze deeper. Check compliance with architecture-guide.md standards usin
 Select checklist by `architecture_type`:
 
 - single_module:
-  - [ ] Facade: `src/index.ts` is present
-  - [ ] One file = one function; types in `src/types.ts`
-  - [ ] No FSD layers; tests in `src/__tests__/`
-  - [ ] Named exports only; no default exports
+    - [ ] Facade: `src/index.ts` is present
+    - [ ] One file = one function; types in `src/types.ts`
+    - [ ] No FSD layers; tests in `src/__tests__/`
+    - [ ] Named exports only; no default exports
 
 - layered_library:
-  - [ ] `src/index.ts` as package facade
-  - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional)
-  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-  - [ ] Tests colocated per module in `__tests__/`
+    - [ ] `src/index.ts` as package facade
+    - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional)
+    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+    - [ ] Tests colocated per module in `__tests__/`
 
 #### Special Case: Model Layer Container Folders
 
@@ -221,37 +221,37 @@ Example invalid structures:
 - `src/model/schemas/index.ts` then `schemas/main.ts` - double facade
 
 - fsd_standard:
-  - [ ] Layers: app → pages → [widgets]? → [features]? → [entities]? → shared → [core]? (опциональные слои: widgets, features, entities, core)
-  - [ ] Обязательные слои: app, pages, shared. Минимальная конфигурация достаточна для простых проектов
-  - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
-  - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
-  - [ ] Segments (ui/, model/, service/, lib/) опциональны, добавляются по необходимости
-  - [ ] No cross-imports within same layer; only downward dependencies
-  - [ ] Tests placed near slices in `__tests__/`
-  - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
-  - [ ] app может импортировать из любых нижележащих слоев (pages, widgets, features, entities, shared, core если присутствует)
+    - [ ] Layers: app → pages → [widgets]? → [features]? → [entities]? → shared → [core]? (опциональные слои: widgets, features, entities, core)
+    - [ ] Обязательные слои: app, pages, shared. Минимальная конфигурация достаточна для простых проектов
+    - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
+    - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
+    - [ ] Segments (ui/, model/, service/, lib/) опциональны, добавляются по необходимости
+    - [ ] No cross-imports within same layer; only downward dependencies
+    - [ ] Tests placed near slices in `__tests__/`
+    - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
+    - [ ] app может импортировать из любых нижележащих слоев (pages, widgets, features, entities, shared, core если присутствует)
 
 - fsd_domain:
-  - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
-  - [ ] Обязательные слои: app, pages, shared. Опциональные: widgets, features, entities, core
-  - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
-  - [ ] Domain grouping применяется только если существуют соответствующие слои (widgets, features, entities)
-  - [ ] Отсутствие опциональных слоев не является нарушением
-  - [ ] Public API via facades only; no cross-imports inside domain layer
-  - [ ] Inter-domain imports follow vertical hierarchy
-  - [ ] Tests near slices; named exports only
-  - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
+    - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
+    - [ ] Обязательные слои: app, pages, shared. Опциональные: widgets, features, entities, core
+    - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
+    - [ ] Domain grouping применяется только если существуют соответствующие слои (widgets, features, entities)
+    - [ ] Отсутствие опциональных слоев не является нарушением
+    - [ ] Public API via facades only; no cross-imports inside domain layer
+    - [ ] Inter-domain imports follow vertical hierarchy
+    - [ ] Tests near slices; named exports only
+    - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
 
 - server_fsd:
-  - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
-  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-  - [ ] Encapsulation respected; tests in `__tests__/`
+    - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
+    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+    - [ ] Encapsulation respected; tests in `__tests__/`
 
 - multi_app_monolith:
-  - [ ] Multiple `<application>` containers; each has its own `entrypoint`
-  - [ ] No direct imports between applications; only via `applications/common`
-  - [ ] Common app uses layered_library rules; each app may use internal architecture
-  - [ ] Tests per application
+    - [ ] Multiple `<application>` containers; each has its own `entrypoint`
+    - [ ] No direct imports between applications; only via `applications/common`
+    - [ ] Common app uses layered_library rules; each app may use internal architecture
+    - [ ] Tests per application
 
 #### Additional Validations (all types)
 
