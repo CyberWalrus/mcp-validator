@@ -1,9 +1,6 @@
 ---
 id: validate-prompts-v4
 type: combo
-use_cases: ['prompt_validation', 'quality_assurance', 'production_readiness', 'iterative_improvement']
-prompt_language: mixed
-response_language: ru
 alwaysApply: false
 ---
 
@@ -24,7 +21,15 @@ Critical thinking: challenge assumptions, seek alternatives, honestly assess ris
 ## TIER 2: Validation Algorithm
 
 <algorithm_motivation>
-Обеспечить надёжную валидацию промптов для продакшн-окружения через структурированный анализ соответствия стандартам prompt-engineering.mdc v2, выявление критических проблем и предоставление конкретных рекомендаций по улучшению.
+Обеспечить надёжную валидацию промптов для продакшн-окружения через структурированный анализ соответствия стандартам prompt-engineering.mdc v2.
+
+**PRIMARY FOCUS (deep analysis mandatory):**
+
+1. **Logical contradictions and gaps** - CRITICAL priority, requires cross-section comparison and scenario testing
+2. **Writing conciseness** - CRITICAL priority, analyze every phrase for meaning density, provide specific improvements
+3. Structural compliance and quality gates
+
+Each validation must provide concrete evidence (quotes, line numbers, before/after examples) with actionable recommendations.
 </algorithm_motivation>
 
 <algorithm_steps>
@@ -44,9 +49,6 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 
 - [ ] Field `id` - unique identifier with version suffix
 - [ ] Field `type` - algorithm/reference/combo/compact/command
-- [ ] Field `use_cases` - specific scenarios list (concrete, relevant)
-- [ ] Field `prompt_language` - en/ru/mixed (language of prompt content)
-- [ ] Field `response_language` - en/ru/mixed (expected model response language)
 - [ ] Field `alwaysApply` - boolean value
 
 **For compact type (minimal required):**
@@ -54,7 +56,6 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 - [ ] Field `id` - unique identifier
 - [ ] Field `type` - compact
 - [ ] Field `alwaysApply` - boolean value
-- [ ] ❌ Fields `use_cases`, `prompt_language`, `response_language` are OPTIONAL (not required for compact)
 
 **For command type (NO YAML required):**
 
@@ -142,25 +143,34 @@ Let's think step by step. Analyze compliance with modern prompt engineering stan
 
 **Language Policy Compliance (type-dependent):**
 
+**CRITICAL: Prompt content MUST be in English (NO EXCEPTIONS) - validate this FIRST:**
+
+- [ ] All prompt logic, algorithms, instructions, steps are in English
+- [ ] XML tags, YAML metadata, headers, section titles are in English
+- [ ] cognitive_triggers, completion_criteria, exception_handling are in English
+- [ ] Explanations and descriptions are in English
+- [ ] **Allowed Russian ONLY:**
+  - User output instruction: "**ВАЖНО: Все ответы должны быть на русском языке.**" (ONE sentence in expert_role)
+  - Examples showing expected Russian user-facing responses (in <examples> sections)
+- [ ] **FORBIDDEN in Russian:** algorithms, instructions, steps, XML tags, YAML, headers, cognitive_triggers, completion_criteria, exception_handling, any prompt logic
+
 **For algorithm/reference/combo types:**
 
-- [ ] If user-facing output: includes "**ВАЖНО: Все ответы должны быть на русском языке.**" in expert_role
-- [ ] prompt_language matches actual prompt content language
-- [ ] response_language correctly specified for expected model output
+- [ ] If user-facing output: includes "**ВАЖНО: Все ответы должны быть на русском языке.**" in expert_role (ONLY this Russian sentence allowed)
+- [ ] Examples with Russian output samples are clearly marked as examples (not instructions)
 
 **For compact type:**
 
-- [ ] ❌ Language policy in expert_role NOT required (optional for compact)
-- [ ] prompt_language matches actual prompt content language (if present in YAML)
-- [ ] response_language correctly specified (if present in YAML)
+- [ ] All content in English (no Russian language instruction required)
+- [ ] Examples with Russian output (if any) marked as examples only
 
 **For command type:**
 
-- [ ] Russian language for all content (user-facing instructions)
+- [ ] Russian language for all content (command type is exception - user-facing instructions in Russian)
       </validation_checklist>
 
 <completion_criteria>
-Each checklist item verified according to prompt type, violations documented with type-specific context
+Each checklist item verified according to prompt type, violations documented with type-specific context, structural compliance confirmed
 </completion_criteria>
 
 <compact_scoring_rules>
@@ -183,7 +193,6 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 - ❌ Missing TIER structure (expected for compact)
 - ❌ Missing multiple XML tags (expected - uses one wrapper)
 - ❌ Missing `[ALGORITHM-BEGIN/END]` anchors (not needed)
-- ❌ Missing `use_cases`, `prompt_language`, `response_language` in YAML (optional)
 - ❌ Missing language policy instruction "**ВАЖНО: Все ответы должны быть на русском языке.**" (optional for compact)
 - ❌ No `<completion_criteria>` for each step (embedded in logic)
 - ❌ No `<exception_handling>` section (built into flow)
@@ -273,9 +282,9 @@ Reference prompts are documentation, not execution algorithms. Apply FLEXIBLE sc
 **FLEXIBLE for reference (allow variations):**
 
 - ✅ TIER 2 can be named descriptively (not strict "Algorithm/Process")
-    - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
+  - Examples: "Criteria & Anatomy", "Core Concepts", "Guidelines"
 - ✅ Custom XML tags for documentation sections
-    - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
+  - Examples: `<use_cases>`, `<anti_patterns>`, `<best_practices>`
 - ✅ Multiple `<completion_criteria>` blocks for key sections (not every step)
 - ✅ Size 100-1000 lines (documentation needs space)
 
@@ -310,41 +319,102 @@ Let's analyze deeper. Challenge the prompt author's assumptions.
 </cognitive_triggers>
 
 <critical_analysis>
-**CRITICAL THINKING (mandatory checks):**
+**CRITICAL THINKING (mandatory checks - PRIMARY FOCUS on logical integrity and conciseness):**
 
-1. **Function alignment:**
+1. **Language policy compliance (CRITICAL - validate FIRST):**
+    - All prompt logic MUST be in English (NO EXCEPTIONS)
+    - Check: algorithms, instructions, steps, XML tags, YAML, headers, cognitive_triggers, completion_criteria, exception_handling
+    - **Allowed Russian ONLY:** user output instruction ("**ВАЖНО: Все ответы должны быть на русском языке.**") and examples showing Russian output
+    - **Violations:** If any logic/instructions/steps are in Russian → CRITICAL ERROR
+    - Exception: command type (all content in Russian is expected)
+
+2. **Logical contradictions, gaps, and rule clarity (PRIMARY FOCUS - DEEP ANALYSIS REQUIRED):**
+    - **Systematic cross-section comparison:** Read entire prompt, extract all rules and instructions, compare every rule with every other rule
+    - **Direct contradictions:** Same rule stated differently in multiple places with conflicting meanings
+      - Method: For each rule, search prompt for all occurrences, compare formulations
+      - Document: Quote conflicting versions with line numbers, explain exact conflict
+    - **Indirect contradictions:** Rules that conflict when applied together
+      - Method: Test rule combinations in scenarios, identify conflicting outcomes
+      - Document: Describe scenario, quote conflicting rules, explain why they conflict
+    - **Logical gaps (CRITICAL):** Missing steps, undefined transitions, incomplete logic chains
+      - Method: Trace execution flow step-by-step, identify where logic breaks or jumps
+      - Document: Quote where gap occurs, explain what's missing, suggest completion
+    - **Rule clarity:** Vague formulations that allow multiple interpretations
+      - Method: For each rule, test: "Can this be interpreted differently?" If yes → vague
+      - Document: Quote vague rule, list possible interpretations, provide precise formulation
+    - **Unclear priorities:** When multiple rules conflict, which takes precedence?
+      - Method: When conflict found, check if priority is defined. If not → unclear
+      - Document: Quote conflicting rules, check for priority declaration, suggest explicit priority
+    - **Missing context:** Rules that make sense only with hidden assumptions
+      - Method: For each rule, ask: "What must be true for this to work?" Check if stated
+      - Document: Quote rule, list hidden assumptions, suggest explicit context
+
+3. **Writing style and conciseness (PRIMARY FOCUS - ZERO TOLERANCE - ANALYZE EVERY PHRASE):**
+    - **Systematic phrase-by-phrase analysis:** Read entire prompt, identify every phrase that can be improved
+    - **Meaning density check:** Does each sentence convey maximum essential information?
+      - For each sentence: Count essential concepts vs total words. Ratio <0.3 → needs improvement
+      - Document: Quote verbose sentence, count concepts/words, provide dense version
+    - **Redundancy detection:** Repeated concepts, filler words, unnecessary modifiers
+      - For each phrase: Identify repeated ideas, weak fillers ("try to", "potentially", "should attempt")
+      - Document: Quote phrase, list redundancies, provide concise version
+    - **Verb precision:** Single precise verb vs multiple weak modifiers
+      - For each action: Check if multiple weak verbs used instead of one strong verb
+      - Document: Quote weak formulation, identify weak verbs, provide single precise verb
+    - **Contradiction-free:** No vague, verbose, or conflicting statements
+    - **Mandatory improvement recommendations:** For EVERY verbose/vague phrase found:
+      - Current formulation (quote exact text with line number)
+      - Problem identified (specific: redundancy type/weak verb type/vague meaning type)
+      - Improved concise version with word count reduction
+      - Explanation: Why new version is better (concept count, clarity, precision)
+
+4. **Function alignment:**
     - Does prompt perform its declared function?
     - Are instructions sufficient for the task?
     - Any gaps between purpose and content?
 
-2. **Ambiguity detection (highest priority):**
+5. **Ambiguity detection (high priority):**
     - Ambiguous phrasing
-    - Contradictions between sections
     - Undefined terms
     - Incomplete conditional statements
 
-3. **Logical consistency:**
-    - Do steps follow logically?
-    - Are there missing connections?
-    - Are all exceptions handled?
+6. **Logical consistency and completeness:**
+    - Do steps follow logically without gaps?
+    - Are there missing connections between steps?
+    - Are all exceptions and edge cases handled?
+    - **Gap detection:** For each step, verify: Can next step execute with only information from previous? If no → gap
 
-4. **Assumption challenges:**
+7. **Assumption challenges:**
     - What assumptions does author make?
     - Are these assumptions always valid?
     - Any alternative interpretations?
 
-5. **Risk assessment:**
+8. **Risk assessment:**
     - What problems could this prompt create?
     - Where are potential production failures?
     - Are edge cases considered?
       </critical_analysis>
 
 <completion_criteria>
-Full critical analysis completed, all assumptions challenged, risks assessed, alternatives considered
+**MANDATORY COMPLETION (deep analysis required):**
+
+1. **Logical contradictions:** ALL contradictions found and documented with:
+   - Direct contradictions: Quote both versions with line numbers, explain exact conflict
+   - Indirect contradictions: Describe scenario, quote conflicting rules, explain why conflict occurs
+   - Logical gaps: Quote where gap occurs, describe what's missing, suggest completion
+   - Minimum: If prompt has N rules, check at least N×(N-1)/2 pairwise combinations
+
+2. **Writing conciseness:** EVERY verbose/vague phrase analyzed with:
+   - Quote with line number
+   - Specific problem (redundancy type/weak verb/vague meaning)
+   - Improved version with word count
+   - Explanation of improvement
+
+3. **All other checks:** Function alignment, ambiguity, assumptions, risks completed
 </completion_criteria>
 
 <exception_handling>
-If analysis reveals contradictions: document with specific examples
+If analysis reveals contradictions: document with specific examples (quote conflicting rules, explain conflict, suggest resolution)
+If writing style issues found: provide before/after examples for each verbose phrase
 If risks unclear: state limitations rather than speculation
 </exception_handling>
 
@@ -360,7 +430,7 @@ If risks unclear: state limitations rather than speculation
   </technical_validation>
 
 <completion_criteria>
-All technical aspects verified, vulnerabilities identified, quality assessed
+All technical aspects verified, vulnerabilities identified, quality assessed, production readiness confirmed or blocked with specific reasons
 </completion_criteria>
 
 <exception_handling>
@@ -395,9 +465,25 @@ If compatibility unclear: test with multiple model assumptions
 
 <!-- Только критические проблемы, блокирующие production -->
 
-- **[КРИТИЧНО]** Отсутствует поле `response_language` в YAML frontmatter
-- **[КРИТИЧНО]** Несоответствие между `prompt_language: ru` и английским контентом
 - **[КРИТИЧНО]** `<completion_criteria>` в ЗАВЕРШАЮЩИХ ШАГАХ не соответствует формату
+- **[КРИТИЧНО]** Логическое противоречие: правило X (строка Y) конфликтует с правилом Z (строка W)
+  - Конфликт: [описание конкретного противоречия]
+  - Решение: [предложение по устранению]
+- **[КРИТИЧНО]** Непонятное правило: "[цитата]" допускает множественные интерпретации
+  - Проблема: [что именно непонятно]
+  - Исправление: "[предложенная четкая формулировка]"
+- **[КРИТИЧНО]** Нарушение языковой политики: логика/инструкции/шаги на русском языке
+  - Нарушение: "[цитата русскоязычного текста]" в [название секции, строка X]
+  - Правило: Вся логика промпта должна быть на английском (NO EXCEPTIONS)
+  - Исправление: Перевести на английский, оставить русский только для инструкции "ВАЖНО: Все ответы..." и примеров вывода
+- **[КРИТИЧНО]** Логический пробел: отсутствует связь между [шаг X] и [шаг Y]
+  - Проблема: [Шаг X] завершается без информации, необходимой для [шага Y]
+  - Цитата пробела: "[цитата где заканчивается шаг X]" → "[цитата где начинается шаг Y]"
+  - Исправление: Добавить переходную логику/проверку/данные между шагами
+- **[КРИТИЧНО]** Логический пробел: неопределен переход при условии [X]
+  - Проблема: Правило описывает ситуацию A, но не определяет что делать в ситуации B
+  - Цитата: "[цитата правила]" - не покрывает случай [X]
+  - Исправление: Добавить обработку случая [X] с явной логикой
 
 </critical_fixes>
 
@@ -408,6 +494,20 @@ If compatibility unclear: test with multiple model assumptions
 - **[УЛУЧШИТЬ]** Включить `<cognitive_triggers>` в каждый шаг цикла разработки
 - **[УЛУЧШИТЬ]** Добавить `<output_format>` в TIER 3 для унификации ответов ИИ
 - **[УЛУЧШИТЬ]** Уточнить примеры вызова MCP — сейчас они не соответствуют реальному API
+- **[УЛУЧШИТЬ - ЛАКОНИЧНОСТЬ]** Формулировка: "[цитата текущей фразы]"
+  - Проблема: [избыточность/слабый глагол/нечеткость]
+  - Было: "[цитата]"
+  - Стало: "[улучшенная лаконичная версия]"
+  - Объяснение: [почему новая версия лучше передает смысл]
+- **[УЛУЧШИТЬ - ПРОТИВОРЕЧИЕ]** Потенциальный конфликт между правилами (не критичный, но стоит уточнить)
+  - Правило A: "[цитата]" (строка X)
+  - Правило B: "[цитата]" (строка Y)
+  - Контекст: [когда возникает конфликт]
+  - Рекомендация: [как устранить неоднозначность]
+- **[УЛУЧШИТЬ - ЛОГИЧЕСКИЙ ПРОБЕЛ]** Неполная логика: отсутствует обработка перехода между [X] и [Y]
+  - Проблема: [Шаг/правило X] не обеспечивает данные для [шага/правила Y]
+  - Цитата: "[цитата X]" → "[цитата Y]" - отсутствует связь
+  - Рекомендация: Добавить промежуточную проверку/логику/данные
 
 </improvements>
 
@@ -534,6 +634,9 @@ If compatibility unclear: test with multiple model assumptions
 - ✅ Check EVERY item in validation checklist (type-dependent)
 - ✅ Apply critical thinking - challenge author assumptions
 - ✅ Find ALL ambiguities (highest priority)
+- ✅ **LANGUAGE POLICY CHECK (CRITICAL - validate FIRST):** Verify ALL prompt logic is in English (algorithms, instructions, steps, cognitive_triggers, etc.), Russian allowed ONLY for user output instruction and examples
+- ✅ **LOGICAL CONTRADICTIONS AND GAPS CHECK (PRIMARY FOCUS - DEEP ANALYSIS):** Systematic cross-section comparison of all rules, test rule combinations in scenarios, identify direct/indirect conflicts, detect logical gaps (missing steps, undefined transitions), check rule clarity, document unclear priorities with quotes and line numbers
+- ✅ **WRITING CONCISENESS ANALYSIS (PRIMARY FOCUS - ZERO TOLERANCE):** Analyze EVERY phrase systematically, check meaning density (concepts/words ratio), detect redundancy and weak verbs, provide mandatory before/after improvement recommendations for each verbose phrase with word count reduction
 - ✅ Honestly assess risks and limitations
 - ✅ Use structured result format WITH type-specific scoring
 - ✅ **ИГНОРИРОВАТЬ поле `globs`** - не валидировать его наличие или отсутствие
@@ -593,7 +696,7 @@ If compatibility unclear: test with multiple model assumptions
 
 **ALGORITHM/COMBO types:**
 
-- YAML frontmatter (all required): id, type, use_cases, prompt_language, response_language, alwaysApply
+- YAML frontmatter (all required): id, type, alwaysApply
 - TIER structure: 1-2 mandatory, 3-5 optional
 - XML tags (all required): expert_role, algorithm_steps, completion_criteria, exception_handling, cognitive_triggers, algorithm_motivation, output_format
 - System anchors: [ALGORITHM-BEGIN/END] mandatory
@@ -602,7 +705,7 @@ If compatibility unclear: test with multiple model assumptions
 
 **REFERENCE type:**
 
-- YAML frontmatter (all required): id, type, use_cases, prompt_language, response_language, alwaysApply
+- YAML frontmatter (all required): id, type, alwaysApply
 - TIER structure: TIER 1 mandatory, TIER 2+ flexible naming allowed
 - XML tags: expert_role mandatory, custom tags encouraged for documentation
 - System anchors: [REFERENCE-BEGIN/END] mandatory
@@ -611,7 +714,7 @@ If compatibility unclear: test with multiple model assumptions
 
 **COMPACT type:**
 
-- YAML frontmatter (minimal): id, type, alwaysApply (use_cases/languages optional)
+- YAML frontmatter (minimal): id, type, alwaysApply
 - TIER structure: ❌ NO TIER structure (flat with bold headers)
 - XML tags: ONE semantic wrapper tag with prompt name
 - System anchors: ❌ NO anchors (uses XML wrapper)
@@ -668,6 +771,30 @@ If compatibility unclear: test with multiple model assumptions
 - **❌ Неправильно:** Абстрактные инструкции без примеров
 - **✅ Правильно:** Конкретные bash/git команды с пояснениями
 - **Score:** 80-90/100 для четких command инструкций с примерами
+
+**Logical contradictions detection:**
+
+- **❌ Противоречие:** "Все правила обязательны (строка 10)" vs "Некоторые правила опциональны (строка 45)"
+  - Конфликт: Одни правила обязательны, другие опциональны без четкого критерия разделения
+  - Решение: Определить категории (CRITICAL/MANDATORY vs OPTIONAL) или уточнить условия применения
+- **❌ Непонятное правило:** "Применяй правила когда это уместно"
+  - Проблема: Неопределен критерий "уместности", допускает произвольную интерпретацию
+  - Исправление: "Применяй правила X при условии Y, правила Z при условие W"
+
+**Writing style and conciseness:**
+
+- **❌ Вербозная фраза:** "Вы должны попытаться сделать максимальное усилие для того чтобы потенциально завершить задачу"
+  - Проблема: Избыточность (сделать усилие + завершить), слабые глаголы (попытаться, потенциально)
+  - **✅ Улучшенная:** "Заверши задачу" или "Выполни требование"
+  - Объяснение: Один точный глагол заменяет 8 слов без потери смысла
+- **❌ Избыточность:** "Все правила должны быть соблюдены и выполнены в обязательном порядке"
+  - Проблема: Повторение одного понятия (соблюдены=выполнены, должны=обязательном порядке)
+  - **✅ Улучшенная:** "Соблюдай все правила"
+  - Объяснение: Сокращение с 10 до 4 слов, смысл идентичен
+- **❌ Слабые модификаторы:** "Можно попробовать использовать возможно более эффективный подход"
+  - Проблема: Множество неопределенных модификаторов (можно, попробовать, возможно, более)
+  - **✅ Улучшенная:** "Используй эффективный подход" или "Примени оптимальный метод"
+  - Объяснение: Четкое указание без колебаний, максимум информации в минимуме слов
   </validation_examples>
 
 [REFERENCE-END]
