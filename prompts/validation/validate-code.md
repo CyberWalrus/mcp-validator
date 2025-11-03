@@ -99,7 +99,7 @@ Analyze code compliance with standards based on file type.
 - Guard clauses (no deep nesting)
 - Array methods (EXCEPTION: math algorithms only)
 - Explicit comparisons: `value === null` (NOT `!value`)
-- No inline comments (EXCEPTION: @ts-ignore/@ts-expect-error/eslint-disable)
+- No inline comments (EXCEPTION: @ts-ignore/@ts-expect-error/eslint-disable) - **CRITICAL:** Scan ALL function bodies for `//` or `/* */` comments, mark ALL explanatory comments as CRITICAL violations
 
 **Imports/Exports:**
 
@@ -296,6 +296,8 @@ function processNumber(value: number): number {
 // ✅ Trust TypeScript
 return value * 2;
 ```
+
+**COMMENTS DETECTION (CRITICAL):** Scan ALL function bodies (between `{` and `}`) for `//` or `/* */` comments. Mark ALL explanatory comments (NOT tool directives like `@ts-ignore`/`@ts-expect-error`/`eslint-disable`) as CRITICAL violations requiring removal.
 
 **4. FLAT STRUCTURE OPPORTUNITIES (HIGH):**
 
@@ -558,40 +560,38 @@ Structured assessment format for MCP processing:
 22. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
 23. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
 24. **[BLOCKS MERGE]** Import React types directly: `import type { FC, ReactNode, ReactElement } from 'react'` (NOT `React.ReactNode`)
+25. **[BLOCKS MERGE]** Remove ALL explanatory comments from function/component bodies (scan code between `{` and `}` for `//`/`/* */`, keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
 
 **DEEP ANALYSIS FINDINGS (CRITICAL/HIGH PRIORITY):**
-
-25. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
-26. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
-27. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
-28. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
-29. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
-30. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
-31. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
-32. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
-33. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
+26. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
+27. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
+28. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+29. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
+30. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
+31. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
+32. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
+33. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
+34. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
+35. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
 
 **CODE QUALITY (HIGH PRIORITY):**
-
-34. **[HIGH]** Use `ReactNode` return type for components (with direct import)
-35. **[HIGH]** Destructure props in function parameters, not inside component
-36. **[HIGH]** Use guard clauses with `return null` for conditional rendering
-37. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
-38. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
-39. **[HIGH]** Add `as const` to constant arrays and objects
-40. **[HIGH]** Remove trivial comments from function bodies (complex logic comments allowed as exception)
-41. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
-42. **[HIGH]** Make helper functions private (remove `export` keyword)
+36. **[HIGH]** Use `ReactNode` return type for components (with direct import)
+37. **[HIGH]** Destructure props in function parameters, not inside component
+38. **[HIGH]** Use guard clauses with `return null` for conditional rendering
+39. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
+40. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
+41. **[HIGH]** Add `as const` to constant arrays and objects
+42. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
+43. **[HIGH]** Make helper functions private (remove `export` keyword)
 
 **MAINTAINABILITY (MEDIUM/LOW PRIORITY):**
-
-43. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
-44. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
-45. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-46. **[LOW]** Improve variable naming descriptiveness
-47. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
-48. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
-49. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+44. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
+45. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+46. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+47. **[LOW]** Improve variable naming descriptiveness
+48. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
+49. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
+50. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
 </recommendations>
 
 </validation_result>
