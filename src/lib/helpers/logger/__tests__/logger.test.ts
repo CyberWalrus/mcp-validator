@@ -43,8 +43,14 @@ describe('Logger', () => {
 
     /** Проверяет логирование WARN сообщений по умолчанию */
     it('должен логировать сообщения WARN по умолчанию', async () => {
-        const { warn } = await loadLogger();
-        warn('Test warn message');
+        vi.doMock('../../../../model/config', () => ({
+            APP_CONFIG: {
+                logging: { level: 'INFO' },
+            },
+        }));
+
+        const { log } = await import('../helpers/log');
+        log('WARN', 'Test warn message');
 
         expect(consoleLogSpy).toHaveBeenCalledWith(
             expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[WARN\] Test warn message/),
@@ -61,7 +67,7 @@ describe('Logger', () => {
 
     /** Проверяет что DEBUG сообщения не логируются по умолчанию */
     it('не должен логировать DEBUG сообщения по умолчанию', async () => {
-        const { log } = await loadLogger();
+        const { log } = await import('../helpers/log');
         log('DEBUG', 'Test debug message');
 
         expect(consoleLogSpy).not.toHaveBeenCalled();
@@ -71,7 +77,7 @@ describe('Logger', () => {
     it('должен логировать DEBUG сообщения когда LOG_LEVEL=DEBUG', async () => {
         process.env.LOG_LEVEL = 'DEBUG';
 
-        const { log } = await loadLogger();
+        const { log } = await import('../helpers/log');
         log('DEBUG', 'Test debug message');
 
         expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringMatching(/\[.*\] \[DEBUG\] Test debug message/));
@@ -93,7 +99,7 @@ describe('Logger', () => {
     it('не должен логировать сообщения ниже установленного уровня', async () => {
         process.env.LOG_LEVEL = 'WARN';
 
-        const { log } = await loadLogger();
+        const { log } = await import('../helpers/log');
         log('INFO', 'This should not be logged');
         log('DEBUG', 'This should not be logged');
         log('WARN', 'This should be logged');
@@ -108,7 +114,7 @@ describe('Logger', () => {
     it('должен использовать INFO уровень для неизвестного LOG_LEVEL', async () => {
         process.env.LOG_LEVEL = 'UNKNOWN_LEVEL' as any;
 
-        const { log } = await loadLogger();
+        const { log } = await import('../helpers/log');
         log('DEBUG', 'This should not be logged');
         log('INFO', 'This should be logged');
 

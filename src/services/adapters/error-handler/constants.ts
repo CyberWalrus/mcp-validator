@@ -2,8 +2,6 @@ import { getPackageResourceResolver } from '../../../lib/helpers/resource-resolv
 
 const resourceResolver = getPackageResourceResolver();
 
-/** Путь к директории с шаблонами ошибок */
-export const ERROR_TEMPLATES_PATH = resourceResolver.resolveErrorTemplatesDir();
 /** Маппинг кодов JSON-RPC ошибок к типам шаблонов */
 export const ERROR_CODE_TO_TYPE = {
     [-32700]: 'system',
@@ -20,21 +18,6 @@ export const ERROR_TYPE_TO_TEMPLATE = {
     file: 'file-error.md',
     system: 'system-error.md',
     validation: 'validation-error.md',
-} as const;
-/** Обязательные поля для каждого типа шаблона */
-export const TEMPLATE_REQUIRED_FIELDS = {
-    file: ['operation', 'file_path', 'error_message', 'file_size_limit'],
-    system: [
-        'error_type',
-        'error_message',
-        'error_code',
-        'node_version',
-        'platform',
-        'memory_usage',
-        'uptime',
-        'stack_trace',
-    ],
-    validation: ['error_type', 'error_message', 'error_details'],
 } as const;
 /** Значения по умолчанию для обязательных полей */
 export const DEFAULT_FIELD_VALUES = {

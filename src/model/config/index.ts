@@ -1,18 +1,3 @@
-/** Константы конфигурации */
-export { DEFAULT_LOGGING_CONFIG, DEFAULT_OPENROUTER_CONFIG, PACKAGE_RESOURCE_PATHS } from './constants';
-
-/** Схемы валидации конфигурации */
-export {
-    apiConfigSchema,
-    appConfigSchema,
-    consistencyThresholdsSchema,
-    logLevelSchema,
-    modelConfigSchema,
-    runtimeConfigSchema,
-    timeoutsConfigSchema,
-    validationLimitsSchema,
-} from './schemas';
-
 /** Типы конфигурации */
 export type {
     ApiConfig,
