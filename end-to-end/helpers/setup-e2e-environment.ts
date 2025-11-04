@@ -1,8 +1,6 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 
-import { forceKillProcess } from '../../src/lib/helpers/force-kill-process';
-import { killProcess } from '../../src/lib/helpers/kill-process';
 import { TEST_TIMEOUTS } from '../constants';
 import { createMcpClientSimulator } from '../mocks/mcp-client-simulator';
 import { MockOpenRouterAPI } from '../mocks/openrouter-api-mocks';
@@ -41,13 +39,21 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
 
     const cleanup = async (): Promise<void> => {
         if (mcpProcess && mcpProcess.pid && !mcpProcess.killed) {
-            killProcess(mcpProcess);
+            try {
+                mcpProcess.kill('SIGTERM');
+            } catch {
+                // eslint-disable-next-line no-empty
+            }
 
             await new Promise((resolve) => {
                 mcpProcess.on('exit', resolve);
                 setTimeout(() => {
-                    if (!mcpProcess.killed) {
-                        forceKillProcess(mcpProcess);
+                    if (!mcpProcess.killed && mcpProcess.pid) {
+                        try {
+                            mcpProcess.kill('SIGKILL');
+                        } catch {
+                            // eslint-disable-next-line no-empty
+                        }
                     }
                     resolve(undefined);
                 }, TEST_TIMEOUTS.CLEANUP);
