@@ -657,6 +657,16 @@ Let's verify E2E tests follow best practices for stability, maintainability, and
 - [ ] Tests cover error scenarios (network errors, validation errors)
 - [ ] Error messages verified from user perspective
 - [ ] Recovery flows tested (retry, error dismissal)
+
+**Cross-Browser Compatibility:**
+
+- [ ] Tests run on multiple browsers (Chrome, Firefox, Safari/WebKit) via Playwright
+- [ ] Uses `test.use({ browserName: 'chromium' })` or project-based browser configuration
+- [ ] No browser-specific code (userAgent checks, browser detection)
+- [ ] Uses standard Web APIs (no Chrome/Firefox-specific APIs)
+- [ ] No CSS selectors that differ between browsers
+- [ ] Uses `page.locator()` with standard selectors (data-testid, role, text)
+- [ ] Tests work identically across Chrome, Firefox, Safari
 </e2e_tests_only>
 
 <completion_criteria>
@@ -667,6 +677,7 @@ Let's verify E2E tests follow best practices for stability, maintainability, and
 - User scenario coverage: list critical paths and verify coverage
 - Stability: count waitForResponse/waitForLoadState usage vs setTimeout/sleep (target: 0 setTimeout/sleep)
 - API mocking: verify all external APIs use page.route()
+- Cross-browser coverage: verify tests configured for multiple browsers (target: 3+ browsers or Playwright projects)
 </completion_criteria>
 
 <exception_handling>
@@ -674,6 +685,8 @@ If test isolation issue found: specify shared state location and suggest fixture
 If fragile selector found: suggest data-testid alternative with specific line number
 If hardcoded delay found: suggest waitForResponse/waitForLoadState alternative
 If real API call found: suggest page.route() mocking approach
+If browser-specific code found: suggest using standard Web APIs and removing userAgent checks
+If single browser test: suggest adding test.use() for multiple browsers or Playwright projects configuration
 </exception_handling>
 
 ### Step 7: Browser Test Quality Checks
@@ -719,6 +732,15 @@ Let's verify Browser tests use real browser features correctly and follow Vitest
 - [ ] Tests CSS transitions/animations
 - [ ] Verifies focus states and accessibility styles
 - [ ] No mocked CSS values (use real computed styles)
+
+**Cross-Browser Compatibility:**
+
+- [ ] Tests configured to run in multiple browsers (Chrome, Firefox, Safari)
+- [ ] No browser-specific JavaScript APIs (webkit, ms prefixes)
+- [ ] No browser detection code (userAgent, navigator checks)
+- [ ] Uses standard CSS properties (no vendor prefixes in tests)
+- [ ] CSS styles verified work across browsers via getComputedStyle()
+- [ ] Event handling uses standard APIs (not browser-specific event types)
 </browser_tests_only>
 
 <completion_criteria>
@@ -729,6 +751,7 @@ Let's verify Browser tests use real browser features correctly and follow Vitest
 - Cleanup verification: verify cleanup() in afterEach, count DOM leaks (target: 0 leaks)
 - Viewport coverage: verify viewport size tests, count responsive checks
 - CSS validation: verify getComputedStyle() usage, count style checks
+- Cross-browser verification: verify tests run in multiple browsers, count browser-specific code (target: 0 browser-specific APIs)
 </completion_criteria>
 
 <exception_handling>
@@ -737,6 +760,8 @@ If direct event calls found: suggest userEvent alternatives
 If cleanup missing: specify afterEach location and suggest cleanup() addition
 If viewport not tested: suggest viewport size tests for responsive components
 If CSS mocked: suggest getComputedStyle() for real style verification
+If browser-specific API found: suggest using standard Web API alternative
+If single browser configuration: suggest adding multiple browser support in Vitest Browser config
 </exception_handling>
 
 </algorithm_steps>
@@ -752,7 +777,7 @@ Use this EXACT format for test code analysis:
 
 <test_type>
 **Тип теста:** unit|e2e|browser
-**Применены проверки:** Step 0 (тип), Step 1 (бесполезные), Step 2 (моки), Step 3 (производительность), Step 4 (покрытие), Step 5 (комментарии), Step 6 (E2E качество - только для e2e), Step 7 (Browser качество - только для browser)
+**Применены проверки:** Step 0 (тип), Step 1 (бесполезные), Step 2 (моки), Step 3 (производительность), Step 4 (покрытие), Step 5 (комментарии), Step 6 (E2E качество + кроссбраузерность - только для e2e), Step 7 (Browser качество + кроссбраузерность - только для browser)
 </test_type>
 
 <overall_score>
@@ -854,6 +879,11 @@ Use this EXACT format for test code analysis:
 - **Строка 45:** Нет `page.waitForResponse()` перед кликом - может привести к flaky тесту
 - **Строка 67:** Shared state между тестами через глобальную переменную - использовать fixtures
 
+**Кроссбраузерность:**
+
+- **Строка X:** Тест запускается только в Chrome - добавить конфигурацию для Firefox и Safari
+- **Строка Y:** Используется userAgent для определения браузера - удалить браузерно-специфичный код
+
 </e2e_specific_issues>
 
 <browser_specific_issues>
@@ -863,6 +893,11 @@ Use this EXACT format for test code analysis:
 - **Строка 23:** Используется `@testing-library/react` вместо `vitest-browser-react` - заменить импорт
 - **Строка 45:** Прямой вызов `onClick()` вместо `userEvent.click()` - использовать реальные события
 - **Строка 67:** Отсутствует `cleanup()` в afterEach - добавить очистку DOM
+
+**Кроссбраузерность:**
+
+- **Строка X:** Используется WebKit-специфичный API - заменить на стандартный Web API
+- **Строка Y:** Тесты настроены только для одного браузера - добавить поддержку нескольких браузеров
 
 </browser_specific_issues>
 
@@ -1090,6 +1125,58 @@ Expected output:
 </useless_tests>
 ```
 
+**Example 9: Cross-Browser Test Issues**
+
+Input E2E test file:
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('should work in Chrome', async ({ page }) => {
+    const userAgent = await page.evaluate(() => navigator.userAgent);
+    if (userAgent.includes('Chrome')) {
+        await page.goto('/page');
+        await page.click('.chrome-button');
+    }
+});
+```
+
+Expected output:
+
+```xml
+<e2e_specific_issues>
+- **Line 3:** Browser detection via userAgent - remove browser-specific code, use test.use() for multiple browsers
+- **Line 4-6:** Chrome-specific test - should work identically across all browsers
+- **Line 5:** CSS selector `.chrome-button` may differ between browsers - use data-testid
+</e2e_specific_issues>
+
+<critical_fixes>
+- **[КРИТИЧНО]** Тест проверяет только Chrome - добавить конфигурацию для Firefox и Safari через test.use() или Playwright projects
+- **[КРИТИЧНО]** Используется userAgent для определения браузера - удалить браузерно-специфичный код
+</critical_fixes>
+```
+
+Input Browser test file:
+
+```typescript
+import { render } from 'vitest-browser-react';
+
+test('should use WebKit API', () => {
+    const element = document.createElement('div');
+    element.webkitRequestAnimationFrame(() => {});
+    render(<Component />);
+});
+```
+
+Expected output:
+
+```xml
+<browser_specific_issues>
+- **Line 3:** Используется WebKit-специфичный API `webkitRequestAnimationFrame` - заменить на стандартный `requestAnimationFrame`
+- **Отсутствует:** Конфигурация для нескольких браузеров - добавить поддержку Chrome, Firefox, Safari
+</browser_specific_issues>
+```
+
 <reference_patterns>
 **Common Test Anti-patterns:**
 
@@ -1132,6 +1219,14 @@ Expected output:
 - Missing boundary value tests
 - (E2E) Missing critical user paths (registration, login, checkout)
 - (Browser) Missing user interactions (hover, keyboard, touch)
+
+**Cross-Browser Test Anti-patterns:**
+
+- **Browser Detection:** Checking `navigator.userAgent` or `window.chrome` in tests
+- **Single Browser:** Testing only in Chrome without Firefox/Safari configuration
+- **Vendor Prefixes:** Using `-webkit-`, `-moz-` prefixes in CSS tests
+- **Browser-Specific APIs:** Using Chrome-only APIs (`chrome.runtime`, `webkitRequestAnimationFrame`)
+- **Fragile Selectors:** CSS selectors that render differently across browsers
 
 </reference_patterns>
 
