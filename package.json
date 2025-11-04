@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.5.17",
+  "version": "0.5.18",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
@@ -35,10 +35,12 @@
     "start": "node --import tsx src/index.ts",
     "build": "tsup",
     "test": "yarn test:unit && yarn test:e2e",
-    "test:unit": "cross-env NODE_ENV=test vitest --run",
-    "test:e2e": "cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
-    "lint": "yarn eslint --fix --report-unused-disable-directives-severity off src && yarn typecheck",
-    "typecheck": "tsc --noEmit"
+    "lint": "aifr \"yarn lint:eslint\" \"yarn lint:ts\" \"yarn lint:knip\" \"yarn lint:test-unit\" \"yarn lint:test-e2e\"",
+    "lint:test-unit": "cross-env NODE_ENV=test vitest --run",
+    "lint:test-e2e": "cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
+    "lint:ts": "tsc --noEmit",
+    "lint:eslint": "yarn eslint --fix --report-unused-disable-directives-severity off src",
+    "lint:knip": "knip --no-progress --include exports,files"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.20.0",
@@ -50,8 +52,10 @@
   "devDependencies": {
     "@types/node": "24.7.2",
     "@vitest/coverage-v8": "3.2.4",
+    "ai-friendly-runner": "0.4.2",
     "cross-env": "10.1.0",
     "eslint-walrus-config": "1.1.0",
+    "knip": "5.67.1",
     "tsup": "8.5.0",
     "tsx": "4.20.6",
     "typescript": "5.9.3",
