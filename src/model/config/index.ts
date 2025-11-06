@@ -27,6 +27,9 @@ export type {
     ValidationInputWithoutEncoding,
     ValidationResult,
     ValidationType,
+    VerificationCheckResult,
+    VerifyInfoInput,
+    VerifyInfoResult,
 } from './types';
 
 /** Конфигурация приложения и функция инициализации */

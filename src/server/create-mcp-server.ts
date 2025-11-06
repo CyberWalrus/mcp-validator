@@ -4,6 +4,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { APP_CONFIG } from '../model/config';
 import { handleTestPromptTool, testPromptTool } from '../tools/test-prompt-tool';
 import { handleValidateTool, validateTool } from '../tools/validate-tool';
+import { handleVerifyInfoTool, verifyInfoTool } from '../tools/verify-info-tool';
 
 /** Создание и инициализация MCP сервера с официальным SDK */
 export function createMcpServer(): Server {
@@ -22,7 +23,7 @@ export function createMcpServer(): Server {
     );
 
     server.setRequestHandler(ListToolsRequestSchema, () => ({
-        tools: [validateTool, testPromptTool],
+        tools: [validateTool, testPromptTool, verifyInfoTool],
     }));
 
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
@@ -46,6 +47,20 @@ export function createMcpServer(): Server {
 
                 case 'test-prompt': {
                     const result = await handleTestPromptTool(args);
+
+                    return {
+                        content: [
+                            {
+                                text: result.content,
+                                type: 'text',
+                            },
+                        ],
+                        isError: result.isError || false,
+                    };
+                }
+
+                case 'verify-info': {
+                    const result = await handleVerifyInfoTool(args);
 
                     return {
                         content: [

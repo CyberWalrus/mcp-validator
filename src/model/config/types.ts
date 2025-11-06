@@ -15,6 +15,11 @@ import type {
     validationTypeSchema,
 } from '../schemas/validation-schema';
 import type {
+    verificationCheckResultSchema,
+    verifyInfoInputSchema,
+    verifyInfoResultSchema,
+} from '../schemas/verify-info-schema';
+import type {
     apiConfigSchema,
     appConfigSchema,
     consistencyThresholdsSchema,
@@ -146,3 +151,14 @@ export type TestPromptResult = {
     /** Краткий отчет */
     summary?: string;
 };
+
+// ========== ПРОВЕРКА ИНФОРМАЦИИ ==========
+
+/** Входные данные для проверки информации */
+export type VerifyInfoInput = z.infer<typeof verifyInfoInputSchema>;
+
+/** Результат одной проверки */
+export type VerificationCheckResult = z.infer<typeof verificationCheckResultSchema>;
+
+/** Результат проверки информации */
+export type VerifyInfoResult = z.infer<typeof verifyInfoResultSchema>;
