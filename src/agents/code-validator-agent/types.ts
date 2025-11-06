@@ -32,6 +32,8 @@ export type OpenAICallResult = {
     duration: number;
     responseContent: string;
     tokensUsed: number;
+    provider?: string;
+    totalCost?: string;
 };
 
 /** Результат парсинга ответа валидации */

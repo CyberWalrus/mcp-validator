@@ -23,7 +23,7 @@ export async function makeOpenRouterRequest(_request: OpenRouterRequest): Promis
     const mockResponse = mockResponsesQueue.shift();
     if (!mockResponse) {
         // Если нет мок-ответов, создаем дефолтный для валидации
-        const defaultResponse: MockedOpenRouterResponse = {
+        const defaultResponse = {
             choices: [
                 {
                     message: {
@@ -36,12 +36,16 @@ export async function makeOpenRouterRequest(_request: OpenRouterRequest): Promis
                 },
             ],
             model: 'test-model',
+            provider: 'OpenAI',
+            totalCost: '0.0015',
             usage: { total_tokens: 100 },
-        };
+        } as MockedOpenRouterResponse;
 
         // Добавляем минимальную задержку для реалистичного duration
-        await new Promise(resolve => setTimeout(resolve, 1));
-        
+        await new Promise((resolve) => {
+            setTimeout(resolve, 1);
+        });
+
         const duration = Date.now() - startTime;
         const choice = defaultResponse.choices[0];
 
@@ -49,16 +53,28 @@ export async function makeOpenRouterRequest(_request: OpenRouterRequest): Promis
             return Promise.reject(new Error('Некорректный дефолтный мок-ответ'));
         }
 
-        return Promise.resolve({
+        const result: OpenRouterResponse = {
             duration,
             model: defaultResponse.model,
             text: choice.message.content,
             tokensUsed: defaultResponse.usage.total_tokens,
-        });
+        };
+
+        const defaultWithMetadata = defaultResponse as { provider?: string; totalCost?: string };
+        if (defaultWithMetadata.provider) {
+            result.provider = defaultWithMetadata.provider;
+        }
+        if (defaultWithMetadata.totalCost) {
+            result.totalCost = defaultWithMetadata.totalCost;
+        }
+
+        return Promise.resolve(result);
     }
 
     // Добавляем минимальную задержку для реалистичного duration
-    await new Promise(resolve => setTimeout(resolve, 1));
+    await new Promise((resolve) => {
+        setTimeout(resolve, 1);
+    });
 
     const duration = Date.now() - startTime;
 
@@ -68,10 +84,20 @@ export async function makeOpenRouterRequest(_request: OpenRouterRequest): Promis
         return Promise.reject(new Error('Некорректный мок-ответ'));
     }
 
-    return Promise.resolve({
+    const result: OpenRouterResponse = {
         duration,
         model: mockResponse.model,
         text: choice.message.content,
         tokensUsed: mockResponse.usage.total_tokens,
-    });
+    };
+
+    const mockWithMetadata = mockResponse as { provider?: string; totalCost?: string };
+    if (mockWithMetadata.provider) {
+        result.provider = mockWithMetadata.provider;
+    }
+    if (mockWithMetadata.totalCost) {
+        result.totalCost = mockWithMetadata.totalCost;
+    }
+
+    return Promise.resolve(result);
 }

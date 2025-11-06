@@ -28,7 +28,10 @@ export async function validateCodeWithAgent(
 
         const validationPrompt = formatValidationPrompt(contentResult.content, validationInput);
 
-        const { responseContent, tokensUsed, duration } = await callOpenAIForValidation(agent, validationPrompt);
+        const { responseContent, tokensUsed, duration, provider, totalCost } = await callOpenAIForValidation(
+            agent,
+            validationPrompt,
+        );
 
         if (responseContent === '') {
             return {
@@ -49,6 +52,8 @@ export async function validateCodeWithAgent(
                 fullResponse: responseText,
                 model: agent.model,
                 tokensUsed,
+                ...(provider ? { provider } : {}),
+                ...(totalCost ? { totalCost } : {}),
             },
             recommendations: parsed.recommendations,
             score: parsed.score,

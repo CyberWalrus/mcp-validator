@@ -15,6 +15,34 @@ function expectValidMCPResponse(response: MCPResponse) {
     // В будущем можно усилить проверки
 }
 
+/** Проверяет наличие метаданных о провайдере и стоимости в ответе */
+function expectMetadataInResponse(response: MCPResponse) {
+    expect(response.jsonrpc).toBe('2.0');
+    expect(response.result).toBeDefined();
+
+    const result = response.result as { content: Array<{ text: string; type: string }> } | undefined;
+    expect(result?.content).toHaveLength(1);
+    expect(result?.content?.[0]?.type).toBe('text');
+
+    const markdownContent = result?.content?.[0]?.text;
+    if (typeof markdownContent === 'string') {
+        // Проверяем наличие секции метаданных
+        expect(markdownContent).toContain('**Метаданные валидации:**');
+
+        // Проверяем наличие провайдера и стоимости (если они есть в моке)
+        const hasProvider = markdownContent.includes('Провайдер:');
+        const hasCost = markdownContent.includes('Стоимость:');
+
+        // Если метаданные присутствуют, они должны быть корректно отформатированы
+        if (hasProvider) {
+            expect(markdownContent).toMatch(/- Провайдер: .+/);
+        }
+        if (hasCost) {
+            expect(markdownContent).toMatch(/- Стоимость: .+/);
+        }
+    }
+}
+
 describe('E2E: Validate инструмент', () => {
     let testContext: E2ETestContext;
 
@@ -43,6 +71,7 @@ describe('E2E: Validate инструмент', () => {
             );
 
             expectValidMCPResponse(response);
+            expectMetadataInResponse(response);
         });
 
         it('должен обрабатывать некорректный код', async () => {
@@ -60,6 +89,7 @@ describe('E2E: Validate инструмент', () => {
             });
 
             expectValidMCPResponse(response);
+            expectMetadataInResponse(response);
         });
     });
 
@@ -276,6 +306,68 @@ Returns list of users`,
             });
 
             expectValidMCPResponse(response);
+        });
+    });
+
+    describe('Метаданные валидации', () => {
+        it('должен включать информацию о провайдере и стоимости в метаданных', async () => {
+            // Настраиваем мок с провайдером и стоимостью
+            testContext.mockOpenRouter.mockResponse(MOCK_API_RESPONSES.CODE_VALIDATION_SUCCESS);
+
+            const response = await testContext.clientSimulator.callTool(
+                'validate',
+                TEST_SCENARIOS.VALIDATE_TYPESCRIPT.arguments,
+            );
+
+            expectValidMCPResponse(response);
+
+            const result = response.result as { content: Array<{ text: string; type: string }> } | undefined;
+            const markdownContent = result?.content?.[0]?.text;
+
+            if (typeof markdownContent === 'string') {
+                // Проверяем наличие секции метаданных
+                expect(markdownContent).toContain('**Метаданные валидации:**');
+
+                // Проверяем наличие провайдера и стоимости из мока
+                expect(markdownContent).toContain('Провайдер:');
+                expect(markdownContent).toContain('Стоимость:');
+                expect(markdownContent).toMatch(/- Провайдер: OpenAI/);
+                expect(markdownContent).toMatch(/- Стоимость: 0\.0015/);
+            }
+        });
+
+        it('должен корректно обрабатывать отсутствие метаданных', async () => {
+            // Настраиваем мок без провайдера и стоимости
+            testContext.mockOpenRouter.mockResponse({
+                choices: [
+                    {
+                        message: {
+                            content: 'Тестовый ответ без метаданных',
+                        },
+                    },
+                ],
+                model: 'gpt-4',
+                usage: {
+                    total_tokens: 100,
+                },
+            });
+
+            const response = await testContext.clientSimulator.callTool(
+                'validate',
+                TEST_SCENARIOS.VALIDATE_TYPESCRIPT.arguments,
+            );
+
+            expectValidMCPResponse(response);
+
+            const result = response.result as { content: Array<{ text: string; type: string }> } | undefined;
+            const markdownContent = result?.content?.[0]?.text;
+
+            if (typeof markdownContent === 'string') {
+                // Проверяем что метаданные присутствуют, но провайдер и стоимость могут отсутствовать
+                expect(markdownContent).toContain('**Метаданные валидации:**');
+                // Если провайдер и стоимость отсутствуют, они не должны быть в выводе
+                // (это нормально, так как они опциональные)
+            }
         });
     });
 }, 30000); // Увеличенный таймаут для E2E тестов

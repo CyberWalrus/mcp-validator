@@ -29,6 +29,10 @@ export type MockedOpenRouterResponse = {
         /** Общее количество токенов */
         readonly total_tokens: number;
     };
+    /** Провайдер модели (опционально) */
+    readonly provider?: string;
+    /** Общая стоимость обработки (опционально) */
+    readonly totalCost?: string;
 };
 
 /** Клиент для тестирования MCP */

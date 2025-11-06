@@ -46,7 +46,7 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
     }
 
     try {
-        const { statusCode, body } = await request(requestUrl, {
+        const { statusCode, body, headers } = await request(requestUrl, {
             body: JSON.stringify(requestBody),
             headers: {
                 ...DEFAULT_HEADERS,
@@ -87,11 +87,29 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
 
         const duration = Date.now() - startTime;
 
+        const getHeaderValue = (headerName: string): string | undefined => {
+            if (headers === null || headers === undefined) {
+                return undefined;
+            }
+
+            const header = headers[headerName] || headers[headerName.toLowerCase()];
+            if (header === null || header === undefined) {
+                return undefined;
+            }
+
+            return Array.isArray(header) ? header[0] : header;
+        };
+
+        const provider = getHeaderValue('x-provider');
+        const totalCost = getHeaderValue('x-total-cost') || getHeaderValue('x-tokens-total-cost');
+
         return {
             duration,
             model: data.model,
             text: choice.message.content,
             tokensUsed: data.usage.total_tokens,
+            ...(provider ? { provider } : {}),
+            ...(totalCost ? { totalCost } : {}),
         };
     } catch (error) {
         clearTimeout(timeoutId);

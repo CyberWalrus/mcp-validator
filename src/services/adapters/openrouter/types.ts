@@ -13,6 +13,8 @@ export type OpenRouterResponse = {
     model: string;
     text: string;
     tokensUsed: number;
+    provider?: string;
+    totalCost?: string;
 };
 
 /** Тип функции OpenRouter клиента */

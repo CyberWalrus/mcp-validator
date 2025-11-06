@@ -11,11 +11,16 @@ const { request: mockRequest } = await import('undici');
 
 let makeOpenRouterRequest: MakeOpenRouterRequestFn;
 
-function createMockResponse(statusCode: number, body: string): Dispatcher.ResponseData {
+function createMockResponse(
+    statusCode: number,
+    body: string,
+    headers?: Record<string, string>,
+): Dispatcher.ResponseData {
     return {
         body: {
             text: () => Promise.resolve(body),
         },
+        headers: headers || {},
         statusCode,
     } as Dispatcher.ResponseData;
 }
