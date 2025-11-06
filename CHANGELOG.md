@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.5.18] - 2025-11-04
+
+<small>04.11.2025 17:22</small>
+
+### Changed
+
+- **Улучшение системы линтинга и добавление knip**
+    - Добавлена конфигурация knip для обнаружения неиспользуемого кода
+    - Обновлен lint скрипт для использования ai-friendly-runner с параллельным выполнением проверок
+    - Добавлены отдельные скрипты для lint:eslint, lint:ts, lint:knip, lint:test-unit, lint:test-e2e
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/3fed269900049b51d24c41ecbd0cc39013f8c16f" target="_blank">3fed269</a>
+
+- **Упрощение CI/CD workflow**
+    - Упрощен GitHub Actions workflow в publish.yml
+    - Удалены избыточные шаги сборки и тестирования из CI/CD
+    - Оптимизирован процесс публикации пакета
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/0a14ae33f8a05f5c7308355eebc6719d05d21eb6" target="_blank">0a14ae3</a>
+
+- **Обновление зависимостей**
+    - Обновлен yarn.lock с новыми версиями зависимостей
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/96bae5b62dd8cd55236ee2a2a707095ab6b59fae" target="_blank">96bae5b</a>
+
+### Refactor
+
+- **Очистка неиспользуемого кода**
+    - Удалены неиспользуемые файлы после анализа knip
+    - Удалены устаревшие функции logger (debug, warn, logger-constants)
+    - Удалены неиспользуемые хелперы (force-kill-process, kill-process)
+    - Удалены пустые файлы конфигурации и типов (model/config/constants.ts, model/schemas/main.ts, model/types/main.ts)
+    - Удалены неиспользуемые адаптеры и workflows
+    - Обновлены импорты и зависимости после удаления файлов
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/3c18452eed30fd9b619cb8c6543c652eb14947ea" target="_blank">3c18452</a>
+
+### Docs
+
+- **Обновление промпта валидации тестов**
+    - Обновлен промпт валидации тестов с улучшенными правилами и требованиями
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/a07c45e46f8c07a877cddce9ac6319726990df06" target="_blank">a07c45e</a>
+
 ## [0.5.9] - 2025-10-30
 
 <small>30.10.2025 15:20</small>
