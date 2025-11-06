@@ -26,17 +26,11 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
         stdio: ['pipe', 'pipe', 'pipe'],
     });
 
-    if (mcpProcess.pid == null) {
+    if (mcpProcess.pid === null || mcpProcess.pid === undefined) {
         throw new Error('Не удалось запустить MCP сервер');
     }
 
-    await waitForServerReady(mcpProcess);
-
-    const clientSimulator = createMcpClientSimulator();
-    clientSimulator.connectToProcess(mcpProcess);
-
-    const mockOpenRouter = new MockOpenRouterAPI();
-
+    /** Очищает ресурсы процесса MCP сервера */
     const cleanup = async (): Promise<void> => {
         if (mcpProcess && mcpProcess.pid && !mcpProcess.killed) {
             try {
@@ -60,6 +54,18 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
             });
         }
     };
+
+    try {
+        await waitForServerReady(mcpProcess);
+    } catch (error) {
+        await cleanup();
+        throw error;
+    }
+
+    const clientSimulator = createMcpClientSimulator();
+    clientSimulator.connectToProcess(mcpProcess);
+
+    const mockOpenRouter = new MockOpenRouterAPI();
 
     return {
         cleanup,
