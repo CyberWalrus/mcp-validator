@@ -1,7 +1,3 @@
-import { getPackageResourceResolver } from '../../../lib/helpers/resource-resolver';
-
-const resourceResolver = getPackageResourceResolver();
-
 /** Маппинг кодов JSON-RPC ошибок к типам шаблонов */
 export const ERROR_CODE_TO_TYPE = {
     [-32700]: 'system',
