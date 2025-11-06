@@ -37,7 +37,7 @@
     "test": "yarn test:unit && yarn test:e2e",
     "lint": "aifr \"yarn lint:eslint\" \"yarn lint:ts\" \"yarn lint:knip\" \"yarn lint:test-unit\" \"yarn lint:test-e2e\"",
     "lint:test-unit": "cross-env NODE_ENV=test vitest --run",
-    "lint:test-e2e": "cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
+    "lint:test-e2e": "yarn build && cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
     "lint:ts": "tsc --noEmit",
     "lint:eslint": "yarn eslint --fix --report-unused-disable-directives-severity off src",
     "lint:knip": "knip --no-progress --include exports,files"
