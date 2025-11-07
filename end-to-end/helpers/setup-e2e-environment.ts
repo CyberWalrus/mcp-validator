@@ -21,6 +21,8 @@ export async function setupE2EEnvironment(): Promise<E2ETestContext> {
             MCP_E2E_TEST: 'true',
             NODE_ENV: 'test',
             API_KEY: 'test-key-for-e2e',
+            NODE_NO_WARNINGS: '1',
+            NODE_OPTIONS: '--no-warnings',
         },
         shell: process.platform === 'win32',
         stdio: ['pipe', 'pipe', 'pipe'],

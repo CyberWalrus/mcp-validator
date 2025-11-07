@@ -9,7 +9,12 @@ export async function waitForServerReady(mcpProcess: ChildProcess): Promise<void
         let errorOutput = '';
 
         const timeout = setTimeout(() => {
-            reject(new Error('Таймаут ожидания готовности сервера'));
+            const errorMessage = [
+                'Таймаут ожидания готовности сервера',
+                `Полученный stdout: ${output || '(пусто)'}`,
+                `Полученный stderr: ${errorOutput || '(пусто)'}`,
+            ].join('\n');
+            reject(new Error(errorMessage));
         }, TEST_TIMEOUTS.SERVER_READY_FAST);
 
         const handlers = {
