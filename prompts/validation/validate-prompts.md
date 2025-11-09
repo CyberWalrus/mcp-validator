@@ -185,7 +185,7 @@ Compact prompts optimize for speed and minimalism. Apply DIFFERENT scoring crite
 - ✅ Numbered list for logic (not prose)
 - ✅ Explicit action items with examples
 - ✅ Built-in fallback (e.g., "Otherwise → DEFAULT")
-- ✅ No emoji (token economy)
+- ✅ Emoji allowed for critical attention markers (⚠️, 🔴, ✅, ❌) - use sparingly to highlight important rules
 - ✅ Front-loaded critical info
 
 **LOW PRIORITY for compact (DO NOT penalize):**
@@ -548,7 +548,7 @@ If compatibility unclear: test with multiple model assumptions
 </overall_score>
 
 <checks_passed>
-**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Numbered Logic ✅ Size ≤50 lines ✅ No Emoji ✅ Explicit Actions ✅ Built-in Fallback
+**Пройдено:** ✅ YAML Minimal (3/3) ✅ Single Semantic Wrapper ✅ Numbered Logic ✅ Size ≤50 lines ✅ Explicit Actions ✅ Built-in Fallback
 **НЕ ТРЕБУЕТСЯ (compact):** ❌ TIER Structure ❌ Multiple XML tags ❌ System Anchors ❌ Extended YAML ❌ Imperative Triggers ❌ Language Policy instruction
 </checks_passed>
 
@@ -640,6 +640,7 @@ If compatibility unclear: test with multiple model assumptions
 - ✅ Honestly assess risks and limitations
 - ✅ Use structured result format WITH type-specific scoring
 - ✅ **ИГНОРИРОВАТЬ поле `globs`** - не валидировать его наличие или отсутствие
+- ✅ **EMOJI ALLOWED:** Emoji (⚠️, 🔴, ✅, ❌, 🎉, ⚡, 📚, 🛠️) are allowed and encouraged in critical sections to draw AI attention to important rules, warnings, and status indicators - use sparingly and purposefully
 
 **TYPE-SPECIFIC REQUIREMENTS:**
 
