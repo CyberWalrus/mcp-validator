@@ -233,6 +233,12 @@ Let's check test isolation and proper mocking of all dependencies.
 - [ ] Using `os.tmpdir()` instead of hardcoded temp directories (`/tmp/`, `C:\temp\`)
 - [ ] Using `path.join()` in factory functions for mock file paths
 - [ ] Path comparisons use `path.normalize()` or case-insensitive comparison
+
+**Vitest Global Types:**
+
+- [ ] No imports from 'vitest' for global functions (describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi, test, suite)
+- [ ] Global types configured via `/// <reference types="vitest/globals" />` in types file (e.g., `types/vitest.d.ts`)
+- [ ] `globals: true` set in `vitest.config.ts` for global function availability
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -291,6 +297,7 @@ Let's check test isolation and proper mocking of all dependencies.
 - Mock quality checklist: count vi.mocked() usage, factory functions, vi.clearAllMocks() in beforeEach
 - Isolation verification: zero shared variables/objects between test functions detected
 - Structure compliance: all vi.mock() declarations counted and verified as pre-import
+- Global types verification: zero imports from 'vitest' for global functions (describe, it, expect, vi, etc.), verify global types file exists with `/// <reference types="vitest/globals" />`
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -824,6 +831,7 @@ Use this EXACT format for test code analysis:
 - **[КРИТИЧНО]** Hardcoded пути в тестах (строка X) - заменить на `path.join()` или `os.tmpdir()` (кроссплатформенность)
 - **[КРИТИЧНО]** Использование hardcoded разделителей в путях тестов (строка Y) - использовать `path.sep` или `path.join()`
 - **[КРИТИЧНО]** Import paths содержат `index` (строка Z) - использовать `from './folder'` вместо `from './folder/index'`
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке X (describe, it, expect, vi) - использовать глобальные функции, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
 (Для e2e: **[КРИТИЧНО]** Хардкодированный setTimeout в строке 45 - заменить на page.waitForResponse())
 (Для e2e: **[КРИТИЧНО]** Используется CSS селектор `.button` в строке 23 - заменить на data-testid)
 (Для browser: **[КРИТИЧНО]** Отсутствует cleanup() в afterEach - добавить cleanup() из vitest-browser-react)
@@ -1276,6 +1284,58 @@ describe('Timer function', () => {
 });
 ```
 
+**Example 12: Vitest Global Types Usage**
+
+Input unit test file (incorrect):
+
+```typescript
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+describe('User validation', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('should validate user name', () => {
+        expect(validateUserName('John')).toBe(true);
+    });
+});
+```
+
+Expected output:
+
+```xml
+<critical_fixes>
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке 1 (beforeEach, describe, expect, it, vi) - использовать глобальные функции, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
+</critical_fixes>
+```
+
+Correct usage:
+
+```typescript
+// types/vitest.d.ts
+/// <reference types="vitest/globals" />
+
+// vitest.config.ts
+export default defineConfig({
+    test: {
+        globals: true,
+        // ...
+    },
+});
+
+// test file (no imports needed)
+describe('User validation', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('должен валидировать имя пользователя', () => {
+        expect(validateUserName('John')).toBe(true);
+    });
+});
+```
+
 <reference_patterns>
 **Common Test Anti-patterns:**
 
@@ -1293,6 +1353,7 @@ describe('Timer function', () => {
 - Large data generation in `it()` blocks instead of `beforeAll()`
 - Multiple DOM elements creation without cleanup
 - Hardcoded paths (`/tmp/`, `C:\temp\`) instead of `os.tmpdir()` (cross-platform issue)
+- Importing Vitest globals (`import { describe, it, expect, vi } from 'vitest'`) instead of using global functions with `globals: true` and global types (`/// <reference types="vitest/globals" />`)
 
 **E2E Test Anti-patterns:**
 
