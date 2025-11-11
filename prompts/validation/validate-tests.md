@@ -205,7 +205,7 @@ Let's check test isolation and proper mocking of all dependencies.
 - [ ] All HTTP requests are mocked (fetch, axios, ky)
 - [ ] All file operations are mocked (fs, readFile, writeFile)
 - [ ] All external APIs are mocked (Google Sheets, Telegram API)
-- [ ] All timers are mocked (setTimeout, setInterval, Date.now)
+- [ ] All timers use Vitest API: `vi.useFakeTimers()`, `vi.advanceTimersByTime()`, `vi.runAllTimers()`, `vi.setSystemTime()` (not native setTimeout/setInterval/Date.now)
 
 **System Modules:**
 
@@ -225,6 +225,14 @@ Let's check test isolation and proper mocking of all dependencies.
 - [ ] Mock data created through factory functions
 - [ ] vi.clearAllMocks() in beforeEach for state cleanup
 - [ ] Mocks declared before imports (vi.mock at file beginning)
+- [ ] No `index` in import paths (use `from './folder'` instead of `from './folder/index'`)
+
+**Cross-Platform Path Handling:**
+
+- [ ] Using `path.join()` instead of hardcoded paths (`/tmp/`, `C:\temp\`) in test code
+- [ ] Using `os.tmpdir()` instead of hardcoded temp directories (`/tmp/`, `C:\temp\`)
+- [ ] Using `path.join()` in factory functions for mock file paths
+- [ ] Path comparisons use `path.normalize()` or case-insensitive comparison
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -328,7 +336,7 @@ Let's find all code sections that can slow down test execution.
 
 **Asynchronous Delays:**
 
-- [ ] Real setTimeout/setInterval without vi.useFakeTimers()
+- [ ] Native setTimeout/setInterval/Date.now instead of Vitest API (vi.useFakeTimers(), vi.advanceTimersByTime(), vi.setSystemTime())
 - [ ] Waiting for real Promise without mock resolve/reject
 - [ ] Real network requests and their timeouts
 
@@ -344,6 +352,12 @@ Let's find all code sections that can slow down test execution.
 - [ ] Memory leaks through unclosed connections
 - [ ] Unfinished Promise in tests
 - [ ] Active timers after test completion
+
+**Cross-Platform Path Issues:**
+
+- [ ] Hardcoded paths (`/tmp/`, `C:\temp\`) instead of `os.tmpdir()`
+- [ ] Hardcoded path separators (`/` or `\`) instead of `path.join()`
+- [ ] Case-sensitive file path comparisons without normalization
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -404,6 +418,7 @@ Let's find all code sections that can slow down test execution.
 
 - Performance threshold: all tests <100ms, identify tests >100ms execution time
 - 100% synchronous blocking operations (HTTP, file I/O, crypto) catalogued
+- Timer API usage: verify Vitest API (vi.useFakeTimers/advanceTimersByTime/setSystemTime) instead of native setTimeout/setInterval/Date.now
 - Resource leak detection: timers, connections validated for cleanup
 - Heavy computation analysis: operations >10ms in arrange/act phases identified
 </unit_tests_only>
@@ -803,9 +818,12 @@ Use this EXACT format for test code analysis:
 <!-- Только критические проблемы, блокирующие production -->
 
 - **[КРИТИЧНО]** Найдены реальные HTTP запросы в строках 45, 67 - заменить на vi.mock (unit) / page.route() (e2e)
-- **[КРИТИЧНО]** Отсутствует мокирование setTimeout в строке 23 - добавить vi.useFakeTimers() (unit)
+- **[КРИТИЧНО]** Используется нативный setTimeout/setInterval в строке 23 - заменить на vi.useFakeTimers() + vi.advanceTimersByTime() (unit)
 - **[КРИТИЧНО]** Комментарии в теле тестов (строки 12, 34, 78) - нарушение стандартов проекта
 - **[КРИТИЧНО]** Не покрыта ветвь if (user === null) - добавить тест edge case (unit)
+- **[КРИТИЧНО]** Hardcoded пути в тестах (строка X) - заменить на `path.join()` или `os.tmpdir()` (кроссплатформенность)
+- **[КРИТИЧНО]** Использование hardcoded разделителей в путях тестов (строка Y) - использовать `path.sep` или `path.join()`
+- **[КРИТИЧНО]** Import paths содержат `index` (строка Z) - использовать `from './folder'` вместо `from './folder/index'`
 (Для e2e: **[КРИТИЧНО]** Хардкодированный setTimeout в строке 45 - заменить на page.waitForResponse())
 (Для e2e: **[КРИТИЧНО]** Используется CSS селектор `.button` в строке 23 - заменить на data-testid)
 (Для browser: **[КРИТИЧНО]** Отсутствует cleanup() в afterEach - добавить cleanup() из vitest-browser-react)
@@ -831,6 +849,8 @@ Use this EXACT format for test code analysis:
 - **Строка 45:** fetch('`https://api.example.com`') - реальный HTTP запрос замедлит тесты
 - **Строка 67:** readFileSync('./config.json') - синхронная файловая операция
 - **Строка 89:** Array(1000).fill().map() - тяжелые вычисления в каждом тесте
+- **Строка 112:** Hardcoded путь `/tmp/test.json` - заменить на `os.tmpdir()` для кроссплатформенности
+- **Строка 134:** setTimeout() вместо vi.useFakeTimers() + vi.advanceTimersByTime() - использовать Vitest API для таймеров
 (Для e2e: **Строка 123:** await new Promise(resolve => setTimeout(resolve, 1000)) - хардкодированная задержка, заменить на page.waitForResponse())
 (Для browser: **Строка 145:** Отсутствует cleanup() в afterEach - возможна утечка DOM узлов)
 
@@ -1125,7 +1145,35 @@ Expected output:
 </useless_tests>
 ```
 
-**Example 9: Cross-Browser Test Issues**
+**Example 9: Cross-Platform Path Issues in Tests**
+
+Input unit test file:
+
+```typescript
+import { readFileSync } from 'node:fs';
+
+describe('File operations', () => {
+    it('should read config file', () => {
+        const filePath = '/tmp/config.json'; // Hardcoded path
+        const content = readFileSync(filePath, 'utf-8');
+        expect(content).toBeDefined();
+    });
+});
+```
+
+Expected output:
+
+```xml
+<critical_fixes>
+- **[КРИТИЧНО]** Hardcoded путь `/tmp/config.json` в строке 4 - заменить на `os.tmpdir()` для кроссплатформенности
+</critical_fixes>
+
+<performance_issues>
+- **Строка 4:** Hardcoded путь `/tmp/config.json` - заменить на `os.tmpdir()` для кроссплатформенности
+</performance_issues>
+```
+
+**Example 10: Cross-Browser Test Issues**
 
 Input E2E test file:
 
@@ -1177,6 +1225,57 @@ Expected output:
 </browser_specific_issues>
 ```
 
+**Example 11: Vitest Timer API Usage**
+
+Input unit test file:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+
+describe('Timer function', () => {
+    it('should call callback after delay', () => {
+        const callback = vi.fn();
+        setTimeout(callback, 1000); // Native setTimeout
+        expect(callback).toHaveBeenCalled();
+    });
+});
+```
+
+Expected output:
+
+```xml
+<critical_fixes>
+- **[КРИТИЧНО]** Используется нативный setTimeout в строке 5 - заменить на vi.useFakeTimers() + vi.advanceTimersByTime(1000)
+</critical_fixes>
+
+<performance_issues>
+- **Строка 5:** setTimeout() вместо vi.useFakeTimers() + vi.advanceTimersByTime() - использовать Vitest API для таймеров
+</performance_issues>
+```
+
+Correct usage:
+
+```typescript
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+describe('Timer function', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    it('должен вызывать callback после задержки', () => {
+        const callback = vi.fn();
+        setTimeout(callback, 1000);
+        vi.advanceTimersByTime(1000);
+        expect(callback).toHaveBeenCalled();
+    });
+});
+```
+
 <reference_patterns>
 **Common Test Anti-patterns:**
 
@@ -1190,9 +1289,10 @@ Expected output:
 
 - `fetch()`, `axios.get()` without mocks
 - `readFileSync()`, `writeFileSync()` without mocks
-- `setTimeout()`, `setInterval()` without `vi.useFakeTimers()`
+- Native `setTimeout()`, `setInterval()`, `Date.now()` instead of Vitest API (`vi.useFakeTimers()`, `vi.advanceTimersByTime()`, `vi.setSystemTime()`)
 - Large data generation in `it()` blocks instead of `beforeAll()`
 - Multiple DOM elements creation without cleanup
+- Hardcoded paths (`/tmp/`, `C:\temp\`) instead of `os.tmpdir()` (cross-platform issue)
 
 **E2E Test Anti-patterns:**
 

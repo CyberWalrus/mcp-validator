@@ -106,6 +106,14 @@ Analyze code compliance with standards based on file type.
 - Named exports only (exception: Storybook)
 - Node.js with `node:` prefix (CRITICAL - refactor legacy)
 - Type imports with `type` prefix
+- No `index` in import paths (use `from './folder'` instead of `from './folder/index'`)
+
+**Cross-Platform Compatibility (CRITICAL):**
+
+- Hardcoded file paths: `/path/to/file`, `C:\Users\`, `/usr/bin/` → use `path.join()` or `path.resolve()`
+- Hardcoded path separators: `/` or `\` → use `path.sep` or `path.join()`
+- Hardcoded EOL: `\n` → use `os.EOL` when writing text files
+- System environment variables: `process.env.HOME` without fallback → add `process.env.USERPROFILE` for Windows
 
 <completion_criteria>
 Style violations identified with severity, file type rules applied correctly
@@ -262,6 +270,18 @@ function getStatusMessage(status: 'active' | 'inactive' | 'pending'): string {
     if (status === 'active') return 'User is active';
     return ''; // 'inactive' and 'pending' ignored
 }
+
+// ❌ Cross-platform path issues
+const filePath = '/tmp/data.json'; // fails on Windows
+const fullPath = baseDir + '/' + fileName; // hardcoded separator
+if (fileName === 'config.json') { ... } // case-sensitive on Linux
+// ✅ Cross-platform solutions
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+const filePath = join(tmpdir(), 'data.json');
+const fullPath = join(baseDir, fileName);
+import { normalize } from 'node:path';
+if (normalize(fileName).toLowerCase() === 'config.json') { ... }
 ```
 
 **3. SIMPLIFICATION OPPORTUNITIES (HIGH):**
@@ -492,6 +512,7 @@ Structured assessment format for MCP processing:
 - **[CRITICAL]** Deep nesting instead of guard clauses (applicable to function files)
 - **[CRITICAL]** Using default exports (exception: Storybook files)
 - **[CRITICAL]** Node.js imports without `node:` prefix (REQUIRED, refactor legacy code)
+- **[CRITICAL]** Import paths contain `index` (using `from './folder/index'` instead of `from './folder'`)
 - **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas/barrel files/helpers.ts <150 lines)
 - **[CRITICAL]** Exporting helper functions (helpers must be private, not exported)
 - **[CRITICAL]** Mixing entity types (functions + constants/types in one file; should separate into different files)
@@ -505,6 +526,9 @@ Structured assessment format for MCP processing:
 - **[CRITICAL]** React.lazy() for small components <100 lines (only for large components or heavy deps)
 - **[CRITICAL]** Comments inside function bodies for trivial cases (exception: complex logic explanation allowed, @ts-ignore/@ts-expect-error/eslint-disable allowed but flag for review)
 - **[CRITICAL]** Generics without G/T prefix (use `GItem`, `TValue`, not `Item`, `Value`)
+- **[CRITICAL]** Hardcoded file paths (using `/path/to/file` or `C:\Users\` instead of `path.join()` or `path.resolve()`)
+- **[CRITICAL]** Hardcoded path separators (using `/` or `\` instead of `path.sep` or `path.join()`)
+- **[CRITICAL]** Hardcoded EOL characters (`\n` instead of `os.EOL` when writing text files)
   </critical_issues>
 
 <warnings>
@@ -519,6 +543,8 @@ Structured assessment format for MCP processing:
 - **[WARNING]** Type name missing proper suffix (Props/Params/Result/Return/Type/State) - consider adding for consistency
 - **[WARNING]** DOM ref without `$` prefix - suggest `$refName` format
 - **[WARNING]** useRef value without `Ref` suffix - suggest `nameRef` format
+- **[WARNING]** Case-sensitive file name comparison without normalization (may fail on Windows/macOS)
+- **[WARNING]** Using `process.env.HOME` without fallback to `process.env.USERPROFILE` for Windows compatibility
 </warnings>
 
 <notes>
@@ -548,50 +574,57 @@ Structured assessment format for MCP processing:
 10. **[BLOCKS MERGE]** Add proper prefixes to boolean variables (`is/has/can/should`)
 11. **[BLOCKS MERGE]** Replace `enum` with union types
 12. **[BLOCKS MERGE]** Add `G` or `T` prefix to all generics (`GItem`, `TValue`)
-13. **[BLOCKS MERGE]** Move all exported types to separate types.ts (function files must NOT export types)
-14. **[BLOCKS MERGE]** Move all exported constants to separate constants.ts (function files must NOT export constants)
-15. **[BLOCKS MERGE]** Ensure file focuses on single entity type: separate functions/constants/types/schemas
-16. **[BLOCKS MERGE]** Remove exports from helper functions (keep only one main export in function files)
-17. **[BLOCKS MERGE]** Refactor Node.js imports to use `node:` prefix (REQUIRED, legacy code refactoring)
-18. **[BLOCKS MERGE]** Replace for/while loops with array methods (NO EXCEPTIONS)
-19. **[BLOCKS MERGE]** Remove classes, use functions and composition (NO EXCEPTIONS, including React PureComponent)
-20. **[BLOCKS MERGE]** Add `use` prefix to custom hooks (MUST start with `use`)
-21. **[BLOCKS MERGE]** Move component types to local types.ts (NOT global types file)
-22. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
-23. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
-24. **[BLOCKS MERGE]** Import React types directly: `import type { FC, ReactNode, ReactElement } from 'react'` (NOT `React.ReactNode`)
-25. **[BLOCKS MERGE]** Remove ALL explanatory comments from function/component bodies (scan code between `{` and `}` for `//`/`/* */`, keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+13. **[BLOCKS MERGE]** Remove `index` from import paths (use `from './folder'` instead of `from './folder/index'`)
+14. **[BLOCKS MERGE]** Move all exported types to separate types.ts (function files must NOT export types)
+15. **[BLOCKS MERGE]** Move all exported constants to separate constants.ts (function files must NOT export constants)
+16. **[BLOCKS MERGE]** Ensure file focuses on single entity type: separate functions/constants/types/schemas
+17. **[BLOCKS MERGE]** Remove exports from helper functions (keep only one main export in function files)
+18. **[BLOCKS MERGE]** Refactor Node.js imports to use `node:` prefix (REQUIRED, legacy code refactoring)
+19. **[BLOCKS MERGE]** Replace for/while loops with array methods (NO EXCEPTIONS)
+20. **[BLOCKS MERGE]** Remove classes, use functions and composition (NO EXCEPTIONS, including React PureComponent)
+21. **[BLOCKS MERGE]** Add `use` prefix to custom hooks (MUST start with `use`)
+22. **[BLOCKS MERGE]** Move component types to local types.ts (NOT global types file)
+23. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
+24. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
+25. **[BLOCKS MERGE]** Import React types directly: `import type { FC, ReactNode, ReactElement } from 'react'` (NOT `React.ReactNode`)
+26. **[BLOCKS MERGE]** Remove ALL explanatory comments from function/component bodies (scan code between `{` and `}` for `//`/`/* */`, keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+27. **[BLOCKS MERGE]** Replace hardcoded file paths with `path.join()` or `path.resolve()` (cross-platform compatibility)
+28. **[BLOCKS MERGE]** Replace hardcoded path separators (`/` or `\`) with `path.sep` or `path.join()`
+29. **[BLOCKS MERGE]** Replace hardcoded EOL (`\n`) with `os.EOL` when writing text files
 
 **DEEP ANALYSIS FINDINGS (CRITICAL/HIGH PRIORITY):**
-26. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
-27. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
-28. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
-29. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
-30. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
-31. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
-32. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
-33. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
-34. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
-35. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
+30. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
+31. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
+32. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+33. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
+34. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
+35. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
+36. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
+37. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
+38. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
+39. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
 
 **CODE QUALITY (HIGH PRIORITY):**
-36. **[HIGH]** Use `ReactNode` return type for components (with direct import)
-37. **[HIGH]** Destructure props in function parameters, not inside component
-38. **[HIGH]** Use guard clauses with `return null` for conditional rendering
-39. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
-40. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
-41. **[HIGH]** Add `as const` to constant arrays and objects
-42. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
-43. **[HIGH]** Make helper functions private (remove `export` keyword)
+40. **[HIGH]** Use `ReactNode` return type for components (with direct import)
+41. **[HIGH]** Destructure props in function parameters, not inside component
+42. **[HIGH]** Use guard clauses with `return null` for conditional rendering
+43. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
+44. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
+45. **[HIGH]** Add `as const` to constant arrays and objects
+46. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
+47. **[HIGH]** Make helper functions private (remove `export` keyword)
 
 **MAINTAINABILITY (MEDIUM/LOW PRIORITY):**
-44. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
-45. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
-46. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-47. **[LOW]** Improve variable naming descriptiveness
-48. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
-49. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
-50. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+48. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
+49. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+50. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+51. **[LOW]** Improve variable naming descriptiveness
+52. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
+53. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
+54. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+55. **[HIGH]** Add path normalization via `path.normalize()` for user-provided paths
+56. **[MEDIUM]** Use case-insensitive file name comparison or normalize paths before comparison (Windows/macOS compatibility)
+57. **[MEDIUM]** Add fallback for `process.env.HOME` → `process.env.USERPROFILE` for Windows compatibility
 </recommendations>
 
 </validation_result>
@@ -865,8 +898,9 @@ export { anotherFunction } from '../../utils/helper'; // ❌ External import
 **Bad Code Example (Function File with Multiple Violations):**
 
 ```typescript
-// Multiple violations: class, for loop, no JSDoc, default export, Node.js without node: prefix
+// Multiple violations: class, for loop, no JSDoc, default export, Node.js without node: prefix, index in import
 import { readFileSync } from 'fs'; // ❌ Missing node: prefix
+import { validateInput } from './validators/index'; // ❌ Contains 'index' in path
 
 export default class InputValidator {
     validate(input: any) {
@@ -1026,6 +1060,61 @@ export const APP_CONFIG = {
     MAX_RETRIES: 3,
     TIMEOUT: 5000,
 } as const;
+```
+
+**Good Code Example (Cross-Platform File Paths):**
+
+```typescript
+import { join, resolve, normalize } from 'node:path';
+import { tmpdir, EOL } from 'node:os';
+
+/** Сохраняет данные во временный файл */
+export function saveToTempFile(data: string): string {
+    const tempDir = tmpdir();
+    const fileName = 'data.json';
+    const filePath = join(tempDir, fileName);
+    return filePath;
+}
+
+/** Создает путь к файлу конфигурации */
+export function getConfigPath(baseDir: string, fileName: string): string {
+    return join(baseDir, fileName);
+}
+
+/** Нормализует пользовательский путь */
+export function normalizeUserPath(userPath: string): string {
+    return normalize(userPath);
+}
+
+/** Получает домашнюю директорию пользователя */
+export function getUserHomeDir(): string {
+    return process.env.HOME ?? process.env.USERPROFILE ?? '';
+}
+
+/** Записывает текст с правильным EOL */
+export function writeTextFile(content: string[]): string {
+    return content.join(EOL);
+}
+```
+
+**Bad Code Example (Cross-Platform Issues):**
+
+```typescript
+// ❌ Hardcoded paths - fails on Windows
+const filePath = '/tmp/data.json';
+const configPath = '/usr/local/config.json';
+
+// ❌ Hardcoded separators - fails on Windows
+const fullPath = baseDir + '/' + fileName;
+
+// ❌ Case-sensitive comparison - fails on Windows/macOS
+if (fileName === 'Config.json') { ... }
+
+// ❌ Hardcoded EOL - wrong line endings on Windows
+const content = lines.join('\n');
+
+// ❌ No Windows fallback
+const homeDir = process.env.HOME;
 ```
 
 </code_examples>
