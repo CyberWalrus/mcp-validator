@@ -34,16 +34,19 @@ AI агент для проверки информации через OpenAI SDK
 
 <key_concepts>
 **Параллельные проверки:**
+
 - Выполняет 3 независимые проверки одновременно через Promise.all()
 - Каждая проверка использует свой промпт (check1, check2, check3)
 - Результаты комбинируются в единый отчет с общей оценкой
 
 **Источники данных:**
+
 - Поддерживает текст (content) и файлы (file)
 - Автоматически читает файлы с указанной кодировкой
 </key_concepts>
 
 <usage_example>
+
 ```typescript
 import { createVerifyInfoAgent, verifyInfoWithAgent } from './verify-info-agent';
 
@@ -59,9 +62,7 @@ const result = await verifyInfoWithAgent(agent, {
 console.log(result.combinedReport);
 console.log(result.overallScore);
 ```
+
 </usage_example>
-
-
-
 
 
