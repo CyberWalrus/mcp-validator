@@ -85,8 +85,10 @@ Analyze code compliance with standards based on file type.
 
 **React (if applicable):**
 
-- Import types directly: `import type { ReactNode } from 'react'` (NOT `React.ReactNode`)
+- Import types directly: `import type { ReactNode, FC } from 'react'` (NOT `React.ReactNode`)
 - Return type: `ReactNode` (NOT `JSX.Element`)
+- For `const Component`: use `FC<Props>` type (NOT `() => ReactNode`)
+- For `function Component()`: use `ReactNode` return type
 - Props destructuring in parameters
 - Guard clause with `return null` for conditional rendering
 - React.lazy() ONLY for >100 lines OR heavy deps
@@ -181,6 +183,7 @@ Verify documentation completeness and TypeScript type safety.
 - NO `any` → use `unknown` + type guards or concrete types
 - NO `Function` → use concrete signatures `(data: unknown) => void`
 - NO `JSX.Element` → use `ReactNode`
+- For `const` declarations: assign type to variable (e.g., `const Component: FC<Props> = ...` NOT `const Component: () => ReactNode = ...`; applies to all const declarations, not just components)
 - Prefer `type` over `interface`
 - Generics with G/T prefix: `GItem`, `TValue` (NOT `Item`, `Value`)
 - Use `Pick<>`/`Omit<>` (NOT manual type creation)
@@ -506,6 +509,7 @@ Structured assessment format for MCP processing:
 - **[CRITICAL]** Using `Function` type (use concrete function signatures like `(data: unknown) => void`)
 - **[CRITICAL]** Using `JSX.Element` type (use `ReactNode` or `ReactElement` with direct import)
 - **[CRITICAL]** Using `React.ReactNode`, `React.ReactElement`, `React.FC` instead of direct imports (import `type { ReactNode, ReactElement, FC } from 'react'`)
+- **[CRITICAL]** Using explicit function type for `const` component (use `const Component: FC<Props> = ...` NOT `const Component: () => ReactNode = ...`)
 - **[CRITICAL]** Multiline JSDoc with `@param`/`@returns`
 - **[CRITICAL]** Missing JSDoc documentation on functions (including private functions - ALL functions require JSDoc, NOT applicable to barrel files)
 - **[CRITICAL]** Barrel file importing from external directories (barrel files must only import from current directory and subdirectories)
@@ -551,7 +555,8 @@ Structured assessment format for MCP processing:
 <!-- Recommendations without blocking -->
 
 - **[NOTE]** Using `export const fn = () => {}` instead of `export function fn()` - prefer function declaration
-- **[NOTE]** React component using `const Component: FC` instead of `function Component()` - prefer function declaration
+- **[NOTE]** React component using `const Component: FC<Props>` instead of `function Component()` - prefer function declaration (const is acceptable if used consistently)
+- **[NOTE]** React component using `const Component: () => ReactNode` instead of `const Component: FC<Props>` - prefer FC type for const declarations
 - **[NOTE]** Can improve variable naming descriptiveness
 - **[INFO]** Numeric literals >1000 without underscores - suggest `60_000` instead of `60000` for readability
 - **[INFO]** Using `for` loop in mathematical algorithm (ИНН/СНИЛС validation, checksum) - acceptable exception
@@ -587,44 +592,46 @@ Structured assessment format for MCP processing:
 23. **[BLOCKS MERGE]** Remove React.lazy() from small components <100 lines
 24. **[BLOCKS MERGE]** For barrel files: ensure all imports are from current directory or subdirectories only (no `../` imports)
 25. **[BLOCKS MERGE]** Import React types directly: `import type { FC, ReactNode, ReactElement } from 'react'` (NOT `React.ReactNode`)
-26. **[BLOCKS MERGE]** Remove ALL explanatory comments from function/component bodies (scan code between `{` and `}` for `//`/`/* */`, keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
-27. **[BLOCKS MERGE]** Replace hardcoded file paths with `path.join()` or `path.resolve()` (cross-platform compatibility)
-28. **[BLOCKS MERGE]** Replace hardcoded path separators (`/` or `\`) with `path.sep` or `path.join()`
-29. **[BLOCKS MERGE]** Replace hardcoded EOL (`\n`) with `os.EOL` when writing text files
+26. **[BLOCKS MERGE]** For `const` components: use `const Component: FC<Props> = ...` (NOT `const Component: () => ReactNode = ...`)
+27. **[BLOCKS MERGE]** Remove ALL explanatory comments from function/component bodies (scan code between `{` and `}` for `//`/`/* */`, keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+28. **[BLOCKS MERGE]** Replace hardcoded file paths with `path.join()` or `path.resolve()` (cross-platform compatibility)
+29. **[BLOCKS MERGE]** Replace hardcoded path separators (`/` or `\`) with `path.sep` or `path.join()`
+30. **[BLOCKS MERGE]** Replace hardcoded EOL (`\n`) with `os.EOL` when writing text files
 
 **DEEP ANALYSIS FINDINGS (CRITICAL/HIGH PRIORITY):**
-30. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
-31. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
-32. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
-33. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
-34. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
-35. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
-36. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
-37. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
-38. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
-39. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
+31. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
+32. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
+33. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+34. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
+35. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
+36. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
+37. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
+38. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
+39. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
+40. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
 
 **CODE QUALITY (HIGH PRIORITY):**
-40. **[HIGH]** Use `ReactNode` return type for components (with direct import)
-41. **[HIGH]** Destructure props in function parameters, not inside component
-42. **[HIGH]** Use guard clauses with `return null` for conditional rendering
-43. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
-44. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
-45. **[HIGH]** Add `as const` to constant arrays and objects
-46. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
-47. **[HIGH]** Make helper functions private (remove `export` keyword)
+41. **[HIGH]** Use `ReactNode` return type for components (with direct import)
+42. **[HIGH]** Destructure props in function parameters, not inside component
+43. **[HIGH]** Use guard clauses with `return null` for conditional rendering
+44. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
+45. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
+46. **[HIGH]** Add `as const` to constant arrays and objects
+47. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
+48. **[HIGH]** Make helper functions private (remove `export` keyword)
 
 **MAINTAINABILITY (MEDIUM/LOW PRIORITY):**
-48. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
-49. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
-50. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-51. **[LOW]** Improve variable naming descriptiveness
-52. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
-53. **[INFO]** Consider using `function Component()` instead of `const Component: FC` for React components (preference, not blocking)
-54. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
-55. **[HIGH]** Add path normalization via `path.normalize()` for user-provided paths
-56. **[MEDIUM]** Use case-insensitive file name comparison or normalize paths before comparison (Windows/macOS compatibility)
-57. **[MEDIUM]** Add fallback for `process.env.HOME` → `process.env.USERPROFILE` for Windows compatibility
+49. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
+50. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+51. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+52. **[LOW]** Improve variable naming descriptiveness
+53. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
+54. **[INFO]** Consider using `function Component()` instead of `const Component: FC<Props>` for React components (preference, but const is acceptable if used consistently)
+55. **[INFO]** For `const` components: prefer `const Component: FC<Props> = ...` over `const Component: () => ReactNode = ...`
+56. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+57. **[HIGH]** Add path normalization via `path.normalize()` for user-provided paths
+58. **[MEDIUM]** Use case-insensitive file name comparison or normalize paths before comparison (Windows/macOS compatibility)
+59. **[MEDIUM]** Add fallback for `process.env.HOME` → `process.env.USERPROFILE` for Windows compatibility
 </recommendations>
 
 </validation_result>
@@ -967,14 +974,14 @@ export function LoginForm({ email, onSubmit }: LoginFormProps): ReactNode {
 **Bad Code Example (React Component with Multiple Violations):**
 
 ```typescript
-import { FC } from 'react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 // WRONG: Component types in global types file
 export type LoginFormProps = { email?: string; onSubmit: Function };
 
-// WRONG: Using React.FC prefix, JSX.Element, Function type
-export const LoginForm: FC<LoginFormProps> = (props): JSX.Element => {
+// WRONG: Using explicit function type for const component (should use FC)
+export const LoginForm: () => ReactNode = (props): ReactNode => {
     // WRONG: Props not destructured in parameters
     const { email, onSubmit } = props;
     
@@ -986,6 +993,35 @@ export const LoginForm: FC<LoginFormProps> = (props): JSX.Element => {
     
     // WRONG: Ternary in JSX instead of guard clause
     return email ? <form onSubmit={onSubmit}></form> : null;
+};
+```
+
+**Good Code Example (Const Component with FC Type):**
+
+```typescript
+import type { FC } from 'react';
+import { useRef, useEffect } from 'react';
+
+import type { DashboardProps } from './types';
+
+/** Композитный виджет дашборда с счетчиком */
+export const Dashboard: FC<DashboardProps> = ({ title, onAction }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        containerRef.current?.focus();
+    }, []);
+
+    if (title === null || title === undefined) {
+        return null;
+    }
+
+    return (
+        <div ref={containerRef}>
+            <h2>{title}</h2>
+            <button onClick={onAction}>Action</button>
+        </div>
+    );
 };
 ```
 
