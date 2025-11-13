@@ -234,11 +234,29 @@ Let's check test isolation and proper mocking of all dependencies.
 - [ ] Using `path.join()` in factory functions for mock file paths
 - [ ] Path comparisons use `path.normalize()` or case-insensitive comparison
 
-**Vitest Global Types:**
+**Vitest Global Types (CRITICAL - MANDATORY CHECK):**
 
-- [ ] No imports from 'vitest' for global functions (describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi, test, suite)
+**FORBIDDEN Import Pattern (MUST BE DETECTED):**
+
+- [ ] **CRITICAL:** Any import statement containing `from 'vitest'` with global functions: `import { beforeEach, describe, expect, it, vi } from 'vitest';` - **MUST BE FLAGGED AS ERROR**
+- [ ] **CRITICAL:** Any import statement containing `from 'vitest'` with any of these functions: `describe`, `it`, `test`, `expect`, `beforeEach`, `afterEach`, `beforeAll`, `afterAll`, `vi`, `suite` - **MUST BE FLAGGED AS ERROR**
+- [ ] **Pattern to detect:** `import { ... } from 'vitest'` where `...` contains any global function name
+- [ ] **Examples of FORBIDDEN imports:**
+    - `import { beforeEach, describe, expect, it, vi } from 'vitest';` ❌
+    - `import { describe, it, expect } from 'vitest';` ❌
+    - `import { vi } from 'vitest';` ❌
+    - `import { test, expect } from 'vitest';` ❌
+    - `import { beforeEach, afterEach } from 'vitest';` ❌
+
+**REQUIRED Configuration (if globals are used):**
+
 - [ ] Global types configured via `/// <reference types="vitest/globals" />` in types file (e.g., `types/vitest.d.ts`)
 - [ ] `globals: true` set in `vitest.config.ts` for global function availability
+
+**CORRECT Usage (no imports needed):**
+
+- [ ] Global functions used directly without imports: `describe()`, `it()`, `expect()`, `vi`, `beforeEach()`, etc.
+- [ ] No `import` statement for global Vitest functions
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -297,7 +315,8 @@ Let's check test isolation and proper mocking of all dependencies.
 - Mock quality checklist: count vi.mocked() usage, factory functions, vi.clearAllMocks() in beforeEach
 - Isolation verification: zero shared variables/objects between test functions detected
 - Structure compliance: all vi.mock() declarations counted and verified as pre-import
-- Global types verification: zero imports from 'vitest' for global functions (describe, it, expect, vi, etc.), verify global types file exists with `/// <reference types="vitest/globals" />`
+- **MANDATORY:** Vitest imports audit: scan ALL import statements in file, count ALL instances of `import { ... } from 'vitest'` where `...` contains any global function (describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi, test, suite), **MUST report EVERY occurrence with exact line number**, target: **ZERO** such imports allowed
+- Global types verification: if globals are used, verify global types file exists with `/// <reference types="vitest/globals" />` and `globals: true` in `vitest.config.ts`
 </unit_tests_only>
 
 <e2e_tests_only>
@@ -320,6 +339,7 @@ Let's check test isolation and proper mocking of all dependencies.
 If mock is missing for external dependency: mark as critical issue
 If mock is incomplete: specify concrete missing parts
 If there are direct calls without mocks: classify by criticality level
+**MANDATORY:** If ANY import statement contains `from 'vitest'` with global functions (describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi, test, suite): **MUST report as CRITICAL error with exact line number and full import statement**, **DO NOT SKIP THIS CHECK**
 </exception_handling>
 
 ### Step 3: Performance and Slow Logic Analysis
@@ -831,7 +851,9 @@ Use this EXACT format for test code analysis:
 - **[КРИТИЧНО]** Hardcoded пути в тестах (строка X) - заменить на `path.join()` или `os.tmpdir()` (кроссплатформенность)
 - **[КРИТИЧНО]** Использование hardcoded разделителей в путях тестов (строка Y) - использовать `path.sep` или `path.join()`
 - **[КРИТИЧНО]** Import paths содержат `index` (строка Z) - использовать `from './folder'` вместо `from './folder/index'`
-- **[КРИТИЧНО]** Импорты из 'vitest' в строке X (describe, it, expect, vi) - использовать глобальные функции, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке X: `import { beforeEach, describe, expect, it, vi } from 'vitest';` - **ЗАПРЕЩЕНО**, использовать глобальные функции без импорта, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке Y: `import { describe, it, expect } from 'vitest';` - **ЗАПРЕЩЕНО**, удалить импорт, использовать глобальные функции
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке Z: `import { vi } from 'vitest';` - **ЗАПРЕЩЕНО**, использовать глобальный `vi` без импорта
 (Для e2e: **[КРИТИЧНО]** Хардкодированный setTimeout в строке 45 - заменить на page.waitForResponse())
 (Для e2e: **[КРИТИЧНО]** Используется CSS селектор `.button` в строке 23 - заменить на data-testid)
 (Для browser: **[КРИТИЧНО]** Отсутствует cleanup() в afterEach - добавить cleanup() из vitest-browser-react)
@@ -1261,11 +1283,21 @@ Expected output:
 </performance_issues>
 ```
 
-Correct usage:
+Correct usage (no imports needed - globals enabled):
 
 ```typescript
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// types/vitest.d.ts
+/// <reference types="vitest/globals" />
 
+// vitest.config.ts
+export default defineConfig({
+    test: {
+        globals: true,
+        // ...
+    },
+});
+
+// test file (no imports for globals)
 describe('Timer function', () => {
     beforeEach(() => {
         vi.useFakeTimers();
@@ -1306,7 +1338,7 @@ Expected output:
 
 ```xml
 <critical_fixes>
-- **[КРИТИЧНО]** Импорты из 'vitest' в строке 1 (beforeEach, describe, expect, it, vi) - использовать глобальные функции, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
+- **[КРИТИЧНО]** Импорты из 'vitest' в строке 1: `import { beforeEach, describe, expect, it, vi } from 'vitest';` - **ЗАПРЕЩЕНО**, использовать глобальные функции без импорта, добавить глобальные типы если отсутствуют (создать `types/vitest.d.ts` с `/// <reference types="vitest/globals" />` и проверить `globals: true` в `vitest.config.ts`)
 </critical_fixes>
 ```
 
@@ -1353,7 +1385,7 @@ describe('User validation', () => {
 - Large data generation in `it()` blocks instead of `beforeAll()`
 - Multiple DOM elements creation without cleanup
 - Hardcoded paths (`/tmp/`, `C:\temp\`) instead of `os.tmpdir()` (cross-platform issue)
-- Importing Vitest globals (`import { describe, it, expect, vi } from 'vitest'`) instead of using global functions with `globals: true` and global types (`/// <reference types="vitest/globals" />`)
+- **CRITICAL:** Importing Vitest globals (`import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll, test, suite } from 'vitest';`) - **FORBIDDEN**, must use global functions with `globals: true` and global types (`/// <reference types="vitest/globals" />`), **MUST detect and report ALL such imports with exact line numbers**
 
 **E2E Test Anti-patterns:**
 
