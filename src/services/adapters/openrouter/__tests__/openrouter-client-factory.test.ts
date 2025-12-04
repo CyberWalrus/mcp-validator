@@ -3,7 +3,6 @@ describe('getOpenRouterClient', () => {
 
     beforeEach(() => {
         process.env = { ...originalEnv };
-        // Сбрасываем кеш клиента между тестами
         vi.resetModules();
     });
 
@@ -19,9 +18,9 @@ describe('getOpenRouterClient', () => {
         return module.getOpenRouterClient;
     }
 
-    it('должен возвращать мок клиент в тестовом режиме', async () => {
+    it('должен возвращать реальный клиент когда MCP_E2E_TEST не установлен', async () => {
         process.env.NODE_ENV = 'test';
-        process.env.MCP_E2E_TEST = 'true';
+        delete process.env.MCP_E2E_TEST;
 
         const getOpenRouterClient = await loadFactory();
         const client = await getOpenRouterClient();

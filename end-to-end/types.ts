@@ -72,6 +72,16 @@ export type MCPRequest = {
     params?: unknown;
 };
 
+/** MCP ошибка JSON-RPC */
+export type MCPError = {
+    /** Код ошибки */
+    code: number;
+    /** Данные ошибки */
+    data?: unknown;
+    /** Сообщение об ошибке */
+    message: string;
+};
+
 /** Базовый MCP ответ */
 export type MCPResponse = {
     /** Идентификатор */
@@ -79,7 +89,7 @@ export type MCPResponse = {
     /** Версия JSON-RPC */
     jsonrpc: '2.0';
     /** Ошибка */
-    error?: unknown;
+    error?: MCPError;
     /** Результат */
     result?: unknown;
 };

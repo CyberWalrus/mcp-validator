@@ -3,11 +3,7 @@ import type { AgentConfig } from '../../agents/test-prompt-agent/types';
 import type { TestPromptInput, TestPromptResult } from '../../model/config';
 import { APP_CONFIG } from '../../model/config';
 import { renderErrorResponse } from '../../services/adapters/error-handler';
-import { TEST_PROMPT_TOOL } from './constants';
 import { formatTestPromptResult } from './format-test-prompt-result';
-
-/** MCP инструмент для тестирования промптов */
-export const testPromptTool = TEST_PROMPT_TOOL;
 
 /** Глобальный кэш агента для повторного использования */
 let testPromptAgent: AgentConfig | null = null;

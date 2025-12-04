@@ -6,16 +6,11 @@ import type {
     ValidateCodeWithAgent as ValidateCodeWithAgentFn,
 } from '../code-validator-agent/types';
 
-// Мок OpenAI
-vi.mock('openai', () => ({
-    default: vi.fn().mockImplementation(() => ({
-        chat: {
-            completions: {
-                create: vi.fn().mockResolvedValue({
-                    choices: [
-                        {
-                            message: {
-                                content: `
+const mockOpenAIResponse = {
+    choices: [
+        {
+            message: {
+                content: `
 <validation_result>
 <summary>
 **Оценка:** 85/100
@@ -25,14 +20,22 @@ vi.mock('openai', () => ({
 - **[БЛОКИРУЮЩИЙ]** Нет критических проблем
 </critical_issues>
 </validation_result>
-                                `,
-                            },
-                        },
-                    ],
-                }),
+                `,
             },
         },
-    })),
+    ],
+};
+
+class MockOpenAI {
+    chat = {
+        completions: {
+            create: vi.fn().mockResolvedValue(mockOpenAIResponse),
+        },
+    };
+}
+
+vi.mock('openai', () => ({
+    default: MockOpenAI,
 }));
 
 describe('CodeValidatorAgent', () => {

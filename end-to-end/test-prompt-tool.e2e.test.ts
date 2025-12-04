@@ -178,11 +178,14 @@ describe('E2E: Test-Prompt инструмент', () => {
             });
 
             expect(response.jsonrpc).toBe('2.0');
-            expect(response.result).toBeDefined();
-            const result = response.result as { content: Array<{ text: string; type: string }> };
-            expect(result.content).toHaveLength(1);
-            expect(result.content?.[0]?.type).toBe('text');
-            expect(result.content?.[0]?.text).toMatch(/^# ❌ Ошибка валидации/);
+            // McpServer с Zod возвращает ошибку валидации в JSON-RPC error или result
+            if (response.error) {
+                expect(response.error.code).toBe(-32602);
+            } else {
+                expect(response.result).toBeDefined();
+                const result = response.result as { content: Array<{ text: string; type: string }> };
+                expect(result.content?.[0]?.text).toMatch(/ошибка|error|required/i);
+            }
         });
 
         it('должен обрабатывать некорректное количество итераций', async () => {
@@ -192,11 +195,14 @@ describe('E2E: Test-Prompt инструмент', () => {
             });
 
             expect(response.jsonrpc).toBe('2.0');
-            expect(response.result).toBeDefined();
-            const result = response.result as { content: Array<{ text: string; type: string }> };
-            expect(result.content).toHaveLength(1);
-            expect(result.content?.[0]?.type).toBe('text');
-            expect(result.content?.[0]?.text).toMatch(/^# ❌ Ошибка валидации/);
+            // McpServer с Zod возвращает ошибку валидации в JSON-RPC error или result
+            if (response.error) {
+                expect(response.error.code).toBe(-32602);
+            } else {
+                expect(response.result).toBeDefined();
+                const result = response.result as { content: Array<{ text: string; type: string }> };
+                expect(result.content?.[0]?.text).toMatch(/ошибка|error|iterations|maximum/i);
+            }
         });
 
         it('должен обрабатывать слишком малое количество итераций', async () => {
@@ -206,11 +212,14 @@ describe('E2E: Test-Prompt инструмент', () => {
             });
 
             expect(response.jsonrpc).toBe('2.0');
-            expect(response.result).toBeDefined();
-            const result = response.result as { content: Array<{ text: string; type: string }> };
-            expect(result.content).toHaveLength(1);
-            expect(result.content?.[0]?.type).toBe('text');
-            expect(result.content?.[0]?.text).toMatch(/^# ❌ Ошибка валидации/);
+            // McpServer с Zod возвращает ошибку валидации в JSON-RPC error или result
+            if (response.error) {
+                expect(response.error.code).toBe(-32602);
+            } else {
+                expect(response.result).toBeDefined();
+                const result = response.result as { content: Array<{ text: string; type: string }> };
+                expect(result.content?.[0]?.text).toMatch(/ошибка|error|iterations|minimum/i);
+            }
         });
     });
 
