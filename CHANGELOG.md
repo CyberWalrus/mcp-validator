@@ -1,5 +1,150 @@
 # Changelog
 
+## [0.7.0] - 2025-12-05
+
+<small>05.12.2025 00:49</small>
+
+### Changed
+
+- **Refactoring MCP server to high-level McpServer API**
+    - Migrated from low-level MCP SDK to high-level McpServer API
+    - Updated server creation and initialization logic
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/10544b3" target="_blank">10544b3</a>
+
+- **Dependencies update**
+    - Updated project dependencies
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/081124e" target="_blank">081124e</a>
+
+- **Uncommitted changes in package.json** – version update to 0.7.0
+- **Uncommitted changes in src/server/create-mcp-server.ts** – server creation refactoring
+- **Uncommitted changes in src/server/mcp-server.ts** – server startup refactoring
+- **Uncommitted changes in vitest.e2e.ci.config.ts** – E2E test configuration updates
+- **Uncommitted changes in vitest.e2e.config.ts** – E2E test configuration updates
+
+### Added
+
+- **Unit tests for MCP server creation**
+    - Added comprehensive tests for createMcpServer function
+    - Tests cover server instance creation, tool registration, and schema validation
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/uncommitted" target="_blank">uncommitted</a>
+
+## [0.6.4] - 2025-11-14
+
+<small>14.11.2025 02:51</small>
+
+### Changed
+
+- **Test validation prompt updates**
+    - Updated test validation prompt with detailed Vitest import checks
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/1f8edf4" target="_blank">1f8edf4</a>
+
+- **React component validation rules updates**
+    - Updated React component validation rules
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/1dd867a" target="_blank">1dd867a</a>
+
+## [0.6.3] - 2025-11-13
+
+<small>13.11.2025 11:16</small>
+
+### Changed
+
+- **Git ignore updates**
+    - Added .vscode exclusion to .gitignore
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/50c743a" target="_blank">50c743a</a>
+
+- **Test validation documentation updates**
+    - Updated test validation documentation
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/0e311bb" target="_blank">0e311bb</a>
+
+## [0.6.2] - 2025-11-11
+
+<small>11.11.2025 05:07</small>
+
+### Changed
+
+- **Validation prompts updates**
+    - Updated validation prompts with cross-platform rules
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/3c44b61" target="_blank">3c44b61</a>
+
+## [0.6.1] - 2025-11-09
+
+<small>09.11.2025 19:41</small>
+
+### Fixed
+
+- **Server readiness timeout and error handling**
+    - Updated server readiness timeout and added error handling with stdout/stderr output
+    - Updated server readiness timeout for Windows and added null/undefined checks in E2E cleanup function
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/4ecce5a" target="_blank">4ecce5a</a>
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/70733e1" target="_blank">70733e1</a>
+
+### Changed
+
+- **E2E test linting command updates**
+    - Updated E2E test linting command in package.json, added build before execution
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/fec477b" target="_blank">fec477b</a>
+
+- **AI documentation formatting**
+    - Added empty lines at end of AI documentation
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/56e8088" target="_blank">56e8088</a>
+
+### Docs
+
+- **Prompt validation updates**
+    - Allowed emoji usage in critical prompt places
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/c7128b7" target="_blank">c7128b7</a>
+
+## [0.6.0] - 2025-11-06
+
+<small>06.11.2025 20:06</small>
+
+### Added
+
+- **Verify-info tool for information verification**
+    - Added verify-info tool for AI-based information verification with 3 parallel checks
+    - Supports text and file inputs, returns combined report with reliability assessment
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/9a74a02" target="_blank">9a74a02</a>
+
+- **Provider metadata and cost information in validation**
+    - Added provider metadata and cost information to validation results
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/9d6501c" target="_blank">9d6501c</a>
+
+### Changed
+
+- **CHANGELOG updates**
+    - Updated CHANGELOG with new changes including linting improvements, CI/CD simplification, dependency updates, unused code cleanup, and test validation prompt updates
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/a9441c2" target="_blank">a9441c2</a>
+
+- **CI/CD workflow simplification**
+    - Simplified CI/CD workflow in publish.yml
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/0a14ae3" target="_blank">0a14ae3</a>
+
+- **Dependencies update**
+    - Updated dependencies in yarn.lock
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/96bae5b" target="_blank">96bae5b</a>
+
+### Refactor
+
+- **Unused code removal from error-handler**
+    - Removed unused code from error-handler module
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/ce002d1" target="_blank">ce002d1</a>
+
+- **Unused files removal after knip analysis**
+    - Removed unused files after knip analysis
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/3c18452" target="_blank">3c18452</a>
+
+### Docs
+
+- **Test validation prompt updates**
+    - Updated test validation prompt with improved rules and requirements
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/a07c45e" target="_blank">a07c45e</a>
+
+### Tests
+
+- **E2E tests for verify-info tool**
+    - Added E2E tests for verify-info tool
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/bf3f620" target="_blank">bf3f620</a>
+
 ## [0.5.18] - 2025-11-04
 
 <small>04.11.2025 17:22</small>
