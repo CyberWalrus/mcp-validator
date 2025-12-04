@@ -19,7 +19,7 @@ export async function startMcpServer(): Promise<void> {
         const transport = new StdioServerTransport();
 
         info('🚀 Подключение к transport...');
-        await server.server.connect(transport);
+        await server.connect(transport);
 
         info('✅ MCP сервер запущен и готов к работе');
 

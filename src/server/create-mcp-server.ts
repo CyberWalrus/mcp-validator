@@ -51,7 +51,7 @@ export function createMcpServer(): McpServer {
         {
             description:
                 'Универсальная валидация кода, тестов, архитектуры и других типов контента через AI с детальными отчетами',
-            inputSchema: {
+            inputSchema: z.object({
                 context: z.string().describe('Дополнительный контекст для валидации (опционально)').optional(),
                 input: z.object({
                     data: z.string().describe('Данные для валидации или абсолютный путь к файлу'),
@@ -69,7 +69,7 @@ export function createMcpServer(): McpServer {
                     .describe(
                         'Тип валидации: code (качество кода/стиль), tests (покрытие/моки), architecture (структура/паттерны), prompts (YAML/XML), documentation (шаблоны/формат)',
                     ),
-            },
+            }),
             title: 'Валидация кода',
         },
         executeValidateTool,
@@ -80,7 +80,7 @@ export function createMcpServer(): McpServer {
         {
             description:
                 'Параллельное тестирование промптов на консистентность с 3-10 итерациями для проверки стабильности AI ответов',
-            inputSchema: {
+            inputSchema: z.object({
                 context: z.string().describe('Дополнительный контекст для тестирования (опционально)').optional(),
                 iterations: z
                     .number()
@@ -98,7 +98,7 @@ export function createMcpServer(): McpServer {
                     .min(1000)
                     .describe('Timeout для каждого запроса в миллисекундах (по умолчанию из config)')
                     .optional(),
-            },
+            }),
             title: 'Тестирование промптов',
         },
         executeTestPromptTool,
@@ -109,7 +109,7 @@ export function createMcpServer(): McpServer {
         {
             description:
                 'Проверка информации через AI с 3 параллельными проверками. Поддерживает текст и файлы. Возвращает комбинированный отчет с оценкой достоверности',
-            inputSchema: {
+            inputSchema: z.object({
                 context: z.string().describe('Дополнительный контекст для проверки (опционально)').optional(),
                 encoding: z
                     .enum(['utf8', 'utf16le', 'ascii'])
@@ -119,7 +119,7 @@ export function createMcpServer(): McpServer {
                     data: z.string().describe('Текст для проверки или абсолютный путь к файлу'),
                     type: z.enum(['content', 'file']).describe('Тип входных данных: content (текст) или file (файл)'),
                 }),
-            },
+            }),
             title: 'Проверка информации',
         },
         executeVerifyInfoTool,
