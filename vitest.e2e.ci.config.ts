@@ -28,21 +28,22 @@ export default defineConfig({
             NODE_ENV: 'test',
         },
         globals: true,
+        hookTimeout: 60000,
+
         include: ['end-to-end/**/*.e2e.test.ts'],
+
+        maxWorkers: 8,
+
         outputFile: {
             junit: './reports/e2e-junit.xml',
         },
+
         // Отключаем параллельное выполнение в CI для стабильности
         pool: 'threads',
-        poolOptions: {
-            threads: {
-                singleThread: true,
-            },
-        },
+
         reporters: ['verbose', 'junit'],
-        testTimeout: 60000, // Увеличиваем timeout для CI
-        // Увеличиваем timeout для всего тестового набора
-        hookTimeout: 60000,
+
         teardownTimeout: 60000,
+        testTimeout: 60000,
     },
 });

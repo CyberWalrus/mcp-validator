@@ -29,18 +29,11 @@ export default defineConfig({
         },
         globals: true,
         include: ['end-to-end/**/*.e2e.test.ts'],
+        maxWorkers: 8,
         outputFile: {
             junit: './reports/e2e-junit.xml',
         },
         pool: 'forks',
-
-        poolOptions: {
-            forks: {
-                maxForks: 3,
-                minForks: 1,
-                singleFork: false,
-            },
-        },
         reporters: ['verbose', 'junit'],
         testTimeout: 30000,
     },
