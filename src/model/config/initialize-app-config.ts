@@ -64,6 +64,13 @@ export function initializeAppConfig(env: NodeJS.ProcessEnv = process.env): void 
                 env.MCP_SERVER_DESCRIPTION || 'Production-ready MCP validator for Cursor IDE with 4 validation types',
             name: getPackageName(),
             protocolVersion: env.MCP_PROTOCOL_VERSION || '2024-11-05',
+            transport: {
+                http: {
+                    host: env.MCP_HTTP_HOST,
+                    port: env.MCP_HTTP_PORT,
+                },
+                type: env.MCP_TRANSPORT,
+            },
             version: getPackageVersion(),
         },
         model: {

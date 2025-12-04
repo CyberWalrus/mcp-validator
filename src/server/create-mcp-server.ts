@@ -3,8 +3,11 @@ import { z } from 'zod';
 
 import { APP_CONFIG } from '../model/config';
 import { handleTestPromptTool } from '../tools/test-prompt-tool';
+import { createValidateInteractiveHandler } from '../tools/validate-interactive-tool';
 import { handleValidateTool } from '../tools/validate-tool';
 import { handleVerifyInfoTool } from '../tools/verify-info-tool';
+import { registerValidatorPrompts } from './prompts';
+import { registerValidatorResources } from './resources';
 import type { ToolResponse } from './types';
 
 /** Обработчик инструмента validate */
@@ -124,6 +127,37 @@ export function createMcpServer(): McpServer {
         },
         executeVerifyInfoTool,
     );
+
+    const executeValidateInteractiveTool = createValidateInteractiveHandler(server);
+
+    server.registerTool(
+        'validate-interactive',
+        {
+            description:
+                'Интерактивная валидация с уточнением параметров через диалог. Если тип валидации не указан — будет запрошен у пользователя',
+            inputSchema: z.object({
+                context: z.string().describe('Дополнительный контекст для валидации (опционально)').optional(),
+                filePath: z.string().describe('Путь к файлу для валидации'),
+                language: z.string().describe('Язык программирования (опционально)').default('typescript'),
+                validationType: z
+                    .enum(['code', 'tests', 'architecture', 'prompts', 'documentation'])
+                    .describe('Тип валидации (если не указан — будет запрошен)')
+                    .optional(),
+            }),
+            title: 'Интерактивная валидация',
+        },
+        async (params) => {
+            const result = await executeValidateInteractiveTool(params);
+
+            return {
+                content: [{ text: result.content, type: 'text' as const }],
+                isError: result.isError ?? false,
+            };
+        },
+    );
+
+    registerValidatorPrompts(server);
+    registerValidatorResources(server);
 
     return server;
 }

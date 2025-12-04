@@ -12,6 +12,12 @@ vi.mock('../../tools/verify-info-tool', () => ({
     handleVerifyInfoTool: vi.fn().mockResolvedValue({ content: 'verify-info result', isError: false }),
 }));
 
+vi.mock('../../tools/validate-interactive-tool', () => ({
+    createValidateInteractiveHandler: vi
+        .fn()
+        .mockReturnValue(vi.fn().mockResolvedValue({ content: 'validate-interactive result', isError: false })),
+}));
+
 type RegisteredTool = {
     description: string;
     inputSchema: {
@@ -87,17 +93,18 @@ describe('createMcpServer', () => {
         expect(isZodObjectSchema(tools['verify-info'].inputSchema)).toBe(true);
     });
 
-    it('должен регистрировать все 3 инструмента', async () => {
+    it('должен регистрировать все 4 инструмента', async () => {
         const { createMcpServer } = await import('../create-mcp-server');
 
         const server = createMcpServer();
         const tools = getRegisteredTools(server);
         const toolNames = Object.keys(tools);
 
-        expect(toolNames).toHaveLength(3);
+        expect(toolNames).toHaveLength(4);
         expect(toolNames).toContain('validate');
         expect(toolNames).toContain('test-prompt');
         expect(toolNames).toContain('verify-info');
+        expect(toolNames).toContain('validate-interactive');
     });
 
     it('должен содержать validationType в схеме validate', async () => {
@@ -148,5 +155,35 @@ describe('createMcpServer', () => {
         const verifyInfoSchema = tools['verify-info'].inputSchema;
 
         expect(verifyInfoSchema.def?.shape?.input).toBeDefined();
+    });
+
+    it('должен регистрировать инструмент validate-interactive с корректной Zod схемой', async () => {
+        const { createMcpServer } = await import('../create-mcp-server');
+
+        const server = createMcpServer();
+        const tools = getRegisteredTools(server);
+
+        expect(tools['validate-interactive']).toBeDefined();
+        expect(isZodObjectSchema(tools['validate-interactive'].inputSchema)).toBe(true);
+    });
+
+    it('должен содержать filePath в схеме validate-interactive', async () => {
+        const { createMcpServer } = await import('../create-mcp-server');
+
+        const server = createMcpServer();
+        const tools = getRegisteredTools(server);
+        const validateInteractiveSchema = tools['validate-interactive'].inputSchema;
+
+        expect(validateInteractiveSchema.def?.shape?.filePath).toBeDefined();
+    });
+
+    it('должен содержать опциональный validationType в схеме validate-interactive', async () => {
+        const { createMcpServer } = await import('../create-mcp-server');
+
+        const server = createMcpServer();
+        const tools = getRegisteredTools(server);
+        const validateInteractiveSchema = tools['validate-interactive'].inputSchema;
+
+        expect(validateInteractiveSchema.def?.shape?.validationType).toBeDefined();
     });
 });

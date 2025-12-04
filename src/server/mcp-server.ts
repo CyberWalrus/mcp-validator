@@ -1,12 +1,13 @@
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-
 import { initializePromptCache } from '../lib/cache';
 import { error, info } from '../lib/helpers/logger/index';
+import { APP_CONFIG } from '../model/config';
 import { createMcpServer } from './create-mcp-server';
 import { setupGracefulShutdown } from './setup-graceful-shutdown';
+import type { TransportType } from './transports';
+import { startHttpTransport, startStdioTransport } from './transports';
 
-/** Запуск MCP сервера в постоянном режиме */
-export async function startMcpServer(): Promise<void> {
+/** Запуск MCP сервера с выбранным транспортом */
+export async function startMcpServer(transport?: TransportType): Promise<void> {
     try {
         info('🔄 Инициализация кэша промптов...');
         const cacheResult = initializePromptCache();
@@ -15,13 +16,17 @@ export async function startMcpServer(): Promise<void> {
         info('📦 Создание MCP сервера...');
         const server = createMcpServer();
 
-        info('🔌 Создание stdio transport...');
-        const transport = new StdioServerTransport();
+        const transportType = transport ?? APP_CONFIG.mcp.transport.type;
+        info(`🚀 Запуск MCP сервера (транспорт: ${transportType})...`);
 
-        info('🚀 Подключение к transport...');
-        await server.connect(transport);
+        if (transportType === 'http') {
+            const { host, port } = APP_CONFIG.mcp.transport.http;
+            await startHttpTransport(server, { host, port });
+        } else {
+            await startStdioTransport(server);
+        }
 
-        info('✅ MCP сервер запущен и готов к работе');
+        info('✅ MCP сервер готов к работе');
 
         setupGracefulShutdown();
 

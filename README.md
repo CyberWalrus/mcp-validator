@@ -10,6 +10,10 @@
 - [Подключение к Cursor IDE](#подключение-к-cursor-ide)
 - [Переменные окружения](#переменные-окружения)
 - [Инструменты MCP](#инструменты-mcp)
+- [Промпты MCP](#промпты-mcp)
+- [Ресурсы MCP](#ресурсы-mcp)
+- [HTTP режим](#http-режим)
+- [Интерактивная валидация](#интерактивная-валидация)
 - [CLI режим](#cli-режим)
 - [Локальный запуск](#локальный-запуск)
 - [Технологический стек](#технологический-стек)
@@ -317,6 +321,138 @@ cat ~/.cursor/mcp.json | jq '.mcpServers["mcp-validator"]'
 - Аномалии во времени выполнения
 - Повторяющиеся паттерны в ответах
 - Детальный отчет по каждой итерации
+
+### 3️⃣ verify-info — Проверка информации
+
+```typescript
+{
+  "input": {
+    "type": "content",
+    "data": "TypeScript был создан Microsoft в 2012 году"
+  },
+  "context": "Проверка исторических фактов"
+}
+```
+
+Проверяет достоверность информации через 3 параллельные AI проверки с комбинированным отчётом.
+
+### 4️⃣ validate-interactive — Интерактивная валидация
+
+```typescript
+{
+  "filePath": "/path/to/file.ts",
+  "language": "typescript"
+}
+```
+
+Запускает интерактивный режим с выбором типа валидации через elicitation (диалоговое окно в IDE).
+
+## Промпты MCP
+
+MCP Validator предоставляет 5 готовых промптов для быстрого запуска валидации:
+
+| Промпт | Описание | Аргументы |
+| --- | --- | --- |
+| `validate-code` | Валидация кода | `filePath`, `focus` (quality/security/performance/all) |
+| `validate-tests` | Валидация тестов | `filePath` |
+| `validate-architecture` | Валидация архитектуры | `filePath` |
+| `test-consistency` | Тест консистентности промпта | `prompt`, `iterations` (3-10) |
+| `verify-facts` | Проверка фактов | `text` |
+
+**Использование в Cursor:**
+
+```
+/validate-code filePath=/src/utils.ts focus=quality
+```
+
+## Ресурсы MCP
+
+MCP Validator предоставляет 4 ресурса для получения информации:
+
+| URI | Описание | MIME-тип |
+| --- | --- | --- |
+| `validator://config` | Текущая конфигурация валидатора | `application/json` |
+| `validator://prompts/{type}` | Промпт для указанного типа валидации | `text/markdown` |
+| `validator://languages` | Список поддерживаемых языков | `application/json` |
+| `validator://help` | Справка по инструментам | `text/markdown` |
+
+**Пример чтения ресурса:**
+
+```typescript
+// Получить конфигурацию
+const config = await client.readResource("validator://config");
+
+// Получить промпт валидации кода
+const prompt = await client.readResource("validator://prompts/code");
+```
+
+## HTTP режим
+
+MCP Validator поддерживает Streamable HTTP транспорт для интеграции с веб-приложениями.
+
+**Настройка HTTP режима:**
+
+```json
+{
+    "mcpServers": {
+        "mcp-validator": {
+            "command": "npx",
+            "args": ["-y", "mcp-validator"],
+            "env": {
+                "OPENROUTER_API_KEY": "sk-or-v1-xxx",
+                "MCP_TRANSPORT": "http",
+                "MCP_HTTP_PORT": "8080",
+                "MCP_HTTP_HOST": "0.0.0.0"
+            }
+        }
+    }
+}
+```
+
+**Эндпоинты:**
+
+| Метод | Путь | Описание |
+| --- | --- | --- |
+| `POST` | `/mcp` | JSON-RPC запросы к MCP серверу |
+| `GET` | `/mcp` | SSE стрим для событий |
+| `DELETE` | `/mcp` | Закрытие сессии |
+| `GET` | `/health` | Проверка состояния сервера |
+
+**Пример запроса:**
+
+```bash
+curl -X POST http://localhost:8080/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+## Интерактивная валидация
+
+Инструмент `validate-interactive` использует MCP elicitation для интерактивного выбора типа валидации.
+
+**Как это работает:**
+
+1. Вызовите инструмент с путём к файлу
+2. IDE покажет диалоговое окно с выбором типа валидации
+3. Выберите нужный тип (code, tests, architecture, prompts, documentation)
+4. Валидация запустится автоматически
+
+**Преимущества:**
+
+- Не нужно запоминать типы валидации
+- Быстрый выбор через UI
+- Поддержка отмены операции
+
+**Пример использования:**
+
+```typescript
+{
+  "filePath": "/src/components/Button.tsx",
+  "context": "Проверка компонента перед коммитом"
+}
+```
+
+Если тип валидации указан явно (`validationType`), диалоговое окно не появится.
 
 ## CLI режим
 

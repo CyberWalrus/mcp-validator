@@ -3,12 +3,15 @@ export type {
     ApiConfig,
     AppConfig,
     ConsistencyThresholdsConfig,
+    HttpTransportConfig,
     LoggingConfig,
     LogLevel,
     ModelConfig,
     PathsConfig,
     RuntimeConfig,
     TimeoutsConfig,
+    TransportConfig,
+    TransportType,
     ValidationLimitsConfig,
 } from './types';
 

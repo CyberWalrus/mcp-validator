@@ -60,11 +60,27 @@ export const consistencyThresholdsSchema = z.object({
     varianceMedium: z.number().min(0).max(1).default(0.5),
 });
 
+/** Схема валидации типа транспорта */
+export const transportTypeSchema = z.enum(['stdio', 'http']);
+
+/** Схема валидации конфигурации HTTP транспорта */
+export const httpTransportConfigSchema = z.object({
+    host: z.string().default('0.0.0.0'),
+    port: z.coerce.number().int().positive().default(8000),
+});
+
+/** Схема валидации конфигурации транспорта */
+export const transportConfigSchema = z.object({
+    http: httpTransportConfigSchema,
+    type: transportTypeSchema.default('stdio'),
+});
+
 /** Схема валидации конфигурации MCP сервера */
 export const mcpConfigSchema = z.object({
     description: z.string().default('Production-ready MCP validator for Cursor IDE with 4 validation types'),
     name: z.string().default('mcp-validator'),
     protocolVersion: z.string().default('2024-11-05'),
+    transport: transportConfigSchema,
     version: z.string().default('0.3.0'),
 });
 

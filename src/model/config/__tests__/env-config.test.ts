@@ -33,6 +33,13 @@ describe('initializeAppConfig', () => {
                 description: 'Production-ready MCP validator for Cursor IDE with 4 validation types',
                 name: 'mcp-validator',
                 protocolVersion: '2024-11-05',
+                transport: {
+                    http: {
+                        host: '0.0.0.0',
+                        port: 8000,
+                    },
+                    type: 'stdio',
+                },
                 version: '0.3.0',
             },
             model: {

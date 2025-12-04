@@ -23,6 +23,7 @@ import type {
     apiConfigSchema,
     appConfigSchema,
     consistencyThresholdsSchema,
+    httpTransportConfigSchema,
     loggingConfigSchema,
     logLevelSchema,
     mcpConfigSchema,
@@ -30,6 +31,8 @@ import type {
     pathsConfigSchema,
     runtimeConfigSchema,
     timeoutsConfigSchema,
+    transportConfigSchema,
+    transportTypeSchema,
     validationLimitsSchema,
 } from './schemas';
 
@@ -61,6 +64,15 @@ export type ValidationLimitsConfig = z.infer<typeof validationLimitsSchema>;
 
 /** Настройки порогов консистентности */
 export type ConsistencyThresholdsConfig = z.infer<typeof consistencyThresholdsSchema>;
+
+/** Тип транспорта для MCP сервера */
+export type TransportType = z.infer<typeof transportTypeSchema>;
+
+/** Настройки HTTP транспорта */
+export type HttpTransportConfig = z.infer<typeof httpTransportConfigSchema>;
+
+/** Настройки транспорта */
+export type TransportConfig = z.infer<typeof transportConfigSchema>;
 
 /** Настройки MCP сервера */
 export type McpConfig = z.infer<typeof mcpConfigSchema>;
