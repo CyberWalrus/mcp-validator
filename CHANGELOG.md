@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.7.1] - 2025-12-05
+
+<small>05.12.2025 02:47</small>
+
+### Changed
+
+- **MCP server refactoring to high-level McpServer API**
+    - Refactored MCP server to use high-level McpServer API
+    - Updated server creation and initialization logic
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/2a46465" target="_blank">2a46465</a>
+
+- **E2E test configuration updates**
+    - Updated E2E test configuration
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/50215bc" target="_blank">50215bc</a>
+
+- **Uncommitted changes in README.md** – documentation updates
+- **Uncommitted changes in package.json** – version update to 0.7.1
+- **Uncommitted changes in prompts/tools/mcp-tools-description.md** – tool description updates
+- **Uncommitted changes in src/model/config/** – configuration module updates
+- **Uncommitted changes in src/server/** – server module updates
+- **Uncommitted changes in end-to-end/prompts-resources.e2e.test.ts** – new E2E test for prompts resources
+- **Uncommitted changes in end-to-end/validate-interactive-tool.e2e.test.ts** – new E2E test for interactive validation tool
+- **Uncommitted changes in src/server/elicitation/** – new elicitation module
+- **Uncommitted changes in src/server/prompts/** – new prompts module
+- **Uncommitted changes in src/server/resources/** – new resources module
+- **Uncommitted changes in src/server/transports/** – new transports module
+- **Uncommitted changes in src/tools/validate-interactive-tool/** – new interactive validation tool
+
+### Tests
+
+- **Unit tests for MCP server creation**
+    - Added comprehensive unit tests for createMcpServer function
+    - Tests cover server instance creation, tool registration, and schema validation
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/32c47c0" target="_blank">32c47c0</a>
+
 ## [0.7.0] - 2025-12-05
 
 <small>05.12.2025 00:49</small>
