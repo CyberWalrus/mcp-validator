@@ -45,9 +45,9 @@ This prompt is self-contained. It includes a minimal, authoritative glossary of 
 
 **High Cohesion (inside module):**
 
-- Types used by component → same folder
-- Helpers used by one function → same file or folder
-- Constants for one feature → inside that feature
+- Types used by component → same folder's `types.ts` (not scattered across modules)
+- Helpers used by one function → same file or folder's `helpers.ts`
+- Constants for one feature → inside that feature's `constants.ts`
 
 **Low Coupling (between modules):**
 
@@ -63,7 +63,7 @@ This prompt is self-contained. It includes a minimal, authoritative glossary of 
 | 2 places in SAME module | Module ROOT (types.ts, helpers.ts) | — |
 | 3+ modules OR >50 lines | Consider extraction to shared | Requires confirmation |
 
-**Never auto-extract.** Duplication is acceptable if it improves change speed.
+**Never auto-extract.** Duplication is acceptable if it improves change speed. Auto-extraction to shared requires explicit user confirmation.
 
 ### Architectural Types (authoritative)
 
@@ -170,8 +170,40 @@ Files changed: {list of affected files}
 - Flag issues in both existing architecture and recent changes
 - Prioritize validation of modified/new components
 
+**Priority Processing (when DIFF present in context):**
+
+When context contains `scope=planning` and DIFF section:
+
+1. **Parse DIFF section** → extract NEW/MODIFIED/REMOVED lists
+2. **Validate NEW items FIRST** (highest priority):
+   - Correct placement per architecture type
+   - Naming follows conventions
+   - Facade present (if module)
+   - No god file risk (< 500 lines planned)
+   - Cohesion with related code maintained
+3. **Validate MODIFIED items** (high priority):
+   - Change maintains cohesion
+   - No coupling violations introduced
+   - Layer dependencies preserved
+   - No breaking changes to public API
+4. **Validate REMOVED items** (check for orphans):
+   - No orphan imports remain in codebase
+   - Related code updated or migrated
+   - No broken dependencies
+5. **THEN validate overall architecture consistency**
+   - Existing structure still valid
+   - New additions integrate properly
+   - No conflicts between changes
+
+**DIFF Validation Weight:**
+
+- Issues in NEW items: weight × 1.5 (new code must be clean)
+- Issues in MODIFIED items: weight × 1.0 (standard)
+- Issues in REMOVED items: weight × 1.2 (orphans are critical)
+- Issues in existing (unchanged) code: weight × 0.5 (lower priority during planning)
+
 <completion_criteria>
-Architecture files loaded directly; diff context parsed; validation scope focused on changes while ensuring overall consistency.
+Architecture files loaded directly; diff context parsed; validation scope focused on changes while ensuring overall consistency. When DIFF present: NEW items validated first, then MODIFIED, then REMOVED, then overall consistency.
 </completion_criteria>
 
 <exception_handling>
@@ -320,6 +352,40 @@ For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
 - [ ] shared/api optional: fetch requests in slice service files are acceptable
 - [ ] entities/service: may contain business logic if no features layer
 
+#### Diff-Specific Checklist (when scope=planning)
+
+When context contains `scope=planning` with DIFF section, apply these checks IN ADDITION to type-specific checklist:
+
+**For each NEW file/module (from DIFF → NEW):**
+
+- [ ] Correct placement per architecture type (layer, segment, module location)
+- [ ] Naming follows conventions (kebab-case files, PascalCase components)
+- [ ] Facade present if creating new module (index.ts)
+- [ ] No god file risk (planned file < 500 lines)
+- [ ] Related types/constants colocated (not scattered)
+- [ ] Layer dependency rules respected (no upward imports)
+
+**For each MODIFIED file/module (from DIFF → MODIFIED):**
+
+- [ ] Change maintains cohesion (related code stays together)
+- [ ] No coupling violations introduced (no new internal imports)
+- [ ] Public API changes documented (if facade exports change)
+- [ ] Tests coverage maintained (test file exists or will be created)
+- [ ] No breaking changes without migration plan
+
+**For each REMOVED file/module (from DIFF → REMOVED):**
+
+- [ ] No orphan imports remain (other files don't import removed file)
+- [ ] Related code migrated or updated
+- [ ] Tests updated (removed or migrated)
+- [ ] No broken facades (removed file was not re-exported)
+
+**Cross-Change Validation:**
+
+- [ ] NEW items don't duplicate existing code (check for similar existing modules)
+- [ ] MODIFIED + REMOVED don't break layer hierarchy
+- [ ] All changes together maintain architectural consistency
+
 #### Import Graph Heuristics (optional if input lacks imports)
 
 When imports are absent in input, apply structural heuristics:
@@ -429,18 +495,31 @@ Compile all findings into structured validation report.
 
 **Generate `<architecture_validation_result>` with:**
 
-1. **Summary:** Architecture type, score (0-100), status, input format, compliance
+1. **Summary:** Architecture type, score (0-100), status, input format, compliance, validation mode (full/planning)
 2. **Validation Results:** Cohesion/Coupling/Placement + Facades/Layers/Imports/Tests tallies
-3. **Critical Issues:** Cohesion/Coupling issues first, then structural issues
+3. **Critical Issues:** Group by change type when scope=planning (NEW → MODIFIED → REMOVED → EXISTING)
 4. **Recommendations:** Priority-ordered fixes (BLOCKS PRODUCTION → HIGH → MEDIUM → LOW)
 
-**Score Calculation:**
+**Score Calculation (standard mode):**
 
 - Start with 100
 - Subtract 15 per CRITICAL cohesion/coupling issue
 - Subtract 10 per CRITICAL structural issue
 - Subtract 5 per HIGH issue
 - Minimum score: 0
+
+**Score Calculation (planning mode - when scope=planning in context):**
+
+Apply weighted scoring based on change type:
+
+- Start with 100
+- **NEW items violations:** -15 × 1.5 = -22 per CRITICAL, -5 × 1.5 = -8 per HIGH (new code must be clean)
+- **MODIFIED items violations:** -15 per CRITICAL, -5 per HIGH (standard weight)
+- **REMOVED items violations:** -10 × 1.2 = -12 per CRITICAL orphan (orphans are critical)
+- **EXISTING (unchanged) issues:** -15 × 0.5 = -8 per CRITICAL, -5 × 0.5 = -3 per HIGH (lower priority during planning)
+- Minimum score: 0
+
+**Planning mode focus:** Issues in planned changes (NEW/MODIFIED/REMOVED) are prioritized over existing architecture issues.
 
 <completion_criteria>
 Validation report generated in `<architecture_validation_result>` format with all sections filled
@@ -475,6 +554,7 @@ Use this EXACT format optimized for MCP validator processing:
 **Architecture Score:** [0-100]/100
 **Status:** ✅ Production Ready / ⚠️ Needs Review / ❌ Critical Issues
 **Input Format:** file_tree|code_structure|description|schema
+**Validation Mode:** full | planning (scope=planning)
 **Standards Compliance:** ✅ Yes / ❌ No
 </summary>
 
@@ -492,34 +572,62 @@ Use this EXACT format optimized for MCP validator processing:
 **Layers:** X/Y
 **Imports:** X/Y
 **Tests:** X/Y
+
+<!-- Planning mode: DIFF summary (when scope=planning) -->
+
+**DIFF Coverage:** NEW: X items | MODIFIED: Y items | REMOVED: Z items
+**Change Validation:** X/Y items validated
 </validation_results>
 
 <critical_issues>
 
-<!-- Cohesion/Coupling issues FIRST -->
+<!-- PLANNING MODE: Group by change type (NEW → MODIFIED → REMOVED → EXISTING) -->
+
+<!-- Issues in NEW items (highest priority, weight ×1.5) -->
+**[NEW]** Issues in planned new files/modules:
+
+- **[CRITICAL]** {new_file}: Wrong placement - should be in {correct_layer}
+- **[CRITICAL]** {new_module}: Missing facade index.ts
+- **[HIGH]** {new_file}: Naming violation - should be {correct_name}
+
+<!-- Issues in MODIFIED items (standard priority) -->
+**[MODIFIED]** Issues in planned changes:
+
+- **[CRITICAL]** {modified_file}: Change breaks cohesion - types scattered
+- **[HIGH]** {modified_module}: New coupling violation introduced
+
+<!-- Issues in REMOVED items (orphan check, weight ×1.2) -->
+**[REMOVED]** Orphan risks from planned deletions:
+
+- **[CRITICAL]** {removed_file}: Still imported by {other_file} - will break
+
+<!-- Issues in EXISTING unchanged code (lower priority, weight ×0.5) -->
+**[EXISTING]** Pre-existing issues (not blocking for planning):
 
 - **[CRITICAL]** God file detected: {file} has 500+ lines with unrelated code
-- **[CRITICAL]** Scattered code: {feature} types/helpers spread across distant folders
+- **[HIGH]** Scattered code: {feature} types/helpers spread across distant folders
+
+<!-- FULL MODE: Standard grouping (Cohesion/Coupling first, then structural) -->
+
+<!-- Cohesion/Coupling issues FIRST -->
 - **[CRITICAL]** Internal import bypassing facade: {module} imports from {internal_path}
 - **[CRITICAL]** Circular dependency between modules {A} and {B}
 
 <!-- Structural issues -->
-
 - **[CRITICAL]** Module violates Single Responsibility Principle
 - **[CRITICAL]** Missing encapsulation - internal code exposed
-- **[CRITICAL]** Facade index.ts contains logic (should be re-exports only)
 </critical_issues>
 
 <recommendations>
-<!-- Cohesion/Coupling fixes FIRST -->
-1. **[BLOCKS PRODUCTION]** Move scattered code to single module (colocation)
-2. **[BLOCKS PRODUCTION]** Split god files into modular units
-3. **[HIGH]** Fix internal imports: use facade imports only
-4. **[HIGH]** Fix circular dependencies: extract to lower layer
+<!-- PLANNING MODE: Prioritize change-related fixes -->
+1. **[BLOCKS PRODUCTION]** Fix NEW item placement: move {file} to {correct_location}
+2. **[BLOCKS PRODUCTION]** Add facade for new module: create {module}/index.ts
+3. **[HIGH]** Update imports before REMOVE: migrate {file} consumers first
+4. **[HIGH]** Fix MODIFIED cohesion: colocate {types} with {component}
 
-<!-- Structural fixes -->
+<!-- Standard fixes -->
 5. **[MEDIUM]** Enforce facades per module/slice (index.ts)
-6. **[LOW]** Align tests colocations per module/slice
+6. **[LOW]** Address pre-existing issues after current changes complete
 </recommendations>
 
 </architecture_validation_result>
