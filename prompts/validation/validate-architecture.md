@@ -1,9 +1,6 @@
 ---
 id: validate-architecture-v3
 type: algorithm
-use_cases: ['architecture_validation', 'modular_design_check', 'mcp_validator_integration', 'production_readiness']
-prompt_language: 'mixed'
-response_language: ru
 alwaysApply: false
 ---
 
@@ -27,67 +24,103 @@ Critical thinking: challenge architect's assumptions, seek alternative approache
 <reference_overview>
 This prompt is self-contained. It includes a minimal, authoritative glossary of architectural terms and XML tags used to describe project structures. Use these rules exclusively when validating input.
 
+### Golden Rule (PRIMARY)
+
+**Code lives where it is used.** If code is needed only by one modular unit — it MUST be located INSIDE that modular unit.
+
+### Terminology
+
+| Term | Definition |
+|:---|:---|
+| **Modular Unit** | Isolated code block with public API and single responsibility |
+| **Facade** | Entry point (index.ts) exposing public API, hiding internals |
+| **Cohesion** | How related code is grouped together inside module (higher = better) |
+| **Coupling** | Dependencies between modules (lower = better) |
+| **Colocation** | Placing code next to where it's used |
+| **Layer** | Vertical abstraction level with dependency rules |
+| **Slice** | Horizontal module within a layer (FSD term) |
+| **Segment** | Functional block inside slice: ui, model, lib |
+
+### Cohesion and Coupling (CRITICAL)
+
+**High Cohesion (inside module):**
+
+- Types used by component → same folder
+- Helpers used by one function → same file or folder
+- Constants for one feature → inside that feature
+
+**Low Coupling (between modules):**
+
+- Modules communicate only through facades (never internal paths)
+- Shared contracts via types from lower layers
+- Props/parameters (no hidden dependencies)
+
+### Placement Rules
+
+| Where is code used? | Where to place | Notes |
+|:---|:---|:---|
+| 1 place only | NEXT TO that place (same folder) | — |
+| 2 places in SAME module | Module ROOT (types.ts, helpers.ts) | — |
+| 3+ modules OR >50 lines | Consider extraction to shared | Requires confirmation |
+
+**Never auto-extract.** Duplication is acceptable if it improves change speed.
+
 ### Architectural Types (authoritative)
 
 - single_module — Minimal modular unit; one facade `src/index.ts`, one main function per file, tests in `src/__tests__/`.
 - layered_library — Multi-module package with thematic layers (`api`, `ui`, `lib`, `model`, optional extras). Each module has `index.ts` facade; no cross-imports within same layer.
-- fsd_standard — Feature-Sliced Design without domains: layers `app`, `pages`, `widgets`, `features`, `entities`, `shared`, `core`; slices with facades and optional segments.
+- fsd_standard — Feature-Sliced Design without domains: only `app/` mandatory, add layers as project grows (`pages`, `widgets`, `features`, `entities`, `shared`); slices with facades and optional segments.
 - fsd_domain — FSD with domains: domain directories inside `widgets/features/entities` (`user`, `payments`, etc.), public APIs via facades, no cross-imports within 1 layer of same domain.
 - server_fsd — Backend-oriented FSD-like with backend layers (e.g., `controllers`, `services`, `models`, `repositories`, `middleware`, `config`, `utils`, `adapters`, `gateways`).
 - multi_app_monolith — Multiple `<application>` containers in one package, each with its own entrypoint; common code in `applications/common`.
 
-### XML Tags (authoritative)
+### XML Tags (minimal)
 
-- `<package_root>` — single root container.
-- `<source_directory name="src">` — sources location; `name` can differ (use provided).
-- `<prompts_directory name="prompts">` — container for prompt templates.
-- `<application name="...">` — isolated app (multi_app_monolith only); must contain `<entrypoint>`.
-- `<entrypoint name="index.ts">` — entry for app/package/module scope.
-- `<layer name="..." purpose="...">` — semantic layer per type.
-- `<directory name="...">` — grouping node (domains, bases, etc.).
-- `<module name="...">` — modular unit; MUST have `<facade name="index.ts" role="..."/>`.
-- `<facade name="index.ts" role="unit_facade|slice_facade|sub_facade" />` — public API surface; forbids exporting internal helpers.
-- `<segment name="ui|model|service|lib|..." purpose="...">` — internal grouping inside slices/modules (FSD/multi-app).
-- `<file name="..." role="function|component|types|helper|config|workflow|schemas|adapter|asset" />` — code file descriptor.
-- `<test name="..." role="unit_test|integration_test|e2e_test" />` — colocated test file.
-- `<tests_directory name="__tests__">` — container for test files outside `src`.
-- `<config_files>` — container for project configuration files.
-- `<documentation>` — container for documentation files.
+| Tag | Purpose | Required Attrs |
+|:---|:---|:---|
+| `<package_root>` | Root element | — |
+| `<source_directory>` | Source folder | `name` |
+| `<entrypoint>` | Entry file | `name` |
+| `<layer>` | Semantic layer | `name`, `purpose` |
+| `<directory>` | Grouping node | `name` |
+| `<module>` | Modular unit | `name` |
+| `<facade>` | Module facade | `name`, `role` |
+| `<file>` | Code file | `name`, `role` |
+| `<test>` | Test file | `name`, `role` |
+| `<application>` | App container (multi_app only) | `name` |
 
-### Standardized Metadata (authoritative)
+### Forbidden Practices (CRITICAL)
 
-To improve precision, the following standardized attributes and blocks are supported:
+| Practice | Why Forbidden | Fix |
+|:---|:---|:---|
+| God files (500+ lines) | Dump for unrelated code | Split into modular units |
+| Cross-imports (same layer) | Creates hidden coupling | Extract to lower layer or duplicate |
+| Scattered related code | Breaks cohesion | Move to single module |
+| Internal imports (bypass facade) | Breaks encapsulation | Import from index.ts only |
+| Circular dependencies | Architectural violation | Restructure or extract |
+| Auto-extracting to shared | Premature abstractions | Ask user first |
 
-1. File-level metadata block (optional, can appear in any file or bundle):
+### File Structure Rules
 
-```xml
-<architecture_metadata version="1" language="ts">
-  <architecture_type>layered_library|fsd_standard|fsd_domain|single_module|server_fsd|multi_app_monolith</architecture_type>
-  <package_name>@scope/package</package_name>
-  <workspace_path>executables/tools/mcp-validator</workspace_path>
-  <source_root>src</source_root>
-  <entrypoints>
-    <entrypoint path="src/index.ts" />
-  </entrypoints>
-  <ruleset>morj-2025-09</ruleset>
-  <source_revision>git:HEAD_SHA</source_revision>
-  <generated_at>2025-01-01T00:00:00Z</generated_at>
-  <validator_min_version>1</validator_min_version>
-</architecture_metadata>
-```
+**One function per file** — each file contains one main function/component (exception: `helpers.ts` for small related helpers).
 
-1. Tag-level standardized attributes:
+**Mandatory separation:**
 
-- `<package_root name="@scope/package" source_root="src" architecture_type="layered_library" version="1" />`
-- `<layer name="lib" purpose="utilities" order="30" />`
-- `<directory name="helpers" group="helpers" />`
-- `<module name="format-date" path="src/lib/helpers/format-date" layer="lib" visibility="public|internal" status="ready|problems|stub" owners="team-frontend" tags="date,format" />`
-- `<facade name="index.ts" role="unit_facade" exports="formatDate" path="src/lib/helpers/format-date/index.ts" />`
-- `<file name="format-date.ts" role="function" path="src/lib/helpers/format-date/format-date.ts" exports="formatDate" visibility="internal" />`
-- `<test name="__tests__/format-date.test.ts" role="unit_test" framework="vitest" scope="unit" />`
-- `<application name="admin-frontend" environment="web" />`
+- Types → `types.ts` (functions MUST NOT export types)
+- Constants → `constants.ts` (functions MUST NOT export constants)
+- Schemas → `schemas.ts` (Zod/validation schemas)
 
-Validators must not require all attributes; absence means unknown.
+**File naming:**
+
+- Files: `kebab-case.ts` (`validate-email.ts`)
+- Components: `PascalCase.tsx` (`AuthForm.tsx`)
+- Folders: `kebab-case/` (`auth-form/`)
+
+**Import rules:**
+
+- Inside module: relative (`./types`)
+- Between modules: absolute (`$features/auth`)
+- Always through facade, never internal paths
 
 ### Universal Rules (authoritative)
 
@@ -96,8 +129,8 @@ Validators must not require all attributes; absence means unknown.
 - No cross-imports within the same layer; dependencies go only down the layer hierarchy.
 - Tests colocated near source in `__tests__/`.
 - Domain grouping (fsd_domain) applies only to `widgets/features/entities`.
-- **Facades (`index.ts`):** Re-exports of public API only. No function definitions/logic allowed, except for simple modules (single function, total file content ≤10 lines).
-- **Helpers:** Internal helper functions should be co-located with their primary function. They must be in a separate file if they are exported or complex (>10 lines); private helpers should be inlined.
+- **Facades (`index.ts`):** Re-exports of public API only. Exception: single-file modules ≤10 lines may contain one function directly. Otherwise, functions go in separate files and `index.ts` only re-exports them.
+- **Helpers:** Internal helper functions should be co-located with their primary function. Separate file if exported or complex (>10 lines); private helpers may be inlined.
 
 </reference_overview>
 
@@ -125,7 +158,7 @@ Let's load existing architecture files and understand recent changes through dif
 **Expected context format:**
 
 ```
-Архитектурная валидация: {architecture_type}; scope={full|partial}; package={@scope/name}; цель MCP≥85
+Architecture validation: {architecture_type}; scope={full|partial}; package={@scope/name}; target MCP>=85
 DIFF: {summary of changes - added/modified/removed files or modules}
 Files changed: {list of affected files}
 ```
@@ -188,16 +221,18 @@ Let's analyze deeper. Check compliance with architecture-guide.md standards usin
 Select checklist by `architecture_type`:
 
 - single_module:
-    - [ ] Facade: `src/index.ts` is present
-    - [ ] One file = one function; types in `src/types.ts`
-    - [ ] No FSD layers; tests in `src/__tests__/`
-    - [ ] Named exports only; no default exports
+  - [ ] Facade: `src/index.ts` is present
+  - [ ] One file = one function; types in `src/types.ts`
+  - [ ] No FSD layers; tests in `src/__tests__/`
+  - [ ] Named exports only; no default exports
 
 - layered_library:
-    - [ ] `src/index.ts` as package facade
-    - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional)
-    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-    - [ ] Tests colocated per module in `__tests__/`
+  - [ ] `src/index.ts` as package facade
+  - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional: `config/`, `assets/`)
+  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+  - [ ] Tests colocated per module in `__tests__/`
+  - [ ] **Colocation:** Each module contains its own types.ts, helpers.ts, constants.ts
+  - [ ] **Layer dependencies:** ui → lib, model, api; lib → model; api → model; model → nothing
 
 #### Special Case: Model Layer Container Folders
 
@@ -209,67 +244,81 @@ For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
 - [ ] Alternative: `main/` folder with `index.ts` facade for complex sub-groups
 - [ ] No intermediate facades between container and modular unit
 
-Example valid structures:
-
-- `src/model/constants/main.ts` - modular unit (simple)
-- `src/model/schemas/main.ts` - modular unit (simple, re-exports from other files)
-- `src/model/types/main/index.ts` - modular unit (complex, multiple files)
-
-Example invalid structures:
-
-- `src/model/constants/index.ts` - unnecessary facade for container
-- `src/model/schemas/index.ts` then `schemas/main.ts` - double facade
-
 - fsd_standard:
-    - [ ] Layers: app → pages → [widgets]? → [features]? → [entities]? → shared → [core]? (опциональные слои: widgets, features, entities, core)
-    - [ ] Обязательные слои: app, pages, shared. Минимальная конфигурация достаточна для простых проектов
-    - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
-    - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
-    - [ ] Segments (ui/, model/, service/, lib/) опциональны, добавляются по необходимости
-    - [ ] No cross-imports within same layer; only downward dependencies
-    - [ ] Tests placed near slices in `__tests__/`
-    - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
-    - [ ] app может импортировать из любых нижележащих слоев (pages, widgets, features, entities, shared, core если присутствует)
+  - [ ] **Only `app/` is mandatory** — add other layers as project grows
+  - [ ] Layer hierarchy: app → pages → widgets → features → entities → shared
+  - [ ] Layers widgets, features, entities are optional — add as needed
+  - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
+  - [ ] Segments (ui/, model/, lib/, api/) are optional, add as needed
+  - [ ] **Segment colocation:** types in ui/types.ts, model types in model/types.ts
+  - [ ] No cross-imports within same layer; only downward dependencies
+  - [ ] Tests placed near slices in `__tests__/`
+  - [ ] entities/service may contain business logic if features layer is absent
+  - [ ] app can import from any lower layers
+
+#### When to Add FSD Layers
+
+| Trigger | Add Layer |
+|:---|:---|
+| First route | `pages/` |
+| Reusable page section | `widgets/` |
+| User interaction logic | `features/` |
+| Business entity with UI | `entities/` |
+| Cross-cutting utility | `shared/` |
 
 - fsd_domain:
-    - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
-    - [ ] Обязательные слои: app, pages, shared. Опциональные: widgets, features, entities, core
-    - [ ] Опциональный слой core создается для абстракций над библиотеками (роутер, стор, логгер)
-    - [ ] Domain grouping применяется только если существуют соответствующие слои (widgets, features, entities)
-    - [ ] Отсутствие опциональных слоев не является нарушением
-    - [ ] Public API via facades only; no cross-imports inside domain layer
-    - [ ] Inter-domain imports follow vertical hierarchy
-    - [ ] Tests near slices; named exports only
-    - [ ] entities/service может содержать бизнес-логику если слой features отсутствует
+  - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
+  - [ ] Required layers: app, pages, shared. Optional: widgets, features, entities, core
+  - [ ] Optional core layer for library abstractions (router, store, logger)
+  - [ ] Domain grouping applies only when corresponding layers exist (widgets, features, entities)
+  - [ ] Absence of optional layers is not a violation
+  - [ ] Public API via facades only; no cross-imports inside domain layer
+  - [ ] Inter-domain imports follow vertical hierarchy
+  - [ ] Tests near slices; named exports only
+  - [ ] entities/service may contain business logic if features layer is absent
 
 - server_fsd:
-    - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
-    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-    - [ ] Encapsulation respected; tests in `__tests__/`
+  - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
+  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+  - [ ] Encapsulation respected; tests in `__tests__/`
 
 - multi_app_monolith:
-    - [ ] Multiple `<application>` containers; each has its own `entrypoint`
-    - [ ] No direct imports between applications; only via `applications/common`
-    - [ ] Common app uses layered_library rules; each app may use internal architecture
-    - [ ] Tests per application
+  - [ ] Multiple `<application>` containers; each has its own `entrypoint`
+  - [ ] No direct imports between applications; only via `applications/common`
+  - [ ] Common app uses layered_library rules; each app may use internal architecture
+  - [ ] Tests per application
 
 #### Additional Validations (all types)
+
+**Cohesion/Coupling (CRITICAL):**
+
+- [ ] **Cohesion:** Related code grouped in same module (types, helpers, constants colocated)
+- [ ] **Coupling:** No internal imports between modules (only through facades)
+- [ ] **Placement:** Code used by 1 module lives inside that module
+- [ ] **No god files:** Files <500 lines, single responsibility
+- [ ] **No scattered code:** Related functionality in one place
+
+**Structural:**
 
 - [ ] Facade coverage: every `<module>` or slice has exactly one `<facade name="index.ts" .../>`
 - [ ] No internal file import from outside its module (imports limited to facades)
 - [ ] Tests present for testable units (skip for configs/types/constants/assets)
 - [ ] Role consistency: `file.role` matches placement (e.g., `component` only in `ui` segments/layers)
-- [ ] Layer direction: higher layers can depend on any lower layers; опциональные слои (widgets, features, entities, core) могут отсутствовать — это нормально для проектов любого размера (app → может зависеть от pages и shared напрямую в минимальной конфигурации)
-- [ ] Modular units: single file main.ts (simple, role='single_module') or dir with index.ts (complex); model subdirs — single main.ts preferred
-- [ ] Facades: re-exports OR single main function (no multiple definitions); helpers separate if exported >10 lines
+- [ ] Layer direction: higher layers can depend on any lower layers; optional layers may be absent
+- [ ] Modular units: single file main.ts (simple) or dir with index.ts (complex)
+- [ ] Facades: re-exports OR single main function (no multiple definitions)
 - [ ] One main function per file; helpers private/inline if small, separate if exported >10 lines
-- [ ] Naming in exports: module unit name должно присутствовать в экспорте (не обязательно как префикс). Examples: `User`, `UserWidget`, `selectUserByLogin` - все допустимо если содержат название модуля
-- [ ] Constants naming: префиксы обязательны ТОЛЬКО для экспортов в фасадах (`index.ts`). Internal constants without prefixes are allowed: `NAMES`, `GRADE_LEVELS` (inside module). Facade exports require prefixes: `USER_NAMES` (in index.ts)
-- [ ] Segments optional: ui/, model/, service/, lib/ добавляются по необходимости, не все сегменты обязательны
-- [ ] shared/api optional: допустимо временное размещение fetch-запросов в service-файлах слайсов
-- [ ] app initialization: инициализация данных в app/ui/main допустима
-- [ ] entities/service: может содержать бизнес-логику если нет features layer
-- [ ] Metadata conformance: when present, attributes are consistent (e.g., `<module layer="lib">` agrees with actual layer placement; `path` points to existing location). For canonical files, `<architecture_metadata>` MUST include: `architecture_type`, `package_name`, `workspace_path`, `source_root`, `entrypoints`, `ruleset`, `source_revision`, `generated_at`.
+
+**Naming:**
+
+- [ ] Naming in exports: module unit name must be present in export
+- [ ] Constants naming: prefixes required ONLY for facade exports (internal constants without prefixes allowed)
+
+**Optional elements:**
+
+- [ ] Segments (ui/, model/, service/, lib/) add as needed
+- [ ] shared/api optional: fetch requests in slice service files are acceptable
+- [ ] entities/service: may contain business logic if no features layer
 
 #### Import Graph Heuristics (optional if input lacks imports)
 
@@ -287,6 +336,45 @@ If checklist item unclear: document as violation and specify the ambiguity
 If standards conflict: prioritize architecture-guide.md rules
 </exception_handling>
 
+### Step 2.5: Code Cohesion and Coupling Analysis
+
+<cognitive_triggers>
+Evaluate how well code is organized inside modules and how modules interact with each other.
+</cognitive_triggers>
+
+**COHESION CHECKLIST (inside modules):**
+
+- [ ] Related code grouped in same module (types, helpers, constants with their function)
+- [ ] No scattered code across distant folders
+- [ ] Module has single clear responsibility
+- [ ] Types used by component → same folder as component
+- [ ] Helpers used by one function → same file or folder
+
+**COUPLING CHECKLIST (between modules):**
+
+- [ ] Modules communicate only through facades (index.ts)
+- [ ] No internal path imports between modules
+- [ ] Dependencies flow downward only (layer hierarchy)
+- [ ] No circular dependencies between modules
+- [ ] No hidden dependencies (only via props/parameters)
+
+**PLACEMENT VALIDATION:**
+
+- [ ] 1 usage: code is next to usage site (same folder)
+- [ ] 2 usages in same module: code in module root (types.ts, helpers.ts)
+- [ ] 3+ usages across modules: extracted to shared (note if extraction is premature)
+- [ ] No god files (files >500 lines with unrelated code)
+- [ ] No premature extraction to shared (used by <3 modules)
+
+<completion_criteria>
+Cohesion score calculated (items passed / total), coupling violations documented, placement issues flagged
+</completion_criteria>
+
+<exception_handling>
+If cohesion unclear: document module structure and flag for review
+If coupling violation found: suggest specific fix (extract or duplicate)
+</exception_handling>
+
 ### Step 3: Critical Architecture Analysis
 
 <cognitive_triggers>
@@ -301,9 +389,17 @@ Challenge the architect's assumptions. Look for alternatives and potential risks
 - Is modularity sufficient for scaling?
 - Any over-engineering or unnecessary complexity?
 
-**Antipattern Detection (highest priority):**
+**Cohesion/Coupling Antipatterns (highest priority):**
 
+- God files (500+ lines with scattered utilities)
+- Cross-imports between same-layer modules
+- Internal imports bypassing facades
+- Scattered related code across folders
+- Premature extraction to shared (used by <3 modules)
 - Circular dependencies between modules
+
+**Additional Antipattern Detection:**
+
 - God objects/modules with multiple responsibilities
 - Single Responsibility Principle violations
 - Tight coupling between components
@@ -317,12 +413,42 @@ Challenge the architect's assumptions. Look for alternatives and potential risks
 - Security vulnerabilities
 
 <completion_criteria>
-Critical analysis completed, assumptions challenged, risks assessed, alternatives considered
+Critical analysis completed, cohesion/coupling issues prioritized, assumptions challenged, risks assessed
 </completion_criteria>
 
 <exception_handling>
 If analysis reveals contradictions: document with specific examples
 If risks unclear: state limitations rather than speculation
+</exception_handling>
+
+### Step 4: Generate Validation Report
+
+<cognitive_triggers>
+Compile all findings into structured validation report.
+</cognitive_triggers>
+
+**Generate `<architecture_validation_result>` with:**
+
+1. **Summary:** Architecture type, score (0-100), status, input format, compliance
+2. **Validation Results:** Cohesion/Coupling/Placement + Facades/Layers/Imports/Tests tallies
+3. **Critical Issues:** Cohesion/Coupling issues first, then structural issues
+4. **Recommendations:** Priority-ordered fixes (BLOCKS PRODUCTION → HIGH → MEDIUM → LOW)
+
+**Score Calculation:**
+
+- Start with 100
+- Subtract 15 per CRITICAL cohesion/coupling issue
+- Subtract 10 per CRITICAL structural issue
+- Subtract 5 per HIGH issue
+- Minimum score: 0
+
+<completion_criteria>
+Validation report generated in `<architecture_validation_result>` format with all sections filled
+</completion_criteria>
+
+<exception_handling>
+If any required data missing: note as "Unable to validate" in that section
+If score calculation unclear: document assumptions
 </exception_handling>
 
 </algorithm_steps>
@@ -354,34 +480,46 @@ Use this EXACT format optimized for MCP validator processing:
 
 <validation_results>
 
+<!-- Cohesion/Coupling metrics (PRIORITY) -->
+
+**Cohesion:** X/Y (related code grouped in modules)
+**Coupling:** X/Y (facades-only imports between modules)
+**Placement:** X/Y (code lives where it's used)
+
 <!-- Type-specific tallies -->
 
 **Facades:** X/Y
 **Layers:** X/Y
 **Imports:** X/Y
 **Tests:** X/Y
-**Metadata:** X/Y
 </validation_results>
 
 <critical_issues>
 
-<!-- Only production-blocking issues -->
+<!-- Cohesion/Coupling issues FIRST -->
+
+- **[CRITICAL]** God file detected: {file} has 500+ lines with unrelated code
+- **[CRITICAL]** Scattered code: {feature} types/helpers spread across distant folders
+- **[CRITICAL]** Internal import bypassing facade: {module} imports from {internal_path}
+- **[CRITICAL]** Circular dependency between modules {A} and {B}
+
+<!-- Structural issues -->
 
 - **[CRITICAL]** Module violates Single Responsibility Principle
-- **[CRITICAL]** Circular dependency between modules A and B
 - **[CRITICAL]** Missing encapsulation - internal code exposed
-- **[CRITICAL]** Facade index.ts violates re-exports only (has logic/functions: list them)
-  </critical_issues>
+- **[CRITICAL]** Facade index.ts contains logic (should be re-exports only)
+</critical_issues>
 
 <recommendations>
-<!-- Priority-ordered actionable steps; include type-specific hints -->
-1. **[BLOCKS PRODUCTION]** Fix circular dependencies
-2. **[HIGH]** Enforce facades per module/slice (index.ts)
-3. **[MEDIUM]** Remove cross-imports within same layer/domain
-4. **[LOW]** Align tests colocations per module/slice
-1. **[BLOCKS PRODUCTION]** Split facade logic to separate files (one function per file); facade — re-exports only
-2. **[HIGH]** For complex modules, use re-exports in facades; simple modules — single main function (≤10 lines total)
-[HIGH] For simple model subdirs, use single main.ts; complex sub-groups — nested module
+<!-- Cohesion/Coupling fixes FIRST -->
+1. **[BLOCKS PRODUCTION]** Move scattered code to single module (colocation)
+2. **[BLOCKS PRODUCTION]** Split god files into modular units
+3. **[HIGH]** Fix internal imports: use facade imports only
+4. **[HIGH]** Fix circular dependencies: extract to lower layer
+
+<!-- Structural fixes -->
+5. **[MEDIUM]** Enforce facades per module/slice (index.ts)
+6. **[LOW]** Align tests colocations per module/slice
 </recommendations>
 
 </architecture_validation_result>
