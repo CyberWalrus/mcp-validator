@@ -1,5 +1,5 @@
 import { initializePromptCache } from '../lib/cache';
-import { error, info } from '../lib/helpers/logger/index';
+import { error, info } from '../lib/helpers/logger';
 import { APP_CONFIG } from '../model/config';
 import { createMcpServer } from './create-mcp-server';
 import { setupGracefulShutdown } from './setup-graceful-shutdown';
