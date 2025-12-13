@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.2] - 2025-12-13
+
+<small>13.12.2025 07:50</small>
+
+### Changed
+
+- **Uncommitted changes in package.json** – version update to 0.7.2
+- **Uncommitted changes in prompts/validation/validate-architecture.md** – architecture validation prompt updates
+- **Uncommitted changes in src/server/mcp-server.ts** – import path fix
+
 ## [0.7.1] - 2025-12-05
 
 <small>05.12.2025 02:47</small>
