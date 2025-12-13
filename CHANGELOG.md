@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.3] - 2025-12-13
+
+<small>13.12.2025 07:50</small>
+
+### Changed
+
+- **Import path fix in MCP server**
+    - Fixed import path in mcp-server
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/7cd65ba" target="_blank">7cd65ba</a>
+
+- **Uncommitted changes in package.json** – version update to 0.7.3
+- **Uncommitted changes in prompts/validation/validate-architecture.md** – architecture validation prompt updates
+
+### Docs
+
+- **Architecture validation prompt updates**
+    - Updated architecture validation prompt
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/91ec82c" target="_blank">91ec82c</a>
+
 ## [0.7.2] - 2025-12-13
 
 <small>13.12.2025 07:50</small>
