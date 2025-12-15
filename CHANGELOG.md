@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.4] - 2025-12-13
+
+<small>13.12.2025 08:53</small>
+
+### Changed
+
+- **Uncommitted changes in package.json** – version update to 0.7.4
+- **Uncommitted changes in prompts/validation/validate-architecture.md** – architecture validation prompt updates
+- **Uncommitted changes in prompts/validation/validate-code.md** – code validation prompt updates
+- **Uncommitted changes in prompts/validation/validate-documentation.md** – documentation validation prompt updates
+
+### Docs
+
+- **Architecture validation prompt updates**
+    - Updated architecture validation prompt
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/1c1eb7f" target="_blank">1c1eb7f</a>
+
 ## [0.7.3] - 2025-12-13
 
 <small>13.12.2025 07:50</small>
