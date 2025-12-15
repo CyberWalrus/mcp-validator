@@ -33,13 +33,94 @@ This prompt is self-contained. It includes a minimal, authoritative glossary of 
 | Term | Definition |
 |:---|:---|
 | **Modular Unit** | Isolated code block with public API and single responsibility |
-| **Facade** | Entry point (index.ts) exposing public API, hiding internals |
+| **File-module** | Modular unit = 1 file; file itself is the facade |
+| **Folder-module** | Modular unit = folder <6 files; index.ts contains function |
+| **Container** | Folder grouping multiple modular units; has barrel index.ts |
+| **Facade** | Entry point exposing public API, hiding internals |
+| **File-facade** | Single file that IS the module (no index.ts needed) |
+| **Folder-facade** | index.ts with function implementation (NOT re-exports) |
+| **Barrel** | index.ts with ONLY re-exports (for containers/layers) |
 | **Cohesion** | How related code is grouped together inside module (higher = better) |
 | **Coupling** | Dependencies between modules (lower = better) |
 | **Colocation** | Placing code next to where it's used |
 | **Layer** | Vertical abstraction level with dependency rules |
 | **Slice** | Horizontal module within a layer (FSD term) |
 | **Segment** | Functional block inside slice: ui, model, lib |
+
+### Modular Unit Types (CRITICAL)
+
+**Two types of modular units:**
+
+| Type | Structure | Facade | Example |
+|:---|:---|:---|:---|
+| **File-module** | Single `.ts` file | File itself = facade | `format-date.ts` |
+| **Folder-module** | Folder <6 files | `index.ts` with function | `validate-email/index.ts` |
+
+**File-module:** No separate `index.ts` needed. File IS the facade.
+
+```
+shared/lib/format-date.ts    <- This IS the facade
+```
+
+**Folder-module:** `index.ts` contains function (NOT re-exports), internal files not exported.
+
+```
+shared/lib/validate-email/
+├── index.ts       <- Contains function implementation
+├── types.ts       <- Internal (NOT exported)
+└── constants.ts   <- Internal (NOT exported)
+```
+
+### Facade Types (CRITICAL - NO FALSE POSITIVES)
+
+| Facade Type | Contains | When Used |
+|:---|:---|:---|
+| **File-facade** | Function implementation | Module = 1 file |
+| **Folder-facade** | Function implementation | Module = folder <6 files |
+| **Barrel** | Only re-exports | Container grouping modules |
+
+**CRITICAL: Facade Detection Algorithm**
+
+1. Is it a single file with function? → **File-module** (file = facade, NO index.ts needed)
+2. Is it a folder with <6 files? → **Folder-module** (index.ts = function, NOT re-exports)
+3. Is it a folder grouping multiple modules? → **Container** (index.ts = barrel)
+4. Is it a segment inside slice (ui/, model/, lib/)? → **Segment** (NO index.ts, NOT a modular unit)
+5. Is it a layer folder? → **Layer** (no facade needed, or barrel if exports)
+
+**FALSE POSITIVE PREVENTION:**
+
+- DO NOT require `index.ts` for file-modules (`format-date.ts` IS the facade)
+- DO NOT require `index.ts` for segments inside slices (`features/auth/ui/`)
+- DO NOT require `index.ts` for containers in shared (`shared/ui/`, `shared/lib/`)
+- DO NOT require barrel for domain folders (`features/user/`)
+- DO require `index.ts` for folder-modules (`shared/ui/button/`, `shared/lib/validate-email/`)
+- DO require `index.ts` for slice roots (re-exports components)
+
+**CRITICAL: Containers at ANY level have NO index.ts**
+
+Containers can be nested (sub-containers for thematic grouping):
+
+| Context | Folder | Has index.ts? |
+|:---|:---|:---|
+| `shared/ui/` | Container | NO |
+| `shared/lib/` | Container | NO |
+| `shared/lib/helpers/` | Sub-container | NO |
+| `shared/lib/hooks/` | Sub-container | NO |
+| `shared/ui/button/` | Modular unit | YES |
+| `shared/lib/helpers/format-date.ts` | File-module | File IS facade |
+| `features/auth/ui/` | Segment | NO |
+
+**Import directly to modular units (any nesting level):**
+
+```typescript
+// Flat
+import { Button } from '$shared/ui/button';
+import { formatDate } from '$shared/lib/format-date';
+
+// With sub-containers
+import { Button } from '$shared/ui/base/button';
+import { useDebounce } from '$shared/lib/hooks/use-debounce';
+```
 
 ### Cohesion and Coupling (CRITICAL)
 
@@ -125,12 +206,28 @@ This prompt is self-contained. It includes a minimal, authoritative glossary of 
 ### Universal Rules (authoritative)
 
 - One file = one main function/component; named exports only; default exports forbidden.
-- Facade `index.ts` at every module/slice; import only through facades across modules.
 - No cross-imports within the same layer; dependencies go only down the layer hierarchy.
 - Tests colocated near source in `__tests__/`.
 - Domain grouping (fsd_domain) applies only to `widgets/features/entities`.
-- **Facades (`index.ts`):** Re-exports of public API only. Exception: single-file modules ≤10 lines may contain one function directly. Otherwise, functions go in separate files and `index.ts` only re-exports them.
 - **Helpers:** Internal helper functions should be co-located with their primary function. Separate file if exported or complex (>10 lines); private helpers may be inlined.
+
+**Facade Rules (CRITICAL - type-aware):**
+
+- **File-module:** File itself IS the facade. NO separate `index.ts` required.
+- **Folder-module (<6 files):** `index.ts` contains function implementation. Internal files (types.ts, constants.ts) NOT re-exported.
+- **Container/Layer:** `index.ts` is barrel with ONLY re-exports.
+- **Slice (FSD):** `index.ts` in slice ROOT re-exports from files. Segments (ui/, model/) are NOT modular units and have NO index.ts.
+
+**When index.ts is NOT needed:**
+
+- Single file modules (`format-date.ts` = file-module, IS the facade)
+- Domain folders (`features/user/` = container for slices, no facade needed)
+
+**When index.ts IS needed:**
+
+- Folder-modules (contains function + internal files)
+- Containers grouping modules (barrel with re-exports)
+- Slices in FSD (re-exports from components)
 
 </reference_overview>
 
@@ -253,18 +350,18 @@ Let's analyze deeper. Check compliance with architecture-guide.md standards usin
 Select checklist by `architecture_type`:
 
 - single_module:
-  - [ ] Facade: `src/index.ts` is present
-  - [ ] One file = one function; types in `src/types.ts`
-  - [ ] No FSD layers; tests in `src/__tests__/`
-  - [ ] Named exports only; no default exports
+    - [ ] Facade: `src/index.ts` is present
+    - [ ] One file = one function; types in `src/types.ts`
+    - [ ] No FSD layers; tests in `src/__tests__/`
+    - [ ] Named exports only; no default exports
 
 - layered_library:
-  - [ ] `src/index.ts` as package facade
-  - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional: `config/`, `assets/`)
-  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-  - [ ] Tests colocated per module in `__tests__/`
-  - [ ] **Colocation:** Each module contains its own types.ts, helpers.ts, constants.ts
-  - [ ] **Layer dependencies:** ui → lib, model, api; lib → model; api → model; model → nothing
+    - [ ] `src/index.ts` as package facade
+    - [ ] Layers: `api/`, `ui/`, `lib/`, `model/` (and optional: `config/`, `assets/`)
+    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+    - [ ] Tests colocated per module in `__tests__/`
+    - [ ] **Colocation:** Each module contains its own types.ts, helpers.ts, constants.ts
+    - [ ] **Layer dependencies:** ui → lib, model, api; lib → model; api → model; model → nothing
 
 #### Special Case: Model Layer Container Folders
 
@@ -277,16 +374,16 @@ For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
 - [ ] No intermediate facades between container and modular unit
 
 - fsd_standard:
-  - [ ] **Only `app/` is mandatory** — add other layers as project grows
-  - [ ] Layer hierarchy: app → pages → widgets → features → entities → shared
-  - [ ] Layers widgets, features, entities are optional — add as needed
-  - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
-  - [ ] Segments (ui/, model/, lib/, api/) are optional, add as needed
-  - [ ] **Segment colocation:** types in ui/types.ts, model types in model/types.ts
-  - [ ] No cross-imports within same layer; only downward dependencies
-  - [ ] Tests placed near slices in `__tests__/`
-  - [ ] entities/service may contain business logic if features layer is absent
-  - [ ] app can import from any lower layers
+    - [ ] **Only `app/` is mandatory** — add other layers as project grows
+    - [ ] Layer hierarchy: app → [pages]? → [widgets]? → [features]? → [entities]? → [shared]?
+    - [ ] All layers except `app` are optional — add as needed
+    - [ ] Slices have `index.ts` (slice_facade); segments used for complex slices
+    - [ ] Segments (ui/, model/, lib/, api/) are optional, add as needed
+    - [ ] **Segment colocation:** types in ui/types.ts, model types in model/types.ts
+    - [ ] No cross-imports within same layer; only downward dependencies
+    - [ ] Tests placed near slices in `__tests__/`
+    - [ ] entities/service may contain business logic if features layer is absent
+    - [ ] app can import from any lower layers
 
 #### When to Add FSD Layers
 
@@ -299,26 +396,26 @@ For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
 | Cross-cutting utility | `shared/` |
 
 - fsd_domain:
-  - [ ] Layers: app → pages → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → shared → [core]?
-  - [ ] Required layers: app, pages, shared. Optional: widgets, features, entities, core
-  - [ ] Optional core layer for library abstractions (router, store, logger)
-  - [ ] Domain grouping applies only when corresponding layers exist (widgets, features, entities)
-  - [ ] Absence of optional layers is not a violation
-  - [ ] Public API via facades only; no cross-imports inside domain layer
-  - [ ] Inter-domain imports follow vertical hierarchy
-  - [ ] Tests near slices; named exports only
-  - [ ] entities/service may contain business logic if features layer is absent
+    - [ ] Layers: app → [pages]? → [widgets/{domain}]? → [features/{domain}]? → [entities/{domain}]? → [shared]? → [core]?
+    - [ ] **Only `app/` is mandatory** — add other layers as project grows (same as fsd_standard)
+    - [ ] Optional core layer for library abstractions (router, store, logger)
+    - [ ] Domain grouping applies only when corresponding layers exist (widgets, features, entities)
+    - [ ] Absence of optional layers is not a violation
+    - [ ] Public API via facades only; no cross-imports inside domain layer
+    - [ ] Inter-domain imports follow vertical hierarchy
+    - [ ] Tests near slices; named exports only
+    - [ ] entities/service may contain business logic if features layer is absent
 
 - server_fsd:
-  - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
-  - [ ] Each module has `index.ts` facade; no cross-imports inside layer
-  - [ ] Encapsulation respected; tests in `__tests__/`
+    - [ ] Backend layers (controllers, services, models, repositories, middleware, config, utils, adapters, gateways)
+    - [ ] Each module has `index.ts` facade; no cross-imports inside layer
+    - [ ] Encapsulation respected; tests in `__tests__/`
 
 - multi_app_monolith:
-  - [ ] Multiple `<application>` containers; each has its own `entrypoint`
-  - [ ] No direct imports between applications; only via `applications/common`
-  - [ ] Common app uses layered_library rules; each app may use internal architecture
-  - [ ] Tests per application
+    - [ ] Multiple `<application>` containers; each has its own `entrypoint`
+    - [ ] No direct imports between applications; only via `applications/common`
+    - [ ] Common app uses layered_library rules; each app may use internal architecture
+    - [ ] Tests per application
 
 #### Additional Validations (all types)
 
@@ -332,14 +429,21 @@ For `model` layer with container folders (`constants/`, `schemas/`, `types/`):
 
 **Structural:**
 
-- [ ] Facade coverage: every `<module>` or slice has exactly one `<facade name="index.ts" .../>`
+- [ ] Facade coverage: every `<module>` or slice has facade (file-facade OR folder-facade OR barrel)
 - [ ] No internal file import from outside its module (imports limited to facades)
 - [ ] Tests present for testable units (skip for configs/types/constants/assets)
 - [ ] Role consistency: `file.role` matches placement (e.g., `component` only in `ui` segments/layers)
 - [ ] Layer direction: higher layers can depend on any lower layers; optional layers may be absent
-- [ ] Modular units: single file main.ts (simple) or dir with index.ts (complex)
-- [ ] Facades: re-exports OR single main function (no multiple definitions)
 - [ ] One main function per file; helpers private/inline if small, separate if exported >10 lines
+
+**Modular Unit Detection (CRITICAL - NO FALSE POSITIVES):**
+
+- [ ] **File-modules identified:** Single files with function ARE facades (no index.ts required)
+- [ ] **Folder-modules identified:** Folders <6 files with index.ts containing function
+- [ ] **Containers identified:** Folders grouping modules have barrel index.ts
+- [ ] **Segments identified:** ui/, model/, lib/ inside slices are NOT modular units (NO index.ts)
+- [ ] **No false positives:** Don't require index.ts for file-modules or segments
+- [ ] **Internal files hidden:** types.ts, constants.ts inside folder-modules NOT exported through facade
 
 **Naming:**
 
@@ -360,10 +464,12 @@ When context contains `scope=planning` with DIFF section, apply these checks IN 
 
 - [ ] Correct placement per architecture type (layer, segment, module location)
 - [ ] Naming follows conventions (kebab-case files, PascalCase components)
-- [ ] Facade present if creating new module (index.ts)
+- [ ] **Modular unit type identified:** file-module OR folder-module
+- [ ] **Facade correct:** file-module = no index.ts needed; folder-module = index.ts with function
 - [ ] No god file risk (planned file < 500 lines)
 - [ ] Related types/constants colocated (not scattered)
 - [ ] Layer dependency rules respected (no upward imports)
+- [ ] **No false positive:** Don't require index.ts for single-file modules
 
 **For each MODIFIED file/module (from DIFF → MODIFIED):**
 
@@ -624,7 +730,6 @@ Use this EXACT format optimized for MCP validator processing:
 2. **[BLOCKS PRODUCTION]** Add facade for new module: create {module}/index.ts
 3. **[HIGH]** Update imports before REMOVE: migrate {file} consumers first
 4. **[HIGH]** Fix MODIFIED cohesion: colocate {types} with {component}
-
 <!-- Standard fixes -->
 5. **[MEDIUM]** Enforce facades per module/slice (index.ts)
 6. **[LOW]** Address pre-existing issues after current changes complete

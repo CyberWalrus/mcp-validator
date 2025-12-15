@@ -54,16 +54,42 @@ Identify file type to determine applicable validation rules.
 **FILE TYPE DETECTION (check in order):**
 
 1. **Barrel** - ONLY `export { ... } from './module'` statements → Multiple re-exports OK, JSDoc not required, imports from current dir/subdirs only
-2. **Constants** - ONLY `export const` → Multiple exports OK
-3. **Types** - ONLY `type`/`interface` → Multiple exports OK
-4. **Schemas** - ONLY validation schemas → Multiple exports OK
+2. **Constants** - ONLY `export const` (no functions) → Multiple exports OK
+3. **Types** - ONLY `type`/`interface` (no functions) → Multiple exports OK
+4. **Schemas** - ONLY validation schemas (no functions) → Multiple exports OK
 5. **Helpers** - `helpers.ts` with multiple related functions <150 lines → WARNING (prefer separate files)
 6. **Factory** - One main factory + nested private functions → WARNING (prefer extraction)
 7. **Function** - ONE main function export → One-file-one-function applies
 8. **Mixed** - Multiple entity types → CRITICAL violation
 
+**ENTITY SEPARATION DETECTION (CRITICAL):**
+
+Scan file exports to detect mixed entities:
+
+| Pattern | Entity Type | Allowed With |
+|:---|:---|:---|
+| `export function` | Function | Nothing (one per file) |
+| `export const fn =` | Function | Nothing (one per file) |
+| `export type` | Type | Other types only |
+| `export const VAL =` | Constant | Other constants only |
+| `export { x } from` | Re-export | Other re-exports only |
+
+**CRITICAL VIOLATIONS:**
+
+- `export function` + `export type` in same file → CRITICAL (types to types.ts)
+- `export function` + `export const` (non-function) → CRITICAL (constants to constants.ts)
+- Multiple `export function` in same file → CRITICAL (split files)
+- `export function` + `export { ... } from` → CRITICAL (function files don't re-export)
+
+**DETECTION ALGORITHM:**
+
+1. Count `export function` + `export const fn =` → if >1, CRITICAL
+2. Check for `export type` in function file → if found, CRITICAL
+3. Check for `export const VAL =` in function file → if found, CRITICAL
+4. Identify file as Mixed if multiple entity types detected
+
 <completion_criteria>
-File type identified, validation rules selected
+File type identified, entity separation validated, violations detected with CRITICAL severity
 </completion_criteria>
 
 ### Step 1: Code Style and Structure Validation
@@ -82,6 +108,21 @@ Analyze code compliance with standards based on file type.
 - ESM-only (no require/module.exports)
 - Function files MUST NOT export types/constants
 - Minimal private helpers (<10 lines each, max 2-3)
+
+**ENTITY SEPARATION (CRITICAL - SCAN EVERY FILE):**
+
+For function files, scan for these violations:
+
+1. **Type export in function file:** `export type X =` or `export interface X` → CRITICAL
+2. **Constant export in function file:** `export const VAL =` (non-function) → CRITICAL
+3. **Multiple function exports:** More than one `export function` → CRITICAL
+4. **Mixed exports:** Any combination of function + type + constant → CRITICAL
+
+**Detection regex patterns:**
+
+- Function export: `export (async )?function \w+` or `export const \w+ = (\([^)]*\))? =>`
+- Type export: `export (type|interface) \w+`
+- Constant export: `export const [A-Z_]+ =` (SCREAMING_SNAKE_CASE = constant)
 
 **React (if applicable):**
 
@@ -451,48 +492,48 @@ Structured assessment format for MCP processing:
 <!-- List contradictory logic patterns if found -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-    - Impact: [How it affects code]
-    - Fix: [Concrete solution]
-    - Priority: CRITICAL / HIGH / MEDIUM
+  - Impact: [How it affects code]
+  - Fix: [Concrete solution]
+  - Priority: CRITICAL / HIGH / MEDIUM
 
 **LOGIC GAPS:** [0 found / X found]
 
 <!-- List incomplete logic flows and missing validations -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-    - Impact: [Potential runtime errors or edge cases]
-    - Fix: [Add missing validation/error handling]
-    - Priority: CRITICAL / HIGH / MEDIUM
+  - Impact: [Potential runtime errors or edge cases]
+  - Fix: [Add missing validation/error handling]
+  - Priority: CRITICAL / HIGH / MEDIUM
 
 **SIMPLIFICATION OPPORTUNITIES:** [0 found / X found]
 
 <!-- List code that can be simplified without violating rules -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-    - Current: [Current code pattern]
-    - Simplified: [Improved code example]
-    - Benefit: [Readability/performance improvement]
-    - Priority: HIGH / MEDIUM / LOW
+  - Current: [Current code pattern]
+  - Simplified: [Improved code example]
+  - Benefit: [Readability/performance improvement]
+  - Priority: HIGH / MEDIUM / LOW
 
 **FLAT STRUCTURE OPPORTUNITIES:** [0 found / X found]
 
 <!-- List nested conditions that can be flattened with guard clauses -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-    - Current: [Nested structure]
-    - Flat: [Guard clause alternative]
-    - Benefit: [Improved readability and maintainability]
-    - Priority: HIGH / MEDIUM
+  - Current: [Nested structure]
+  - Flat: [Guard clause alternative]
+  - Benefit: [Improved readability and maintainability]
+  - Priority: HIGH / MEDIUM
 
 **OVER-DECOMPOSITION:** [0 found / X found]
 
 <!-- List excessive function extraction that harms readability -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-    - Current: [Multiple small functions]
-    - Recommended: [Inline or consolidate]
-    - Justification: [Why inlining improves code]
-    - Priority: MEDIUM / LOW
+  - Current: [Multiple small functions]
+  - Recommended: [Inline or consolidate]
+  - Justification: [Why inlining improves code]
+  - Priority: MEDIUM / LOW
 
 </deep_analysis>
 

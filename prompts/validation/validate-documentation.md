@@ -15,7 +15,7 @@ alwaysApply: false
 
 <expert_role>
 You are an elite AI Documentation Expert with 10+ years in production documentation systems.
-Specialization: critical analysis of AI documentation (ai-readme.md, ai-module-readme.md), validation against ai-docs-workflow.mdc standards, ensuring quality gates before deployment.
+Specialization: critical analysis of AI documentation (package-ai-docs.md, module-ai-docs.md), validation against ai-docs-workflow.mdc standards, ensuring quality gates before deployment.
 Critical thinking: challenge assumptions, seek alternatives, honestly assess risks.
 
 **ВАЖНО: Все ответы должны быть на русском языке.**
@@ -40,37 +40,47 @@ Let's think step by step. Analyze compliance with AI documentation standards.
 
 **YAML Frontmatter (required):**
 
-**Общие поля:**
+**Common fields:**
 
 - [ ] Field `id` - unique identifier with version suffix
 - [ ] Field `documentation_type` - "ai-package-documentation"|"ai-module-documentation"
 
-**Для пакетной документации (ai-readme.md):**
+**For package-ai-docs.md:**
 
-- [ ] Field `package_context` - name, type, main_exports, workspace_path
-- [ ] Field `context7_refs` - tech stack references (optional)
+- [ ] Field `package_context` - name, type, architecture_type, main_exports, workspace_path
 - [ ] Field `module_docs` - policy: type, rule, targets for module generation
 
-**Для модульной документации (ai-module-readme.md):**
+**For module-ai-docs.md:**
 
 - [ ] Field `module_context` - name, path, parent_package, purpose
 
-**TIER Structure (cross-model):**
+**TIER Structure (NOT applicable to generated AI docs):**
 
-- [ ] `## TIER 1: Expert Role` (mandatory)
-- [ ] `## TIER 2: Algorithm/Process` (mandatory)
-- [ ] `## TIER 3: Output Format` (recommended)
-- [ ] `## TIER 4: Reference/Examples` (optional)
-- [ ] `## TIER 5: Critical Rules` (optional)
+Note: TIER structure is used in TEMPLATES (ai-module-template.md, ai-package-template.md), but NOT in generated documentation (package-ai-docs.md, module-ai-docs.md). Skip this check for generated docs.
 
 **XML Data Structuring:**
 
-- [ ] `<package_purpose>` or `<module_purpose>` - purpose and scope
-- [ ] `<package_structure>` or `<module_structure>` - XML structure representation
-- [ ] `<key_features>` or `<public_api>` - main capabilities
-- [ ] `<architecture_overview>` or `<usage_examples>` - architectural details
-- [ ] `<detailed_modules>` or `<dependencies>` - detailed module information
-- [ ] `<development_commands>` or `<notes>` - development and usage notes
+**For package-ai-docs.md:**
+
+- [ ] `<package_purpose>` - purpose and problems solved
+- [ ] `<package_contract>` - behavioral invariants + API contract
+- [ ] `<design_decisions>` - architectural choices (WHY)
+- [ ] `<business_context>` - business goal, users, criticality, owner
+- [ ] `<test_coverage>` - what is tested, what is NOT tested
+- [ ] `<architecture_overview>` - high-level modules + interactions
+- [ ] `<detailed_modules>` - key modules with status and contracts
+- [ ] `<dependencies>` - external and internal with WHY needed
+- [ ] `<development_commands>` - essential commands
+
+**For module-ai-docs.md:**
+
+- [ ] `<module_purpose>` - 2-3 sentences, responsibility scope
+- [ ] `<contract>` - behavioral invariants + API contract
+- [ ] `<design_decisions>` - WHY this approach, alternatives considered
+- [ ] `<business_context>` - business goal, users, criticality
+- [ ] `<edge_cases>` - boundary conditions and handling
+- [ ] `<public_api>` - exported functions and types (brief)
+- [ ] `<dependencies>` - categorized imports (Node.js, External, Internal)
 
 **System Anchors (machine parsing):**
 
@@ -85,9 +95,8 @@ Let's think step by step. Analyze compliance with AI documentation standards.
 
 **Language Policy Compliance:**
 
-- [ ] If user-facing output: includes "**ВАЖНО: Все ответы должны быть на русском языке.**" in expert_role
-- [ ] Documentation content in Russian where appropriate
-- [ ] Technical terms and code examples in English
+- [ ] Generated documentation content is in Russian
+- [ ] Technical terms and code examples remain in English
       </validation_checklist>
 
 <completion_criteria>
@@ -108,14 +117,14 @@ Let's analyze deeper. Determine correct documentation type and validate against 
 <documentation_type_validation>
 **CRITICAL TYPE DETERMINATION:**
 
-1. **Package Documentation (ai-readme.md):**
+1. **Package Documentation (package-ai-docs.md):**
     - Has `package.json` file in root
     - Contains `package_context` in YAML with name, type, main_exports, workspace_path
     - Includes `module_docs` policy with type, rule, targets
     - Follows ai-package-template.md structure
     - Uses terminology "архитектурный модуль/пакет" throughout content
 
-2. **Module Documentation (ai-module-readme.md):**
+2. **Module Documentation (module-ai-docs.md):**
     - Single module unit with `index.ts` facade
     - Contains `module_context` in YAML with name, path, parent_package, purpose
     - Follows ai-module-template.md structure
@@ -123,11 +132,11 @@ Let's analyze deeper. Determine correct documentation type and validate against 
     - Focused, essential content (recommended under 150 lines)
 
 3. **Type Selection Validation (based on ai-docs-workflow.mdc):**
-    - Package.json present → ai-readme.md (package documentation)
-    - Single function/component in folder → ai-module-readme.md (module documentation)
-    - Multiple related functions with facade → ai-module-readme.md
-    - Large FSD layer (shared, features) → ai-readme.md
-    - If ai-readme.md has module_docs → generates ai-module-readme.md per policy
+    - Package.json present → package-ai-docs.md (package documentation)
+    - Single function/component in folder → module-ai-docs.md (module documentation)
+    - Multiple related functions with facade → module-ai-docs.md
+    - Large FSD layer (shared, features) → package-ai-docs.md
+    - If package-ai-docs.md has module_docs → generates module-ai-docs.md per policy
 
 4. **Template Compliance:**
     - Package docs: matches ai-package-template.md sections
@@ -165,8 +174,8 @@ Let's think step by step about content quality and critical assessment.
     - Examples realistic and functional?
 
 3. **Terminology consistency (based on ai-docs-workflow.mdc):**
-    - **For ai-module-readme.md:** Uses "модульная единица" consistently
-    - **For ai-readme.md:** Uses "архитектурный модуль" or "пакет" (NOT "модульная единица")
+    - **For module-ai-docs.md:** Uses "модульная единица" consistently
+    - **For package-ai-docs.md:** Uses "архитектурный модуль" or "пакет" (NOT "модульная единица")
     - **Context-appropriate terms:** avoids mixing module/package terminology
     - **Conflict resolution:** documents any legacy terminology with explicit mapping
 
@@ -196,7 +205,7 @@ Let's analyze module_docs policy compliance for package documentation.
 </cognitive_triggers>
 
 <module_docs_policy_validation>
-**For Package Documentation (ai-readme.md) - MANDATORY:**
+**For Package Documentation (package-ai-docs.md) - MANDATORY:**
 
 1. **module_docs YAML block presence:**
     - [ ] Has `module_docs` section in YAML frontmatter
@@ -210,11 +219,11 @@ Let's analyze module_docs policy compliance for package documentation.
     - **custom:** targets can be any valid glob patterns for module locations
 
 3. **Rule Consistency:**
-    - **per_slice:** one ai-module-readme.md per FSD slice
-    - **per_library:** one ai-module-readme.md per library in core
-    - **per_component:** one ai-module-readme.md per component
+    - **per_slice:** one module-ai-docs.md per FSD slice
+    - **per_library:** one module-ai-docs.md per library in core
+    - **per_component:** one module-ai-docs.md per component
 
-**For Module Documentation (ai-module-readme.md) - NOT APPLICABLE:**
+**For Module Documentation (module-ai-docs.md) - NOT APPLICABLE:**
 
 - Module docs should NOT have module_docs policy (they are leaf nodes)
   </module_docs_policy_validation>
@@ -264,9 +273,9 @@ If XML structure malformed: provide corrected examples
 ## TIER 3: Output Format
 
 <output_format>
-**КРИТИЧЕСКИ ВАЖНО:** НЕ переписывай документацию полностью! Только исправляй конкретные замечания.
+**CRITICAL:** Do NOT rewrite documentation completely! Only fix specific issues.
 
-Используй этот ТОЧНЫЙ формат для итеративного улучшения:
+Use this EXACT format for iterative improvement:
 
 <validation_result>
 
@@ -276,7 +285,7 @@ If XML structure malformed: provide corrected examples
 </overall>
 
 <checks_passed>
-**Пройдено:** ✅/❌ YAML Метаданные | ✅/❌ TIER Структура | ✅/❌ XML Теги | ✅/❌ Системные Якоря | ✅/❌ Терминология | ✅/❌ Module Docs Политика | ✅/❌ Соответствие Шаблону
+**Пройдено:** ✅/❌ YAML Метаданные | ✅/❌ XML Теги | ✅/❌ Терминология | ✅/❌ Module Docs Политика | ✅/❌ Соответствие Шаблону
 </checks_passed>
 
 <critical_fixes>
@@ -301,7 +310,7 @@ If XML structure malformed: provide corrected examples
 
 </validation_result>
 
-**АЛЬТЕРНАТИВНЫЙ ФОРМАТ (если проблем нет):**
+**ALTERNATIVE FORMAT (if no issues found):**
 
 <validation_result>
 
@@ -311,7 +320,7 @@ If XML structure malformed: provide corrected examples
 </overall>
 
 <checks_passed>
-**Пройдено:** ✅ YAML Метаданные | ✅ TIER Структура | ✅ XML Теги | ✅ Системные Якоря | ✅ Терминология | ✅ Module Docs Политика | ✅ Соответствие Шаблону
+**Пройдено:** ✅ YAML Метаданные | ✅ XML Теги | ✅ Терминология | ✅ Module Docs Политика | ✅ Соответствие Шаблону
 </checks_passed>
 
 **СТАТУС: PRODUCTION READY** 🎉
@@ -359,31 +368,32 @@ If XML structure malformed: provide corrected examples
 **Current Standards (ai-docs-workflow.mdc + templates):**
 
 - **YAML frontmatter:** id, documentation_type, package_context (for packages) OR module_context (for modules)
-- **Package-specific:** module_docs policy (type, rule, targets), context7_refs (optional)
-- **TIER structure:** 1-2 mandatory, 3-5 optional
-- **XML tags:** package_purpose/module_purpose, package_structure/module_structure, key_features/public_api, etc.
-- **System anchors:** [ALGORITHM-BEGIN/END], [REFERENCE-BEGIN/END]
+- **Package-specific:** module_docs policy (type, rule, targets)
+- **Package XML tags:** package_purpose, package_contract, design_decisions, business_context, test_coverage, architecture_overview, detailed_modules, dependencies, development_commands
+- **Module XML tags:** module_purpose, contract, design_decisions, business_context, edge_cases, public_api, dependencies
 - **Size guidelines:** package comprehensive but focused, module under 150 lines recommended
-- **Language policy:** Russian instruction for user-facing output
+- **Language policy:** Russian content in generated docs
 - **Template compliance:** ai-package-template.md for packages, ai-module-template.md for modules
 - **Terminology rules:** "модульная единица" for modules, "архитектурный модуль/пакет" for packages
 - **Type selection:** based on package.json presence and structure complexity
-  </documentation_standards>
+
+**Note:** TIER structure and system anchors ([ALGORITHM-BEGIN/END], [REFERENCE-BEGIN/END]) are used in TEMPLATES, not in generated documentation.
+</documentation_standards>
 
 <validation_examples>
-**Примеры типичных проблем:**
+**Common validation issues:**
 
-- **Несоответствие типа:** Документация помечена как "ai-package-documentation", но нет package.json в корне
-- **Исправление:** Изменить documentation_type на "ai-module-documentation" и добавить module_context
+- **Type mismatch:** Documentation marked as "ai-package-documentation" but no package.json in root
+- **Fix:** Change documentation_type to "ai-module-documentation" and add module_context
 
-- **Отсутствует module_docs:** Пакетная документация без политики генерации модулей
-- **Добавить:** "module_docs: { type: 'fsd-slices', rule: 'per_slice', targets: ['src/features/*/*', 'src/pages/*/*'] }"
+- **Missing module_docs:** Package documentation without module generation policy
+- **Fix:** Add "module_docs: { type: 'fsd-slices', rule: 'per_slice', targets: ['src/features/*/*', 'src/pages/*/*'] }"
 
-- **Неправильная терминология:** Использование "модульная единица" в пакетной документации
-- **Исправить:** Использовать "архитектурный модуль" или "пакет" в package docs
+- **Wrong terminology:** Using "модульная единица" in package documentation
+- **Fix:** Use "архитектурный модуль" or "пакет" in package docs
 
-- **Неправильные YAML поля:** Использование устаревших полей как ai_documentation_version
-- **Убрать:** Поля ai_documentation_version, size_limits (не существуют в шаблонах)
+- **Invalid YAML fields:** Using deprecated fields like ai_documentation_version
+- **Fix:** Remove fields ai_documentation_version, size_limits (not in templates)
   </validation_examples>
 
 [REFERENCE-END]
@@ -406,7 +416,7 @@ If XML structure malformed: provide corrected examples
 
 ---
 
-**Префилл для активации структурированного формата:**
+**Prefill for structured format activation:**
 
 ```xml
 <validation_result>
@@ -417,7 +427,7 @@ If XML structure malformed: provide corrected examples
 </overall>
 
 <checks_passed>
-**Пройдено:** ✅/❌ индикаторы для каждой категории
+**Пройдено:** ✅/❌ YAML Метаданные | ✅/❌ XML Теги | ✅/❌ Терминология | ✅/❌ Module Docs Политика | ✅/❌ Соответствие Шаблону
 </checks_passed>
 ```
 
