@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.5] - 2025-12-17
+
+<small>17.12.2025 04:20</small>
+
+### Changed
+
+- **Uncommitted changes in package.json** – version update to 0.7.5
+- **Uncommitted changes in prompts/validation/validate-code.md** – code validation prompt updates
+
+### Docs
+
+- **Validation prompt updates**
+    - Updated validation prompts
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/b8d3199" target="_blank">b8d3199</a>
+
 ## [0.7.4] - 2025-12-13
 
 <small>13.12.2025 08:53</small>
