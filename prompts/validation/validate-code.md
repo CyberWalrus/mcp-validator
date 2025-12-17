@@ -136,6 +136,8 @@ For function files, scan for these violations:
 - Custom hooks MUST start with `use`
 - useRef for mutable values/DOM (NOT useState)
 - Component types in local types.ts (NOT global)
+- NO JSX in variables (CRITICAL) - `const el = (<div/>)` forbidden, extract to separate component file in same folder
+- NO nested functional components (CRITICAL) - `const Inner = () => <div/>` forbidden, extract to separate file in same folder
 
 **Patterns:**
 
@@ -574,6 +576,8 @@ Structured assessment format for MCP processing:
 - **[CRITICAL]** Hardcoded file paths (using `/path/to/file` or `C:\Users\` instead of `path.join()` or `path.resolve()`)
 - **[CRITICAL]** Hardcoded path separators (using `/` or `\` instead of `path.sep` or `path.join()`)
 - **[CRITICAL]** Hardcoded EOL characters (`\n` instead of `os.EOL` when writing text files)
+- **[CRITICAL]** JSX in variables outside return (`const el = (<div/>)`) - extract to separate component file in same folder
+- **[CRITICAL]** Nested functional components inside component (`const Inner = () => <div/>`) - extract to separate file in same folder
   </critical_issues>
 
 <warnings>
@@ -638,41 +642,43 @@ Structured assessment format for MCP processing:
 28. **[BLOCKS MERGE]** Replace hardcoded file paths with `path.join()` or `path.resolve()` (cross-platform compatibility)
 29. **[BLOCKS MERGE]** Replace hardcoded path separators (`/` or `\`) with `path.sep` or `path.join()`
 30. **[BLOCKS MERGE]** Replace hardcoded EOL (`\n`) with `os.EOL` when writing text files
+31. **[BLOCKS MERGE]** Extract JSX variables to separate component files in same folder (`const el = (<div/>)` forbidden)
+32. **[BLOCKS MERGE]** Extract nested functional components to separate files in same folder (`const Inner = () => <div/>` forbidden)
 
 **DEEP ANALYSIS FINDINGS (CRITICAL/HIGH PRIORITY):**
-31. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
-32. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
-33. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
-34. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
-35. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
-36. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
-37. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
-38. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
-39. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
-40. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
+33. **[BLOCKS MERGE - LOGIC]** Fix logical contradictions (conflicting conditions, impossible states, unreachable code)
+34. **[BLOCKS MERGE - LOGIC]** Fill logic gaps (add missing null/undefined checks, error handling, return paths, state transitions)
+35. **[BLOCKS MERGE]** Scan ALL function bodies for `//`/`/* */` comments - remove ALL explanatory comments (keep ONLY `@ts-ignore`/`@ts-expect-error`/`eslint-disable`)
+36. **[HIGH - LOGIC]** Simplify redundant conditionals (eliminate duplicate checks, unreachable branches)
+37. **[HIGH - STRUCTURE]** Flatten nested conditions using guard clauses (replace nested if/else with early returns)
+38. **[HIGH - SIMPLIFICATION]** Remove unnecessary intermediate variables (inline single-use variables)
+39. **[HIGH - SIMPLIFICATION]** Simplify complex boolean expressions (apply De Morgan's laws, reduce complexity)
+40. **[MEDIUM - DECOMPOSITION]** Inline trivial extracted functions used once (<5 lines, single use)
+41. **[MEDIUM - DECOMPOSITION]** Consolidate over-abstracted logic (remove unnecessary abstraction layers)
+42. **[MEDIUM - DECOMPOSITION]** Evaluate single-use helper functions for inlining (if not improving readability)
 
 **CODE QUALITY (HIGH PRIORITY):**
-41. **[HIGH]** Use `ReactNode` return type for components (with direct import)
-42. **[HIGH]** Destructure props in function parameters, not inside component
-43. **[HIGH]** Use guard clauses with `return null` for conditional rendering
-44. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
-45. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
-46. **[HIGH]** Add `as const` to constant arrays and objects
-47. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
-48. **[HIGH]** Make helper functions private (remove `export` keyword)
+43. **[HIGH]** Use `ReactNode` return type for components (with direct import)
+44. **[HIGH]** Destructure props in function parameters, not inside component
+45. **[HIGH]** Use guard clauses with `return null` for conditional rendering
+46. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
+47. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
+48. **[HIGH]** Add `as const` to constant arrays and objects
+49. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
+50. **[HIGH]** Make helper functions private (remove `export` keyword)
 
 **MAINTAINABILITY (MEDIUM/LOW PRIORITY):**
-49. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
-50. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
-51. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
-52. **[LOW]** Improve variable naming descriptiveness
-53. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
-54. **[INFO]** Consider using `function Component()` instead of `const Component: FC<Props>` for React components (preference, but const is acceptable if used consistently)
-55. **[INFO]** For `const` components: prefer `const Component: FC<Props> = ...` over `const Component: () => ReactNode = ...`
-56. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
-57. **[HIGH]** Add path normalization via `path.normalize()` for user-provided paths
-58. **[MEDIUM]** Use case-insensitive file name comparison or normalize paths before comparison (Windows/macOS compatibility)
-59. **[MEDIUM]** Add fallback for `process.env.HOME` → `process.env.USERPROFILE` for Windows compatibility
+51. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
+52. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+53. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
+54. **[LOW]** Improve variable naming descriptiveness
+55. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
+56. **[INFO]** Consider using `function Component()` instead of `const Component: FC<Props>` for React components (preference, but const is acceptable if used consistently)
+57. **[INFO]** For `const` components: prefer `const Component: FC<Props> = ...` over `const Component: () => ReactNode = ...`
+58. **[REVIEW]** Review `@ts-ignore`, `@ts-expect-error`, `eslint-disable` comments - consider if they can be resolved
+59. **[HIGH]** Add path normalization via `path.normalize()` for user-provided paths
+60. **[MEDIUM]** Use case-insensitive file name comparison or normalize paths before comparison (Windows/macOS compatibility)
+61. **[MEDIUM]** Add fallback for `process.env.HOME` → `process.env.USERPROFILE` for Windows compatibility
 </recommendations>
 
 </validation_result>
@@ -1192,6 +1198,103 @@ const content = lines.join('\n');
 
 // ❌ No Windows fallback
 const homeDir = process.env.HOME;
+```
+
+**Bad Code Example (Nested JSX - CRITICAL):**
+
+```typescript
+import type { ReactNode } from 'react';
+
+import type { MetricCellProps } from './types';
+
+/** Ячейка метрики с вложенным JSX */
+export function MetricCell({ title, onInfoClick }: MetricCellProps): ReactNode {
+    // ❌ CRITICAL: JSX in variable - FORBIDDEN
+    const titleContent = (
+        <span className='title'>
+            {title}
+        </span>
+    );
+
+    // ❌ CRITICAL: Conditional JSX in variable - FORBIDDEN
+    const infoButton = onInfoClick !== undefined && (
+        <button onClick={onInfoClick}>ⓘ</button>
+    );
+
+    // ❌ CRITICAL: Nested functional component - FORBIDDEN
+    const CellContent = () => (
+        <div className='cell-content'>
+            {titleContent}
+        </div>
+    );
+
+    return (
+        <div>
+            {infoButton}
+            <CellContent />
+        </div>
+    );
+}
+```
+
+**Good Code Example (Extracted Components in Same Folder):**
+
+```typescript
+// metric-cell/title-content.tsx
+import type { ReactNode } from 'react';
+
+import type { TitleContentProps } from './types';
+
+/** Отображает заголовок ячейки метрики */
+export function TitleContent({ title }: TitleContentProps): ReactNode {
+    return <span className='title'>{title}</span>;
+}
+
+// metric-cell/info-button.tsx
+import type { ReactNode } from 'react';
+
+import type { InfoButtonProps } from './types';
+
+/** Кнопка информации с иконкой */
+export function InfoButton({ onClick }: InfoButtonProps): ReactNode {
+    return <button onClick={onClick}>ⓘ</button>;
+}
+
+// metric-cell/cell-content.tsx
+import type { ReactNode } from 'react';
+
+import { TitleContent } from './title-content';
+import type { CellContentProps } from './types';
+
+/** Контент ячейки метрики */
+export function CellContent({ title }: CellContentProps): ReactNode {
+    return (
+        <div className='cell-content'>
+            <TitleContent title={title} />
+        </div>
+    );
+}
+
+// metric-cell/index.tsx
+import type { ReactNode } from 'react';
+
+import { CellContent } from './cell-content';
+import { InfoButton } from './info-button';
+import type { MetricCellProps } from './types';
+
+/** Ячейка метрики с прогресс-баром */
+export function MetricCell({ title, onInfoClick }: MetricCellProps): ReactNode {
+    if (onInfoClick === undefined) {
+        return <CellContent title={title} />;
+    }
+
+    return (
+        <div>
+            <InfoButton onClick={onInfoClick} />
+            <CellContent title={title} />
+        </div>
+    );
+}
 ```
 
 </code_examples>
