@@ -51,45 +51,54 @@ Systematic validation prevents technical debt and ensures production stability. 
 Identify file type to determine applicable validation rules.
 </cognitive_triggers>
 
+**🚨 ONE-FILE-ONE-FUNCTION (BLOCKING GATE - CHECK FIRST):**
+
+| File Name | Multiple Functions? | What It Contains |
+|:---|:---|:---|
+| `helpers.ts` | ✅ **YES** | Multiple related functions allowed |
+| `constants.ts` | ❌ NO | Only constants |
+| `types.ts` | ❌ NO | Only types |
+| `schemas.ts` | ❌ NO | Only schemas |
+| `index.ts` (barrel) | ❌ NO | Only re-exports |
+| **Any other file** | ❌ **NO** | **Exactly ONE exported function** |
+
+**SELF-CHECK:** "Is this file NOT `helpers.ts` AND has 2+ exported functions?" → YES = CRITICAL VIOLATION
+
 **FILE TYPE DETECTION (check in order):**
 
-1. **Barrel** - ONLY `export { ... } from './module'` statements → Multiple re-exports OK, JSDoc not required, imports from current dir/subdirs only
-2. **Constants** - ONLY `export const` (no functions) → Multiple exports OK
-3. **Types** - ONLY `type`/`interface` (no functions) → Multiple exports OK
-4. **Schemas** - ONLY validation schemas (no functions) → Multiple exports OK
-5. **Helpers** - `helpers.ts` with multiple related functions <150 lines → WARNING (prefer separate files)
-6. **Factory** - One main factory + nested private functions → WARNING (prefer extraction)
+1. **Helpers** - File named `helpers.ts` → Multiple functions OK
+2. **Barrel** - ONLY `export { ... } from './module'` statements → Multiple re-exports OK, JSDoc not required
+3. **Constants** - ONLY `export const` (no functions) → Multiple exports OK
+4. **Types** - ONLY `type`/`interface` (no functions) → Multiple exports OK
+5. **Schemas** - ONLY validation schemas (no functions) → Multiple exports OK
+6. **Factory** - One main factory + nested private functions → OK (closures)
 7. **Function** - ONE main function export → One-file-one-function applies
 8. **Mixed** - Multiple entity types → CRITICAL violation
 
-**ENTITY SEPARATION DETECTION (CRITICAL):**
+**🚨 ENTITY SEPARATION DETECTION (CRITICAL - ZERO TOLERANCE):**
 
-Scan file exports to detect mixed entities:
-
-| Pattern | Entity Type | Allowed With |
+| Entity | Goes To | NEVER In |
 |:---|:---|:---|
-| `export function` | Function | Nothing (one per file) |
-| `export const fn =` | Function | Nothing (one per file) |
-| `export type` | Type | Other types only |
-| `export const VAL =` | Constant | Other constants only |
-| `export { x } from` | Re-export | Other re-exports only |
+| Functions | `feature.ts` or `helpers.ts` | types.ts, constants.ts |
+| Types | `types.ts` | function files |
+| Constants | `constants.ts` | function files |
 
-**CRITICAL VIOLATIONS:**
+**CRITICAL VIOLATIONS (INSTANT FAILURE):**
 
+- 2+ exported functions in non-helpers file → CRITICAL (only `helpers.ts` allows multiple)
 - `export function` + `export type` in same file → CRITICAL (types to types.ts)
-- `export function` + `export const` (non-function) → CRITICAL (constants to constants.ts)
-- Multiple `export function` in same file → CRITICAL (split files)
-- `export function` + `export { ... } from` → CRITICAL (function files don't re-export)
+- `export function` + `export const VAL` in same file → CRITICAL (constants to constants.ts)
 
 **DETECTION ALGORITHM:**
 
-1. Count `export function` + `export const fn =` → if >1, CRITICAL
-2. Check for `export type` in function file → if found, CRITICAL
-3. Check for `export const VAL =` in function file → if found, CRITICAL
-4. Identify file as Mixed if multiple entity types detected
+1. Is file named `helpers.ts`? → Multiple functions OK, skip function count check
+2. Count `export function` + `export const fn =` → if >1 AND not helpers.ts → CRITICAL
+3. Check for `export type` in function file → if found, CRITICAL
+4. Check for `export const VAL =` in function file → if found, CRITICAL
+5. Identify file as Mixed if multiple entity types detected
 
 <completion_criteria>
-File type identified, entity separation validated, violations detected with CRITICAL severity
+File type identified, ONE-FILE-ONE-FUNCTION self-check passed, entity separation validated
 </completion_criteria>
 
 ### Step 1: Code Style and Structure Validation
@@ -100,22 +109,35 @@ Analyze code compliance with standards based on file type.
 
 **CRITICAL RULES (BLOCKING):**
 
-**Structure:**
+**🚨 Structure (ONE-FILE-ONE-FUNCTION):**
 
-- One file = one function (NOT applicable to: constants/types/schemas/barrel/helpers.ts)
-- Max 150 lines (exempt: tests, constants/types/schemas, barrel, helpers.ts)
+| File Name | Multiple Functions? | Validation |
+|:---|:---|:---|
+| `helpers.ts` | ✅ YES | Multiple functions OK |
+| `constants.ts` | ❌ NO | Only constants |
+| `types.ts` | ❌ NO | Only types |
+| `schemas.ts` | ❌ NO | Only schemas |
+| `index.ts` (barrel) | ❌ NO | Only re-exports |
+| **Any other file** | ❌ **NO** | **Exactly ONE function** |
+
+- Max 150 lines (exempt: tests, constants/types/schemas)
 - No classes (CRITICAL - NO EXCEPTIONS)
 - ESM-only (no require/module.exports)
 - Function files MUST NOT export types/constants
-- Minimal private helpers (<10 lines each, max 2-3)
 
-**ENTITY SEPARATION (CRITICAL - SCAN EVERY FILE):**
+**🚨 ENTITY SEPARATION (CRITICAL - ZERO TOLERANCE):**
 
-For function files, scan for these violations:
+| Entity | Goes To | NEVER In |
+|:---|:---|:---|
+| Functions | `feature.ts` or `helpers.ts` | types.ts, constants.ts |
+| Types | `types.ts` | function files |
+| Constants | `constants.ts` | function files |
 
-1. **Type export in function file:** `export type X =` or `export interface X` → CRITICAL
-2. **Constant export in function file:** `export const VAL =` (non-function) → CRITICAL
-3. **Multiple function exports:** More than one `export function` → CRITICAL
+**CRITICAL VIOLATIONS (scan for):**
+
+1. **2+ functions in non-helpers file:** More than one `export function` AND file is NOT `helpers.ts` → CRITICAL
+2. **Type export in function file:** `export type X =` or `export interface X` → CRITICAL
+3. **Constant export in function file:** `export const VAL =` (non-function) → CRITICAL
 4. **Mixed exports:** Any combination of function + type + constant → CRITICAL
 
 **Detection regex patterns:**
@@ -166,8 +188,8 @@ Style violations identified with severity, file type rules applied correctly
 
 <exception_handling>
 
-- helpers.ts with multiple functions <150 lines: WARNING (prefer separate files)
-- Factory with nested functions: WARNING (prefer extraction)
+- helpers.ts: Multiple functions allowed (no WARNING needed)
+- Factory with nested functions: OK (closures pattern)
 - for loops in math algorithms: INFO note
 - export const fn: INFO (function preferred)
 - Minor import order deviations: IGNORE (linter handles)
@@ -494,48 +516,48 @@ Structured assessment format for MCP processing:
 <!-- List contradictory logic patterns if found -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-  - Impact: [How it affects code]
-  - Fix: [Concrete solution]
-  - Priority: CRITICAL / HIGH / MEDIUM
+    - Impact: [How it affects code]
+    - Fix: [Concrete solution]
+    - Priority: CRITICAL / HIGH / MEDIUM
 
 **LOGIC GAPS:** [0 found / X found]
 
 <!-- List incomplete logic flows and missing validations -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-  - Impact: [Potential runtime errors or edge cases]
-  - Fix: [Add missing validation/error handling]
-  - Priority: CRITICAL / HIGH / MEDIUM
+    - Impact: [Potential runtime errors or edge cases]
+    - Fix: [Add missing validation/error handling]
+    - Priority: CRITICAL / HIGH / MEDIUM
 
 **SIMPLIFICATION OPPORTUNITIES:** [0 found / X found]
 
 <!-- List code that can be simplified without violating rules -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-  - Current: [Current code pattern]
-  - Simplified: [Improved code example]
-  - Benefit: [Readability/performance improvement]
-  - Priority: HIGH / MEDIUM / LOW
+    - Current: [Current code pattern]
+    - Simplified: [Improved code example]
+    - Benefit: [Readability/performance improvement]
+    - Priority: HIGH / MEDIUM / LOW
 
 **FLAT STRUCTURE OPPORTUNITIES:** [0 found / X found]
 
 <!-- List nested conditions that can be flattened with guard clauses -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-  - Current: [Nested structure]
-  - Flat: [Guard clause alternative]
-  - Benefit: [Improved readability and maintainability]
-  - Priority: HIGH / MEDIUM
+    - Current: [Nested structure]
+    - Flat: [Guard clause alternative]
+    - Benefit: [Improved readability and maintainability]
+    - Priority: HIGH / MEDIUM
 
 **OVER-DECOMPOSITION:** [0 found / X found]
 
 <!-- List excessive function extraction that harms readability -->
 
 - **None found** / **[Pattern]** - [Description with line reference]
-  - Current: [Multiple small functions]
-  - Recommended: [Inline or consolidate]
-  - Justification: [Why inlining improves code]
-  - Priority: MEDIUM / LOW
+    - Current: [Multiple small functions]
+    - Recommended: [Inline or consolidate]
+    - Justification: [Why inlining improves code]
+    - Priority: MEDIUM / LOW
 
 </deep_analysis>
 
@@ -560,8 +582,8 @@ Structured assessment format for MCP processing:
 - **[CRITICAL]** Using default exports (exception: Storybook files)
 - **[CRITICAL]** Node.js imports without `node:` prefix (REQUIRED, refactor legacy code)
 - **[CRITICAL]** Import paths contain `index` (using `from './folder/index'` instead of `from './folder'`)
-- **[CRITICAL]** Multiple exported functions in single function file (violates one-file-one-function; NOT applicable to constants/types/schemas/barrel files/helpers.ts <150 lines)
-- **[CRITICAL]** Exporting helper functions (helpers must be private, not exported)
+- **[CRITICAL]** Multiple exported functions in non-helpers file (ONLY `helpers.ts` allows multiple functions; NOT applicable to constants/types/schemas/barrel files)
+- **[CRITICAL]** Exporting helper functions from non-helpers files (private helpers must not be exported; `helpers.ts` can export multiple)
 - **[CRITICAL]** Mixing entity types (functions + constants/types in one file; should separate into different files)
 - **[CRITICAL]** Exporting types from function files (use `export type` ONLY in types.ts, not in function files)
 - **[CRITICAL]** Exporting constants from function files (use constants.ts only, not in function files)
@@ -583,11 +605,9 @@ Structured assessment format for MCP processing:
 <warnings>
 <!-- Important but not blocking issues -->
 
-- **[WARNING]** Multiple functions in helpers.ts file (<150 lines, logically related) - prefer separate files
-- **[WARNING]** Excessive nested private functions in closures/factories - prefer separate files if possible
 - **[WARNING]** Comments inside function bodies explaining complex logic - verify if code can be simplified
 - **[WARNING]** File size close to 150 lines limit (consider splitting)
-- **[WARNING]** More than 2-3 private helper functions - prefer inline logic or separate files
+- **[WARNING]** More than 2-3 private helper functions in non-helpers file - consider extracting to helpers.ts
 - **[WARNING]** Function name missing semantic prefix (get/handle/watch/on/create/fetch/set) - consider adding for clarity
 - **[WARNING]** Type name missing proper suffix (Props/Params/Result/Return/Type/State) - consider adding for consistency
 - **[WARNING]** DOM ref without `$` prefix - suggest `$refName` format
@@ -664,12 +684,11 @@ Structured assessment format for MCP processing:
 46. **[HIGH]** Use `useRef` for mutable values, NOT `useState`
 47. **[HIGH]** Use `Pick<>`, `Omit<>` utility types instead of manual types
 48. **[HIGH]** Add `as const` to constant arrays and objects
-49. **[HIGH]** For function files: merge into single exported function (follow one-file-one-function, except helpers.ts <150 lines)
-50. **[HIGH]** Make helper functions private (remove `export` keyword)
+49. **[HIGH]** For non-helpers function files: ensure exactly ONE exported function (only `helpers.ts` allows multiple)
+50. **[HIGH]** Make helper functions private in non-helpers files (remove `export` keyword)
 
 **MAINTAINABILITY (MEDIUM/LOW PRIORITY):**
-51. **[MEDIUM]** For helpers.ts with multiple functions: consider splitting into separate files (if >150 lines or not logically related)
-52. **[MEDIUM]** For nested private functions: consider extracting to separate files if possible
+51. **[MEDIUM]** For nested private functions: consider extracting to `helpers.ts` or separate files
 53. **[MEDIUM]** Refactor conditions to use guard clauses (if function file)
 54. **[LOW]** Improve variable naming descriptiveness
 55. **[INFO]** Consider using `export function fn()` instead of `export const fn = () => {}` (preference for consistency, but const is acceptable if used consistently in project)
