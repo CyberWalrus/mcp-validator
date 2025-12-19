@@ -1,6 +1,6 @@
 {
   "name": "mcp-validator",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "MCP Validator - инструмент для валидации кода, тестов и архитектуры через AI",
   "type": "module",
   "main": "lib/index.js",
@@ -35,8 +35,6 @@
     "start": "node --import tsx src/index.ts",
     "build": "tsup",
     "test": "yarn test:unit && yarn test:e2e",
-    "test:unit": "cross-env NODE_ENV=test vitest --run",
-    "test:e2e": "yarn build && cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",
     "lint": "aifr \"yarn lint:eslint\" \"yarn lint:ts\" \"yarn lint:knip\" \"yarn lint:test-unit\" \"yarn lint:test-e2e\"",
     "lint:test-unit": "cross-env NODE_ENV=test vitest --run",
     "lint:test-e2e": "yarn build && cross-env NODE_ENV=test MCP_E2E_TEST=true vitest --config vitest.e2e.config.ts --run",

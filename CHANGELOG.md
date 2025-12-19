@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.7] - 2025-12-17
+
+<small>17.12.2025 11:15</small>
+
+### Changed
+
+- **Uncommitted changes in package.json** – version update to 0.7.7 and test command removal
+- **Uncommitted changes in src/services/adapters/openrouter/openrouter-real-client.ts** – provider format update from extra_body to provider.only
+- **Uncommitted changes in src/agents/code-validator-agent/call-openai-for-validation.ts** – provider format update from extra_body to provider.only
+- **Uncommitted changes in src/agents/verify-info-agent/call-openai-for-verification.ts** – provider format update from extra_body to provider.only
+- **Uncommitted changes in end-to-end/constants.ts** – field order update in mock responses
+
+### Fixed
+
+- **Test command fixes**
+    - Added missing test:unit and test:e2e commands
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/b5b3faf" target="_blank">b5b3faf</a>
+
+### Docs
+
+- **Code validation prompt updates**
+    - Updated code validation prompt
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/ce0434a" target="_blank">ce0434a</a>
+
 ## [0.7.6] - 2025-12-17
 
 <small>17.12.2025 11:13</small>
