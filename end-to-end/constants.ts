@@ -25,11 +25,11 @@ export const MOCK_API_RESPONSES = {
             },
         ],
         model: 'gpt-4',
+        provider: 'OpenAI',
+        totalCost: '0.0015',
         usage: {
             total_tokens: 150,
         },
-        provider: 'OpenAI',
-        totalCost: '0.0015',
     },
     /** Валидация с предупреждениями */
     CODE_VALIDATION_WARNING: {
@@ -42,11 +42,11 @@ export const MOCK_API_RESPONSES = {
             },
         ],
         model: 'gpt-4',
+        provider: 'Anthropic',
+        totalCost: '0.0020',
         usage: {
             total_tokens: 200,
         },
-        provider: 'Anthropic',
-        totalCost: '0.0020',
     },
     /** Успешное выполнение промпта */
     PROMPT_TEST_SUCCESS: {
@@ -58,11 +58,11 @@ export const MOCK_API_RESPONSES = {
             },
         ],
         model: 'gpt-4',
+        provider: 'Cerebras',
+        totalCost: '0.0010',
         usage: {
             total_tokens: 100,
         },
-        provider: 'Cerebras',
-        totalCost: '0.0010',
     },
 } as const;
 
