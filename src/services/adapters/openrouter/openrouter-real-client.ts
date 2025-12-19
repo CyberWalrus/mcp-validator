@@ -40,8 +40,8 @@ export async function makeOpenRouterRequest(params: OpenRouterRequest): Promise<
     };
 
     if (config.api.providers && config.api.providers.length > 0) {
-        requestBody.extra_body = {
-            providers: config.api.providers,
+        requestBody.provider = {
+            only: config.api.providers,
         };
     }
 

@@ -40,8 +40,8 @@ export async function callOpenAIForValidation(agent: AgentConfig, validationProm
         temperature: config.model.temperature,
         ...(agent.providers &&
             agent.providers.length > 0 && {
-                extra_body: {
-                    providers: agent.providers,
+                provider: {
+                    only: agent.providers,
                 },
             }),
     };
