@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.8] - 2025-12-19
+
+<small>19.12.2025 08:01</small>
+
+### Changed
+
+- **Uncommitted changes in package.json** – version update to 0.7.8
+- **Uncommitted changes in prompts/verification/verify-info.md** – verify-info prompt updates (id changed to v2, prompt_language set to en, added mission statement)
+- **E2E test constants field order**
+    - Changed field order in E2E test constants
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/c15f201" target="_blank">c15f201</a>
+
+### Fixed
+
+- **OpenRouter provider format fix**
+    - Fixed provider format in OpenRouter clients
+    - <a href="https://github.com/CyberWalrus/mcp-validator/commit/21b5907" target="_blank">21b5907</a>
+
 ## [0.7.7] - 2025-12-17
 
 <small>17.12.2025 11:15</small>
